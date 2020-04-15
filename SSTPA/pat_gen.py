@@ -1,7 +1,11 @@
 import itertools
 
 
-def valid_pattern(string):
+def valid_homeaway_pattern(string):
+  """
+  :param string: string con patron de 1s y 0s
+  :return: (bool) Indica si el patron es valido o no
+  """
   local = string.count("0")
   visit = string.count("1")
   if local < 7 or visit < 7:
@@ -12,7 +16,7 @@ def valid_pattern(string):
     return False
   return True
 
-def check_pattern(team, home_match, full_patterns, teams, start_date):
+def check_homeaway_pattern(team, home_match, full_patterns, teams, start_date):
   """
   :param team: string alias equipo
   :home_match: Diccionario home_match[equipo][fecha]
@@ -59,7 +63,49 @@ def check_pattern(team, home_match, full_patterns, teams, start_date):
       correct_pat.append(pattern)
   return correct_pat
 
-patterns = filter(valid_pattern, ["".join(seq) for seq in itertools.product("01", repeat=15)])
+def check_results_pattern(teams_stats, patterns):
+  """
+  :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
+  :param patterns: (dict) conunto de patrones {int numero: str patron}
+  :return: Diccionario VGig
+  """
+  VGig = dict()
+  for team in teams_stats.keys():
+    VGig[team] = {i: 0 for i in patterns.keys()}
+  patterns_invert_dict = {patterns[key]: key for key in patterns.keys()}
+  for pattern in patterns.values():
+    for team in teams_stats.keys():
+      if pattern.count("D") == teams_stats[team]['draws'] and pattern.count("W") == teams_stats[team]['wins'] and pattern.count("L") == teams_stats[team]['loses']:
+        VGig[team][patterns_invert_dict[pattern]] = 1
+  return VGig
+
+def results_patterns_gen(dates, teams_stats):
+  """
+  :param dates: (int) cantidad de fechas a programar
+  :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
+  :return: (list) patrones de resultados.
+  """
+  permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
+  patterns = set()
+  for team in teams_stats.keys():
+    stats = ["W" for _ in range(teams_stats[team]['wins'])]
+    stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
+    stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
+    stats = "".join(stats)
+    patterns.add(stats)
+  permutations_filtered = set()
+  for perm in permutations:
+    for pat in patterns:
+      if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
+        permutations_filtered.add(perm)
+  return list(permutations_filtered)
+
+
+homeaway_patterns = filter(valid_homeaway_pattern, ["".join(seq) for seq in itertools.product("01", repeat=15)])
+
+
+
+
 
 
 
