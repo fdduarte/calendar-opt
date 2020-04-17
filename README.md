@@ -5,15 +5,10 @@ Modelo de optimización del calendario deportivo ANFP
 
 ### To do
 
-- `Bitf` Equipo `i` en fecha `f` puede llegar a los `t` puntos
 - `Vf` Ponderación de atractivo de fecha `f`
-- Modelo: Rest 8-19
-
-- Parametrizar input
-- Cambiar params a conjuntos (partially donde)
+- Parametrizar input: Fecha FInal
 
 ## Modelo 2: FPP
-
 Standby
 
 

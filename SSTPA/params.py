@@ -32,6 +32,7 @@ def parse_match(filename, start_date):
   match = 240
   home_match = dict()
   teams_stats = dict()
+  team_points = dict()
   for i in match_file:
     if i[0] != "nan":
       date = int(float(i[0]))
@@ -47,6 +48,18 @@ def parse_match(filename, start_date):
       matches[match] = {"date": date, "home": home,
                         "away": away, "winner": winner}
       match -= 1
+      if home not in team_points.keys():
+        team_points[home] = 0
+      if away not in team_points.keys():
+        team_points[away] = 0
+      if date < start_date:
+        if winner == "H":
+          team_points[home] += 3
+        if winner == "A":
+          team_points[away] += 3
+        if winner == "D":
+          team_points[home] += 1
+          team_points[away] += 1
       if home not in home_match.keys():
         home_match[home] = dict()
       home_match[home][date] = 1
@@ -67,7 +80,7 @@ def parse_match(filename, start_date):
         if winner == "D":
           teams_stats[home]['draws'] += 1
           teams_stats[away]['draws'] += 1
-  return matches, home_match, teams_stats
+  return matches, home_match, teams_stats, team_points
 
 def parse_teams(filename):
   teams_file = open_excel(filename, 0)
@@ -81,11 +94,11 @@ def parse_teams(filename):
 #############################
 #* PARAMETROS DE INSTANCIA *#
 #############################
-FECHAINI = 20
+FECHAINI = 16
 
 
 # Carga de Datos
-matches, home_match, teams_stats = parse_match("Datos.xlsx", FECHAINI)
+matches, home_match, teams_stats, team_points = parse_match("Datos.xlsx", FECHAINI)
 teams = parse_teams("Datos.xlsx")
 
 
@@ -95,7 +108,7 @@ teams = parse_teams("Datos.xlsx")
 #################
 
 # I: Equipos
-I = teams.keys()
+I = list(teams.keys())
 
 # N: Partidos
 N = list(range((FECHAINI - 1) * 8 + 1, 241))
@@ -111,45 +124,54 @@ F = list(range(FECHAINI, 31))
 
 # G: Patrones de resultados
 results_patterns = results_patterns_gen(len(F), teams_stats)
-G = {i + 1: results_patterns[i] for i in range(len(results_patterns))}
+r_patterns = {i + 1: results_patterns[i] for i in range(len(results_patterns))}
+G = list(r_patterns.keys())
+
+
+# T: Puntos
+max_points = max([team_points[i] for i in I]) + 3 * (31 - FECHAINI)
+min_points = min([team_points[i] for i in I])
+T = list(range(min_points, max_points))
 
 
 ############################
 #* PARAMETROS DEL MODELO *#
 ############################
 
-# Eit: Eit[equipo][puntos]
-# 1 Si el equipo i tiene t puntos la fecha anterior a N
-# 0 En otro caso
-#**** ARREGLAR PARA CAMBIAR FECHA INI
-max_points = max([teams[team]['fr_points'] for team in teams.keys()]) + 45
-min_points = min([teams[team]['fr_points'] for team in teams.keys()])
-points_range = [min_points, max_points]
+# Ei: E[equipo]
+# cantidad de puntos del equipo i la fecha anterior a la primera
+# de las fechas que quedan por jugar
+E = {i: team_points[i] for i in I}
 
-Eit = {team: {i: 1 if teams[team]['fr_points'] == i else 0 for i in range(*points_range)} for team in teams.keys()}
+# EBit: EB[equipo][puntos]
+# 1 si equipo i tiene t puntos la fecha anterior a la primera
+# de las fechas que quedan por jugar
+# 0 en otro caso
+EB = {i: {t: 1 if team_points[i] == t else 0 for t in T} for i in I}
 
-# Rin: Rin[equipo][partido]:
+
+# Rin: R[equipo][partido]:
 # Puntos que gana el equipo i al jugar partido n
-Rin = dict()
-for team in teams.keys():
-  Rin[team] = dict()
-  for match in N:
-    if team == matches[match]['home']:
-      if matches[match]['winner'] == "H":
-        Rin[team][match] = 3
-      elif matches[match]['winner'] == "D":
-        Rin[team][match] = 1
+R = dict()
+for i in I:
+  R[i] = dict()
+  for n in N:
+    if i == matches[n]['home']:
+      if matches[n]['winner'] == "H":
+        R[i][n] = 3
+      elif matches[n]['winner'] == "D":
+        R[i][n] = 1
       else:
-        Rin[team][match] = 0
-    elif team == matches[match]['away']:
-      if matches[match]['winner'] == "A":
-        Rin[team][match] = 3
-      elif matches[match]['winner'] == "D":
-        Rin[team][match] = 1
+        R[i][n] = 0
+    elif i == matches[n]['away']:
+      if matches[n]['winner'] == "A":
+        R[i][n] = 3
+      elif matches[n]['winner'] == "D":
+        R[i][n] = 1
       else:
-        Rin[team][match] = 0
+        R[i][n] = 0
     else:
-      Rin[team][match] = 0
+      R[i][n] = 0
 
 # EL: EL[equipo][partido]
 # 1 Si el equipo i es local en el partido n
@@ -186,15 +208,15 @@ L = {i: {f: 1 if patterns[i][FECHAINI - f] == "1" else 0 for f in F} for i in S}
 # 1 Si al equipo i se le puede asignar
 # el patron de resultados g.
 # 0 en otro caso.
-VGig = check_results_pattern(teams_stats, G)
+VG = check_results_pattern(teams_stats, r_patterns)
 
-# RPgf: RPgf[patron][fecha]
+# RPgf: RP[patron][fecha]
 # Cantidad de puntos asociados al resultado
 # del patrón g en la fecha f
 char_to_int = {"W": 3, "L": 0, "D": 1}
-RPgh = {g: {f: char_to_int[G[g][f - FECHAINI]] for f in F} for g in G.keys()}
+RP = {g: {f: char_to_int[r_patterns[g][f - FECHAINI]] for f in F} for g in G}
 
-
+print("FINISHED LOADING PARAMS")
 
 
       
