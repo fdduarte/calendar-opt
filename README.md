@@ -5,7 +5,7 @@ Modelo de optimización del calendario deportivo ANFP
 
 ### To do
 
-- Optimizar generador de resultados.
+- Optimizar generador de patrón resultados.
 
 ## Modelo 2: FPP
 
@@ -16,4 +16,3 @@ Standby
 
 ### To do
 
-- Gurobi ouptut parser

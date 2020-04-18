@@ -91,7 +91,7 @@ def results_patterns_gen(filename, teams_stats):
         permutations.append(line.strip())
       return permutations
   except FileNotFoundError:
-    print("Creating patterns file")
+    print("Creating Patterns File")
     permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=15)]
     patterns = set()
     for team in teams_stats.keys():
