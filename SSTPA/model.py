@@ -1,5 +1,6 @@
 from gurobipy import Model, GRB, quicksum
-from params import N, F, S, I, T, G, R, EL, EV, W, L, RP, VG, E, EB
+from params import N, F, S, I, T, G, R, EL, EV, W, L, RP, VG, E, EB, V, matches
+from output import parse_output
 
 m = Model("SSTPA")
 
@@ -49,78 +50,78 @@ d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 #*  RESTRICCIONES  *#
 #####################
 
-# R2
+# R2 B
 m.addConstrs((quicksum(x[n, f] for f in F) == 1 for n in N), name="R2")
 
-# R3
+# R3 B
 m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1 for i in I
                                                                             for f in F), name="R3")
 
-# R4 lets see
+# R4 B
 m.addConstrs((quicksum(y[i, s] for s in S if W[i][s] == 1) == 1 for i in I), name="R4")
-print(4)
-# R5
+
+# R5 B
 m.addConstrs((y[i, s] == 0 for i in I
                            for s in S
                            if W[i][s] == 0), name="R5")
 
-# R6
+# R6 B
 m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i, s] for s in S if L[s][f] == 1) for i in I
                                                                                                             for f in F), name="R6")
-print(6)
-# R7
+
+# R7 B
 m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i, s] for s in S if L[s][f] == 0) for i in I
                                                                                                             for f in F), name="R7")
 
-# R8 Buena
+# R8 B
 m.addConstrs((quicksum(p[i, t, f] for t in T) == 1 for i in I
                                                    for f in F), name="R8")
 
-# R9 buena
+# R9 B
 m.addConstrs((quicksum(z[i, g] for g in G) == 1 for i in I), name="R9")
-print(9)
-# R10 buena
-m.addConstrs((quicksum(x[n, f] * R[i][n] for n in N if EL[i][n] + EV[i][n]  == 1) == quicksum(z[i, g] * RP[g][f] for g in G if VG[i][g] == 1) for i in I for f in F), name="R10")
-print(10)
-# R11 buena
+
+# R10 M
+m.addConstrs((quicksum(x[n, f] * R[i][n] for n in N if EL[i][n] + EV[i][n]  == 1) == quicksum(z[i, g] * RP[g][f] for g in G if VG[i][g] >= 0) for i in I for f in F), name="R10")
+
+# R11 B
 t_r11 = lambda f, i, g: E[i] + sum([RP[g][l] for l in range(F[0], f + 1)])
 m.addConstrs((p[i, t_r11(f, i, g), f] >= z[i, g] for i in I
                                                  for g in G
                                                  for f in F
                                                  if VG[i][g] == 1), name="R11")
-print(11)
-# R12 buena
+
+# R12 B
 m.addConstrs((a[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h <= t + 3 * (31 - f)) for i in I
                                                                                                            for j in I
                                                                                                            for t in T
                                                                                                            for f in F
                                                                                                            if f > F[0] and j != i), name="R12")
 
-# R13 buena
+# R13 B
 m.addConstrs((a[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h <= t + 3 * (31 - F[0])) for i in I
                                                                                                      for j in I
                                                                                                      for t in T
                                                                                                      if j != i), name="R13")
 
-# R15 buena
+# R15 B
 m.addConstrs((a[i, f] <= a[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R15")
 
-# R16
+# R16 B
 m.addConstrs((d[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h >= t + 3 * (31 - f)) for i in I
                                                                                                            for j in I
                                                                                                            for t in T
                                                                                                            for f in F
                                                                                                            if f > F[0] and j != i), name="R16")
 
-# R17
+# R17 B
 m.addConstrs((d[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h >= t + 3 * (31 - F[0])) for i in I
                                                                                                      for j in I
                                                                                                      for t in T
                                                                                                      if j != i), name="R17")
 
-# R18
+# R18 B
 
 m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      for f in F
@@ -135,12 +136,10 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
 #*  FUNCION OBJETIVO  *#
 ########################
 
-m.setObjective(quicksum(quicksum(a[i, f] + d[i, f] for i in I) for f in F), GRB.MAXIMIZE)
+m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in F), GRB.MAXIMIZE)
 
 m.optimize()
 
-for var in m.getVars():
-  if "x" in str(var):
-    print(var)
+parse_output(m.getVars(), matches)
 
 

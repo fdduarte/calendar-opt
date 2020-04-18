@@ -67,38 +67,49 @@ def check_results_pattern(teams_stats, patterns):
   """
   :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
   :param patterns: (dict) conunto de patrones {int numero: str patron}
-  :return: Diccionario VGig
+  :return: Diccionario {equipo: [patrones_utiles]}
   """
-  VGig = dict()
+  team_patterns = dict()
   for team in teams_stats.keys():
-    VGig[team] = {i: 0 for i in patterns.keys()}
-  patterns_invert_dict = {patterns[key]: key for key in patterns.keys()}
-  for pattern in patterns.values():
+    team_patterns[team] = list()
+  for pattern in patterns:
     for team in teams_stats.keys():
       if pattern.count("D") == teams_stats[team]['draws'] and pattern.count("W") == teams_stats[team]['wins'] and pattern.count("L") == teams_stats[team]['loses']:
-        VGig[team][patterns_invert_dict[pattern]] = 1
-  return VGig
+        team_patterns[team].append(pattern)
+  return team_patterns
 
-def results_patterns_gen(dates, teams_stats):
+def results_patterns_gen(filename, teams_stats):
   """
   :param dates: (int) cantidad de fechas a programar
   :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
   :return: (list) patrones de resultados.
   """
-  permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
-  patterns = set()
-  for team in teams_stats.keys():
-    stats = ["W" for _ in range(teams_stats[team]['wins'])]
-    stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
-    stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
-    stats = "".join(stats)
-    patterns.add(stats)
-  permutations_filtered = set()
-  for perm in permutations:
-    for pat in patterns:
-      if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
-        permutations_filtered.add(perm)
-  return list(permutations_filtered)
+  try:
+    with open(f"{filename}_results_pattern.txt", "r", encoding="UTF-8") as infile:
+      permutations = list()
+      for line in infile:
+        permutations.append(line.strip())
+      return permutations
+  except FileNotFoundError:
+    print("Creating patterns file")
+    permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=15)]
+    patterns = set()
+    for team in teams_stats.keys():
+      stats = ["W" for _ in range(teams_stats[team]['wins'])]
+      stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
+      stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
+      stats = "".join(stats)
+      patterns.add(stats)
+    permutations_filtered = set()
+    for perm in permutations:
+      for pat in patterns:
+        if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
+          permutations_filtered.add(perm)
+    with open(f"{filename}_results_pattern.txt", "w", encoding="UTF-8") as infile:
+      for perm in list(permutations_filtered):
+        infile.write(f"{perm}\n")
+    return list(permutations_filtered)
+
 
 
 homeaway_patterns = filter(valid_homeaway_pattern, ["".join(seq) for seq in itertools.product("01", repeat=15)])

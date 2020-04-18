@@ -5,10 +5,10 @@ Modelo de optimización del calendario deportivo ANFP
 
 ### To do
 
-- `Vf` Ponderación de atractivo de fecha `f`
-- Parametrizar input: Fecha FInal
+- Optimizar generador de resultados.
 
 ## Modelo 2: FPP
+
 Standby
 
 

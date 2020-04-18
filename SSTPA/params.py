@@ -95,11 +95,13 @@ def parse_teams(filename):
 #* PARAMETROS DE INSTANCIA *#
 #############################
 FECHAINI = 16
+FECHAFIN = 20
+FILENAME = "Datos"
 
 
 # Carga de Datos
-matches, home_match, teams_stats, team_points = parse_match("Datos.xlsx", FECHAINI)
-teams = parse_teams("Datos.xlsx")
+matches, home_match, teams_stats, team_points = parse_match(f"{FILENAME}.xlsx", FECHAINI)
+teams = parse_teams(f"{FILENAME}.xlsx")
 
 
 
@@ -111,27 +113,29 @@ teams = parse_teams("Datos.xlsx")
 I = list(teams.keys())
 
 # N: Partidos
-N = list(range((FECHAINI - 1) * 8 + 1, 241))
+N = list(range((FECHAINI - 1) * 8 + 1, FECHAFIN * 8 + 1))
 
-# S: Patrones
+# S: Patrones de localias
 full_homeaway_patterns = list(homeaway_patterns).copy()
-patterns = list(set([pat[FECHAINI - 16:] for pat in full_homeaway_patterns]))
+patterns = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in full_homeaway_patterns]))
 patterns = {i + 1: patterns[i] for i in range(len(patterns))}
 S = list(patterns.keys())
 
 # F: Fechas
-F = list(range(FECHAINI, 31))
+F = list(range(FECHAINI, FECHAFIN + 1))
 
 # G: Patrones de resultados
-results_patterns = results_patterns_gen(len(F), teams_stats)
-r_patterns = {i + 1: results_patterns[i] for i in range(len(results_patterns))}
+full_results_patterns = results_patterns_gen(FILENAME, teams_stats)
+r_patterns = list(set([pattern[FECHAINI - 16:FECHAFIN - 15] for pattern in full_results_patterns]))
+r_patterns = {i + 1: r_patterns[i] for i in range(len(r_patterns))}
 G = list(r_patterns.keys())
+r_patterns_inv = {r_patterns[g]: g for g in G}
 
 
 # T: Puntos
-max_points = max([team_points[i] for i in I]) + 3 * (31 - FECHAINI)
+max_points = max([team_points[i] for i in I]) + 3 * (FECHAFIN + 1 - FECHAINI)
 min_points = min([team_points[i] for i in I])
-T = list(range(min_points, max_points))
+T = list(range(min_points, max_points + 1))
 
 
 ############################
@@ -176,12 +180,12 @@ for i in I:
 # EL: EL[equipo][partido]
 # 1 Si el equipo i es local en el partido n
 # 0 En otro caso
-EL = {team: {match: 1 if matches[match]['home'] == team else 0 for match in N} for team in teams.keys()}
+EL = {i: {n: 1 if matches[n]['home'] == i else 0 for n in N} for i in I}
 
 # EVin: EV[equipo][partido]
 # 1 Si el equipo i es visita en el partido n
 # 0 En otro caso
-EV = {team: {match: 1 if matches[match]['away'] == team else 0 for match in N} for team in teams.keys()}
+EV = {i: {n: 1 if matches[n]['away'] == i else 0 for n in N} for i in I}
 
 # Wis: W[equipo][patron]
 # 1 Si al equipo i se le puede asignar el
@@ -191,7 +195,7 @@ W = dict()
 for team in teams.keys():
   W[team] = dict()
   possible_pat = check_homeaway_pattern(team, home_match, full_homeaway_patterns, teams, FECHAINI)
-  possible_pat = list(set([pat[FECHAINI - 16:] for pat in possible_pat]))
+  possible_pat = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in possible_pat]))
   for pat_num in S:
     if patterns[pat_num] in possible_pat:
       W[team][pat_num] = 1
@@ -208,13 +212,23 @@ L = {i: {f: 1 if patterns[i][FECHAINI - f] == "1" else 0 for f in F} for i in S}
 # 1 Si al equipo i se le puede asignar
 # el patron de resultados g.
 # 0 en otro caso.
-VG = check_results_pattern(teams_stats, r_patterns)
+team_patterns = check_results_pattern(teams_stats, full_results_patterns)
+VG = dict()
+for i in I:
+  VG[i] = {g: 0 for g in G}
+  patterns = set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in team_patterns[i]])
+  for pat in patterns:
+    VG[i][r_patterns_inv[pat]] = 1
 
 # RPgf: RP[patron][fecha]
 # Cantidad de puntos asociados al resultado
 # del patrón g en la fecha f
 char_to_int = {"W": 3, "L": 0, "D": 1}
 RP = {g: {f: char_to_int[r_patterns[g][f - FECHAINI]] for f in F} for g in G}
+
+# Vf: V[fecha]
+# Ponderación de atractivo de fecha f
+V = {f: f - 15 for f in F}
 
 print("FINISHED LOADING PARAMS")
 
