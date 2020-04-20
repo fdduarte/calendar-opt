@@ -132,6 +132,5 @@ dmypy.json
 .DS_Store
 
 # Other
-*.xlsx
 *.csv
 *.txt
