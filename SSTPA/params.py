@@ -95,7 +95,7 @@ def parse_teams(filename):
 #* PARAMETROS DE INSTANCIA *#
 #############################
 FECHAINI = 16
-FECHAFIN = 20
+FECHAFIN = 24
 FILENAME = "Datos"
 
 
@@ -124,12 +124,15 @@ S = list(patterns.keys())
 # F: Fechas
 F = list(range(FECHAINI, FECHAFIN + 1))
 
-# G: Patrones de resultados
+# Gi: G[equipo]
+# Patrones de resultados asociados al equipo i
 full_results_patterns = results_patterns_gen(FILENAME, teams_stats)
-r_patterns = list(set([pattern[FECHAINI - 16:FECHAFIN - 15] for pattern in full_results_patterns]))
-r_patterns = {i + 1: r_patterns[i] for i in range(len(r_patterns))}
-G = list(r_patterns.keys())
-r_patterns_inv = {r_patterns[g]: g for g in G}
+team_patterns = check_results_pattern(teams_stats, full_results_patterns)
+G_full = dict()
+for i in I:
+  pat = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in team_patterns[i]]))
+  G_full[i] = {f"{i}-{j + 1}": pat[j] for j in range(len(pat))} # Contiene el valor asociado a la llave patron de Gi
+G = {i: list(G_full[i].keys()) for i in I}
 
 
 # T: Puntos
@@ -208,23 +211,16 @@ for team in teams.keys():
 # 0 en otro caso
 L = {i: {f: 1 if patterns[i][FECHAINI - f] == "1" else 0 for f in F} for i in S}
 
-# VGig: VG[equipo][patron]
-# 1 Si al equipo i se le puede asignar
-# el patron de resultados g.
-# 0 en otro caso.
-team_patterns = check_results_pattern(teams_stats, full_results_patterns)
-VG = dict()
-for i in I:
-  VG[i] = {g: 0 for g in G}
-  patterns = set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in team_patterns[i]])
-  for pat in patterns:
-    VG[i][r_patterns_inv[pat]] = 1
 
 # RPgf: RP[patron][fecha]
 # Cantidad de puntos asociados al resultado
 # del patrón g en la fecha f
 char_to_int = {"W": 3, "L": 0, "D": 1}
-RP = {g: {f: char_to_int[r_patterns[g][f - FECHAINI]] for f in F} for g in G}
+
+RP = dict()
+for i in I:
+  for gi in G[i]:
+    RP[gi] = {f: char_to_int[G_full[i][gi][f - FECHAINI]] for f in F}
 
 # Vf: V[fecha]
 # Ponderación de atractivo de fecha f
