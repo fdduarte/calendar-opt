@@ -95,8 +95,9 @@ def parse_teams(filename):
 #* PARAMETROS DE INSTANCIA *#
 #############################
 FECHAINI = 16
-FECHAFIN = 20
+FECHAFIN = 27
 FILENAME = "modules/params/Datos"
+TIMELIMIT = (2) * 60 * 60
 
 
 # Carga de Datos

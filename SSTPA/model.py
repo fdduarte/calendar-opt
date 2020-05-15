@@ -1,9 +1,11 @@
 from gurobipy import Model, GRB, quicksum
-from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, GT, matches
+from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, GT, TIMELIMIT, matches
 from modules.output import parse_output
 import time
 
 m = Model("SSTPA")
+
+m.setParam('TimeLimit', TIMELIMIT)
 
 start = time.time()
 
