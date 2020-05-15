@@ -1,5 +1,5 @@
 import pandas as pd
-from pat_gen import homeaway_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern
+from modules.params.pat_gen import homeaway_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern
 
 
 def open_excel(name, page):
@@ -95,8 +95,8 @@ def parse_teams(filename):
 #* PARAMETROS DE INSTANCIA *#
 #############################
 FECHAINI = 16
-FECHAFIN = 24
-FILENAME = "Datos"
+FECHAFIN = 20
+FILENAME = "modules/params/Datos"
 
 
 # Carga de Datos
@@ -115,11 +115,19 @@ I = list(teams.keys())
 # N: Partidos
 N = list(range((FECHAINI - 1) * 8 + 1, FECHAFIN * 8 + 1))
 
-# S: Patrones de localias
+# Si: S[equipo]
+# Patrones de localias asociados al equipo i
 full_homeaway_patterns = list(homeaway_patterns).copy()
 patterns = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in full_homeaway_patterns]))
 patterns = {i + 1: patterns[i] for i in range(len(patterns))}
-S = list(patterns.keys())
+
+S_full = dict()
+for i in I:
+  pat = check_homeaway_pattern(i, home_match, full_homeaway_patterns, teams, FECHAINI)
+  pat = list(set([p[FECHAINI - 16:FECHAFIN - 15] for p in pat]))
+  S_full[i] = {f"{i}-{j + 1}": pat[j] for j in range(len(pat))}
+S = {i: list(S_full[i].keys()) for i in I}
+
 
 # F: Fechas
 F = list(range(FECHAINI, FECHAFIN + 1))
@@ -190,26 +198,15 @@ EL = {i: {n: 1 if matches[n]['home'] == i else 0 for n in N} for i in I}
 # 0 En otro caso
 EV = {i: {n: 1 if matches[n]['away'] == i else 0 for n in N} for i in I}
 
-# Wis: W[equipo][patron]
-# 1 Si al equipo i se le puede asignar el
-# patron de localias s
-# 0 En otro caso
-W = dict()
-for team in teams.keys():
-  W[team] = dict()
-  possible_pat = check_homeaway_pattern(team, home_match, full_homeaway_patterns, teams, FECHAINI)
-  possible_pat = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in possible_pat]))
-  for pat_num in S:
-    if patterns[pat_num] in possible_pat:
-      W[team][pat_num] = 1
-    else:
-      W[team][pat_num] = 0
 
 # Lsf: L[patron][fecha]
 # 1 Si el patron s indica que la fecha f
 # es local
 # 0 en otro caso
-L = {i: {f: 1 if patterns[i][FECHAINI - f] == "1" else 0 for f in F} for i in S}
+L = dict()
+for i in I:
+  for s in S[i]:
+    L[s] = {f: 1 if S_full[i][s][FECHAINI - f] == "1" else 0 for f in F}
 
 
 # RPgf: RP[patron][fecha]
@@ -225,6 +222,21 @@ for i in I:
 # Vf: V[fecha]
 # Ponderación de atractivo de fecha f
 V = {f: f - 15 for f in F}
+
+# GTift: G[equipo][fecha][puntos]
+# Patrones tales que el equipo i tiene
+# t puntos en la fecha f
+GT = dict()
+puntos = lambda i, f, g: E[i] + sum([RP[g][l] for l in range(F[0], f + 1)])
+for i in I:
+  GT[i] = dict()
+  for f in F:
+    GT[i][f] = dict()
+    for t in T:
+      GT[i][f][t] = list()
+    for g in G[i]:
+      GT[i][f][puntos(i, f, g)].append(g)
+
 
 print("FINISHED LOADING PARAMS")
 

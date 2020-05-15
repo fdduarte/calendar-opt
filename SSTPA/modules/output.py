@@ -7,8 +7,6 @@ def parse_output(model_vars, matches):
       value = int(float(value.strip(")>")))
       match = int(match.strip("x["))
       date = int(date.strip("]"))
-      print(match, date, value)
-      print(matches[match], date, value)
       if date not in file_lines.keys():
         file_lines[date] = list()
       if value:

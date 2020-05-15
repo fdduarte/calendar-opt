@@ -1,6 +1,6 @@
 from gurobipy import Model, GRB, quicksum
-from params import N, F, S, I, T, G, R, EL, EV, W, L, RP, E, EB, V, matches
-from output import parse_output
+from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, GT, matches
+from modules.output import parse_output
 import time
 
 m = Model("SSTPA")
@@ -18,11 +18,11 @@ start = time.time()
 # 0 en otro caso.
 x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
 
-# y_is: y[equipo, patron_localias]
+# y_is: y[equipo][patron_localias]
 # 1 si al equipo i se le asigna el patron
 # de localias s
 # 0 en otro caso
-y = m.addVars(I, S, vtype=GRB.BINARY, name="y")
+y = {i: m.addVars(S[i], vtype=GRB.BINARY, name="y") for i in I}
 
 # p_itf: P[equipo, puntos, fecha]
 # 1 si el equipo i tiene t puntos al
@@ -30,7 +30,7 @@ y = m.addVars(I, S, vtype=GRB.BINARY, name="y")
 # 0 en otro caso.
 p = m.addVars(I, T, F, vtype=GRB.BINARY, name="p")
 
-# z_ig: z[equipo, patron_resultados]
+# z_ig: z[equipo][patron_resultados]
 # 1 si al equipo i se le asigna el patron
 # de resultados g.
 # 0 en otro caso.
@@ -63,20 +63,17 @@ m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1 for 
                                                                             for f in F), name="R3")
 
 # R4
-m.addConstrs((quicksum(y[i, s] for s in S if W[i][s] == 1) == 1 for i in I), name="R4")
+for i in I:
+  m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
 
-# R5
-m.addConstrs((y[i, s] == 0 for i in I
-                           for s in S
-                           if W[i][s] == 0), name="R5")
 
 # R6
-m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i, s] for s in S if L[s][f] == 1) for i in I
-                                                                                                            for f in F), name="R6")
+for i in I:
+  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
 
 # R7
-m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i, s] for s in S if L[s][f] == 0) for i in I
-                                                                                                            for f in F), name="R7")
+for i in I:
+  m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
 
 # R8
 m.addConstrs((quicksum(p[i, t, f] for t in T) == 1 for i in I
@@ -94,9 +91,16 @@ print(f"R10 Lista en {time.time() - start}")
 
 # R11 B
 t_r11 = lambda f, i, g: E[i] + sum([RP[g][l] for l in range(F[0], f + 1)])
-for i in I:
-  m.addConstrs((p[i, t_r11(f, i, g), f] >= z[i][g] for g in G[i]
-                                                   for f in F), name="R11")
+#for i in I:
+#  m.addConstrs((p[i, t_r11(f, i, g), f] >= z[i][g] for g in G[i]
+#                                                   for f in F), name="R11")
+                                                  
+# R11 R
+m.addConstrs( (p[i, t, f] == quicksum(z[i][g] for g in GT[i][f][t]) for f in F
+                                                                   for t in T
+                                                                   for i in I), name="R11")
+
+
 
 print(f"R11 Lista en {time.time() - start}")
 
@@ -138,7 +142,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      if f > F[0]), name="R18")
 
 
-print(f"Restricciones Listas en {time.time() - start}")
+print(f"Restricciones Listas en {time.time() - start}\n\n")
 
 
 
