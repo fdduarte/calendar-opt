@@ -3,16 +3,16 @@ Modelo de optimización del calendario deportivo ANFP
 
 ## Modelo 1: SSTPA
 
-### To do
+### Cambios Recientes
 
-- Optimizar generador de patrón resultados.
+- Reduccion dimensionalidad patrón de resultados.
+
+- Reduccion dimensionalidad patrón de localías
+
+- Cambio restricción (11).
 
 ## Modelo 2: FPP
 
 Standby
 
-
-## General
-
-### To do
 
