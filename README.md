@@ -1,5 +1,6 @@
-# ANFP-Calendar-Opt
-Modelo de optimización del calendario deportivo ANFP
+# Modelo Optimización Programación Dinámica Calendario Deportivo ANFP
+
+Modelo computacional de optimización del calendario deportivo ANFP.
 
 ## Modelo 1: SSTPA
 
