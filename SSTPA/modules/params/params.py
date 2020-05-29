@@ -106,7 +106,7 @@ FECHAFIN = 30
 TARGET = 30
 FILENAME = "SSTPA/modules/params/Datos"
 TIMELIMIT = (100) * 60 * 60
-MODEL = "V4" # {V3, V4}
+MODEL = "V3" # {V3, V4}
 
 
 # Carga de Datos
