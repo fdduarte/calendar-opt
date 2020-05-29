@@ -4,7 +4,7 @@ Modelo computacional de optimización del calendario deportivo ANFP.
 
 ## Modo de uso
 
-- Cambiar en `SSTPA/modules/params/params.py` variable MODEL por `V3` o `V4`. 
+- Cambiar en `SSTPA/modules/params/params.py` variable `MODEL` por `V3` o `V4`. 
 
 Ubicado en la carpeta `ANFP-Calendar-Opt`
 
