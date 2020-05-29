@@ -78,7 +78,7 @@ def check_results_pattern(teams_stats, patterns):
         team_patterns[team].append(pattern)
   return team_patterns
 
-def results_patterns_gen(filename, teams_stats):
+def results_patterns_gen(filename, teams_stats): # estandarizar una función q llame a las dos
   """
   :param dates: (int) cantidad de fechas a programar
   :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
@@ -110,6 +110,17 @@ def results_patterns_gen(filename, teams_stats):
         infile.write(f"{perm}\n")
     return list(permutations_filtered)
 
+def result_patterns_gen_v4(length):
+  return ["".join(seq) for seq in itertools.product("WDL", repeat=length)]
+
+def check_short_result_pattern(pattern, teams_stats, team):
+  """
+  Chequea si un patrón corto (G1 o G2) es válido para un equipo.
+  Para esto, revisa que no tenga mas victorias y mas derrotas que el equipo.
+  """
+  if pattern.count("D") <= teams_stats[team]['draws'] and pattern.count("W") <= teams_stats[team]['wins']:
+    return 1
+  return 0
 
 
 homeaway_patterns = filter(valid_homeaway_pattern, ["".join(seq) for seq in itertools.product("01", repeat=15)])
