@@ -1,5 +1,6 @@
 import sys, os
 import pandas as pd
+import time
 from modules.params.pat_gen import homeaway_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern, result_patterns_gen_v4, check_short_result_pattern
 
 
@@ -20,7 +21,7 @@ def open_excel(name, page):
     buff = list(zip(*column))
     return buff
 
-def parse_match(filename, start_date):
+def parse_match(filename, start_date, final_date):
   """
   :param filename: nombre del archivo excel
   :return: {match: [{event_date: , home: , away: , winner: }]},
@@ -33,6 +34,7 @@ def parse_match(filename, start_date):
   match = 240
   home_match = dict()
   teams_stats = dict()
+  teams_stats_to_date = dict()
   team_points = dict()
   for i in match_file:
     if i[0] != "nan":
@@ -81,7 +83,21 @@ def parse_match(filename, start_date):
         if winner == "D":
           teams_stats[home]['draws'] += 1
           teams_stats[away]['draws'] += 1
-  return matches, home_match, teams_stats, team_points
+      if date >= start_date and date <= final_date:
+        if home not in teams_stats_to_date.keys():
+          teams_stats_to_date[home] = {'wins': 0, 'loses': 0, 'draws': 0}
+        if away not in teams_stats_to_date.keys():
+          teams_stats_to_date[away] = {'wins': 0, 'loses': 0, 'draws': 0}
+        if winner == "H":
+          teams_stats_to_date[home]['wins'] += 1
+          teams_stats_to_date[away]['loses'] += 1
+        if winner == "A":
+          teams_stats_to_date[away]['wins'] += 1
+          teams_stats_to_date[home]['loses'] += 1
+        if winner == "D":
+          teams_stats_to_date[home]['draws'] += 1
+          teams_stats_to_date[away]['draws'] += 1
+  return matches, home_match, teams_stats, team_points, teams_stats_to_date
 
 def parse_teams(filename):
   teams_file = open_excel(filename, 0)
@@ -101,16 +117,17 @@ def parse_teams(filename):
 #############################
 #* PARAMETROS DE INSTANCIA *#
 #############################
+START_TIME = time.time()
 FECHAINI = 16
 FECHAFIN = 30
 TARGET = 30
 FILENAME = "SSTPA/modules/params/Datos"
 TIMELIMIT = (100) * 60 * 60
-MODEL = "V3" # {V3, V4}
+MODEL = "V4" # {V3, V4}
 
 
 # Carga de Datos
-matches, home_match, teams_stats, team_points = parse_match(f"{FILENAME}.xlsx", FECHAINI)
+matches, home_match, teams_stats, team_points, teams_stats_to_date = parse_match(f"{FILENAME}.xlsx", FECHAINI, FECHAFIN)
 teams = parse_teams(f"{FILENAME}.xlsx")
 
 
@@ -260,32 +277,32 @@ if MODEL == "V4":
   # NVi, NV[equipo]
   # Cantidad de victorias que obtendría el equipo
   # i en las fechas que restan por programar.
-  NV = {i: teams_stats[i]['wins'] for i in I}
+  NV = {i: teams_stats_to_date[i]['wins'] for i in I}
 
   # NEi: EV[equipo]
   # Cantidad de empates que obtendría el equipo
   # i en las fechas que restan por programar.
-  NE = {i: teams_stats[i]['draws'] for i in I}
+  NE = {i: teams_stats_to_date[i]['draws'] for i in I}
 
   # PV1gf: PV1[patron][fecha]
   # Cantidad de victorias que tiene el patron g
   # entre las fechas FECHAINI y f
-  PV1 = {g: {f: G1_full[g][:f - FH[0]].count("W") for f in FH} for g in G1}
+  PV1 = {g: {f: G1_full[g][:f - FH[0] + 1].count("W") for f in FH} for g in G1}
 
   # PV2gf: PV2[patron][fecha]
   # Cantidad de victorioas que tiene el patron g
   # entre las fechas q y FECHAFIN
-  PV2 = {g: {f: G2_full[g][:f - SH[0]].count("W") for f in SH} for g in G2}
+  PV2 = {g: {f: G2_full[g][:f - SH[0] + 1].count("W") for f in SH} for g in G2}
 
   # PE1gf: PE1[patron][fecha]
   # Cantidad de empates que tiene el patron g
   # entre las fechas FECHAINI y f
-  PE1 = {g: {f: G1_full[g][:f - FH[0]].count("D") for f in FH} for g in G1}
+  PE1 = {g: {f: G1_full[g][:f - FH[0] + 1].count("D") for f in FH} for g in G1}
 
   # PE2gf: PE2[patron][fecha]
   # Cantidad de empates que tiene el patron g
   # entre las fechas q y FECHAFIN
-  PE2 = {g: {f: G2_full[g][:f - SH[0]].count("D") for f in SH} for g in G2}
+  PE2 = {g: {f: G2_full[g][:f - SH[0] + 1].count("D") for f in SH} for g in G2}
 
 
 # Vf: V[fecha]
@@ -334,7 +351,6 @@ if MODEL == "V4":
       for g in G1:
         if VG1[i][g]:
           H2[i][f][puntos2(i, f, g)].append(g)
-
 
 
 print("FINISHED LOADING PARAMS")

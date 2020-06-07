@@ -4,16 +4,17 @@ from gurobipy import Model, GRB, quicksum
 import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
-from modules.params.params import I, T, F, S, N, G1, G2, EL, EV, R, L, PV1, PV2, PE1, VG1, VG2, RP1, RP2, PE2, NE, NV, V, EB, FH, SH, H1, H2, FECHAINI, FECHAFIN, FIRST_HALF, SECOND_HALF, TIMELIMIT, matches
+from modules.params.params import I, T, F, S, N, G1, G2, EL, EV, R, L, PV1, PV2, PE1, VG1, VG2, RP1, RP2, PE2, NE, NV, V, EB, FH, SH, H1, H2, START_TIME, FECHAINI, FECHAFIN, FIRST_HALF, SECOND_HALF, TIMELIMIT, matches
 from modules.output_parser import parse_output
 
-m = Model("SSTPA V3")
+m = Model("SSTPA V4")
 
 m.setParam('TimeLimit', TIMELIMIT)
+m.setParam('MIPFocus', 1)
 
 
 
-start = time.time()
+start_model = time.time()
 
 
 #################
@@ -62,7 +63,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"Variables Listas en {time.time() - start}")
+print(f"** VAR TIME: {time.time() - start_model}")
 
 #####################
 #*  RESTRICCIONES  *#
@@ -160,7 +161,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R24")
 
-print(f"Restricciones Listas en {time.time() - start}\n\n")
+print(f"**RES TIME: {time.time() - start_model}\n\n")
 
 
 
@@ -173,5 +174,7 @@ print(f"Restricciones Listas en {time.time() - start}\n\n")
 m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in F), GRB.MAXIMIZE) ## CAMBIAR POR PARAMM
 
 m.optimize()
+
+print(f"**TOT TIME: {time.time() - START_TIME}\n\n")
 
 parse_output(m.getVars(), matches)

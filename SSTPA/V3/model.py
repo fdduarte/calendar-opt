@@ -10,6 +10,7 @@ from modules.output_parser import parse_output
 m = Model("SSTPA V3")
 
 m.setParam('TimeLimit', TIMELIMIT)
+m.setParam('MIPFocus', 1)
 
 start = time.time()
 

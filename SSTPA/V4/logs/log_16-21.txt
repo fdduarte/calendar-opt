@@ -1,0 +1,40 @@
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Variables Listas en 0.023552894592285156
+Restricciones Listas en 8.053560972213745
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 177088 rows, 5776 columns and 2724824 nonzeros
+Model fingerprint: 0x502f3989
+Variable types: 0 continuous, 5776 integer (5776 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 6e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 170588 rows and 3013 columns
+Presolve time: 3.31s
+Presolved: 6500 rows, 2763 columns, 115348 nonzeros
+Variable types: 0 continuous, 2763 integer (2763 binary)
+
+Root relaxation: objective 3.360000e+02, 883 iterations, 0.08 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  336.00000    0  291          -  336.00000      -     -    4s
+H    0     0                     318.0000000  336.00000  5.66%     -    4s
+H    0     0                     336.0000000  336.00000  0.00%     -    4s
+     0     0  336.00000    0  291  336.00000  336.00000  0.00%     -    4s
+
+Explored 1 nodes (3600 simplex iterations) in 4.28 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 336 318 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.360000000000e+02, best bound 3.360000000000e+02, gap 0.0000%
