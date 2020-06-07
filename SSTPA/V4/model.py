@@ -63,7 +63,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"** VAR TIME: {time.time() - start_model}")
+print(f"\n\n** VARIABLES TIME: {time.time() - start_model}\n\n")
 
 #####################
 #*  RESTRICCIONES  *#
@@ -161,7 +161,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R24")
 
-print(f"**RES TIME: {time.time() - start_model}\n\n")
+print(f"** RESTRICTIONS TIME: {time.time() - start_model}\n\n")
 
 
 
@@ -175,6 +175,6 @@ m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in
 
 m.optimize()
 
-print(f"**TOT TIME: {time.time() - START_TIME}\n\n")
+print(f"\n\n** TOTAL TIME: {time.time() - START_TIME}\n\n")
 
 parse_output(m.getVars(), matches)

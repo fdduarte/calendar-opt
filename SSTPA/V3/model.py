@@ -55,7 +55,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"Variables Listas en {time.time() - start}")
+print(f"Variables Listas en {time.time() - start} s")
 
 
 #####################
@@ -109,7 +109,7 @@ m.addConstrs( (p[i, t, f] == quicksum(z[i][g] for g in H[i][f][t]) for f in F
 
 
 
-print(f"R11 Lista en {time.time() - start}")
+print(f"R11 Lista en {time.time() - start} s")
 
 # R12 B
 m.addConstrs((a[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h <= t + 3 * (31 - f)) for i in I
@@ -149,7 +149,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      if f > F[0]), name="R18")
 
 
-print(f"Restricciones Listas en {time.time() - start}\n\n")
+print(f"Restricciones Listas en {time.time() - start} s\n\n")
 
 
 

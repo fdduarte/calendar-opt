@@ -5,8 +5,9 @@ Changed value of parameter TimeLimit to 360000.0
    Prev: inf  Min: 0.0  Max: inf  Default: inf
 Changed value of parameter MIPFocus to 1
    Prev: 0  Min: 0  Max: 3  Default: 0
-** VAR TIME: 0.7652816772460938
-**RES TIME: 52.01624274253845
+
+** VARIABLES TIME: 0.7652816772460938 s
+** RESTRICTION TIME: 52.01624274253845 s
 
 
 Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
@@ -246,7 +247,8 @@ Solution count 0
 
 Solve interrupted
 Best objective -, best bound 1.920000000000e+03, gap -
-**TOT TIME: 131767.3977739811
+
+** TOTAL TIME: 131767.3977739811 s
 
 
 
