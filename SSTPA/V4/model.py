@@ -5,7 +5,7 @@ import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
 from modules.params.params import I, T, F, S, N, G1, G2, EL, EV, R, L, PV1, PV2, PE1, VG1, VG2, RP1, RP2, PE2, NE, NV, V, EB, FH, SH, H1, H2, START_TIME, FECHAINI, FECHAFIN, FIRST_HALF, SECOND_HALF, TIMELIMIT, stats
-from modules.output_parser import parse_output
+from modules.model_stats import ModelStats
 
 m = Model("SSTPA V4")
 
@@ -63,7 +63,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"\n\n** VARIABLES TIME: {time.time() - start_model}\n\n")
+print(f"** VARIABLES TIME: {time.time() - start_model}")
 
 #####################
 #*  RESTRICCIONES  *#
@@ -161,7 +161,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R24")
 
-print(f"** RESTRICTIONS TIME: {time.time() - start_model}\n\n")
+print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
 
 
 
@@ -175,6 +175,6 @@ m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in
 
 m.optimize()
 
-print(f"\n\n** TOTAL TIME: {time.time() - START_TIME}\n\n")
+print(f"\n** TOTAL TIME: {time.time() - START_TIME}")
 
-parse_output(m.getVars(), stats.matches)
+ModelStats.parse_gurobi_output(m.getVars(), stats.matches)

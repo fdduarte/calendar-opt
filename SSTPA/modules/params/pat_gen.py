@@ -1,4 +1,6 @@
 import itertools
+import os
+
 
 def homeaway_filter(breaks):
   def valid_homeaway_pattern(string):
@@ -96,8 +98,15 @@ def results_patterns_gen(filename, teams_stats, start_date, end_date): # estanda
   """
   dates = end_date - start_date + 1
   filename, _ = filename.split(".")
+  filename = os.path.split(filename)
+  filepath = os.path.join(filename[0], 'pat_files')
+  filename = os.path.join(filepath, f"{filename[1]}_results_pattern_{start_date}-{end_date}.txt")
   try:
-    with open(f"{filename}_results_pattern_{start_date}-{end_date}.txt", "r", encoding="UTF-8") as infile:
+      os.mkdir(filepath)
+  except FileExistsError:
+    pass
+  try:
+    with open(filename, "r", encoding="UTF-8") as infile:
       permutations = list()
       for line in infile:
         permutations.append(line.strip())
@@ -117,7 +126,7 @@ def results_patterns_gen(filename, teams_stats, start_date, end_date): # estanda
       for pat in patterns:
         if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
           permutations_filtered.add(perm)
-    with open(f"{filename}_results_pattern_{start_date}-{end_date}.txt", "w", encoding="UTF-8") as infile:
+    with open(filename, "w", encoding="UTF-8") as infile:
       for perm in list(permutations_filtered):
         infile.write(f"{perm}\n")
     return list(permutations_filtered)

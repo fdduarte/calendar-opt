@@ -1,4 +1,3 @@
-Creating Patterns File
 FINISHED LOADING PARAMS
 Using license file /Users/fernandoduarte/gurobi.lic
 Academic license - for non-commercial use only
@@ -9,59 +8,56 @@ Changed value of parameter MIPFocus to 1
 Changed value of parameter MIPGap to 0.3
    Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
 
+** VARIABLES TIME: 0.4402000904083252
 
-** VARIABLES TIME: 0.5461750030517578
-
-
-** RESTRICTIONS TIME: 22.620585918426514
-
-
+** RESTRICTIONS TIME: 20.91322898864746
 Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
-Optimize a model with 333960 rows, 93770 columns and 11230764 nonzeros
-Model fingerprint: 0x575e8fbe
+Optimize a model with 334136 rows, 93770 columns and 11235813 nonzeros
+Model fingerprint: 0x88b11a8b
 Variable types: 0 continuous, 93770 integer (93770 binary)
 Coefficient statistics:
   Matrix range     [1e+00, 3e+00]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+00]
   RHS range        [1e+00, 2e+00]
-Presolve removed 332241 rows and 13689 columns (presolve time = 5s) ...
-Presolve removed 332807 rows and 14305 columns (presolve time = 10s) ...
-Presolve removed 333038 rows and 14493 columns (presolve time = 15s) ...
-Presolve removed 333076 rows and 14572 columns
-Presolve time: 19.59s
-Presolved: 884 rows, 79198 columns, 659264 nonzeros
-Variable types: 0 continuous, 79198 integer (79198 binary)
+Presolve removed 332244 rows and 13689 columns (presolve time = 5s) ...
+Presolve removed 332811 rows and 14305 columns (presolve time = 10s) ...
+Presolve removed 333073 rows and 14505 columns (presolve time = 15s) ...
+Presolve removed 333082 rows and 40274 columns (presolve time = 42s) ...
+Presolve removed 333082 rows and 41728 columns (presolve time = 51s) ...
+Presolve removed 333108 rows and 41735 columns
+Presolve time: 52.71s
+Presolved: 1028 rows, 52035 columns, 419884 nonzeros
+Variable types: 0 continuous, 52035 integer (52035 binary)
 
 Root simplex log...
 
 Iteration    Objective       Primal Inf.    Dual Inf.      Time
-       0    8.8000000e+01   3.400000e+02   0.000000e+00     46s
-    2378    8.8000000e+01   0.000000e+00   0.000000e+00     47s
+       0    8.8000000e+01   3.370000e+02   0.000000e+00     55s
+    1120    8.7999965e+01   5.167061e+02   0.000000e+00     55s
+    2374    8.8000000e+01   0.000000e+00   0.000000e+00     56s
 
-Root relaxation: objective 8.800000e+01, 2378 iterations, 1.82 seconds
-Total elapsed time = 54.35s
-Total elapsed time = 58.44s
-Total elapsed time = 66.09s
-Total elapsed time = 70.36s
+Root relaxation: objective 8.800000e+01, 2374 iterations, 1.26 seconds
+Total elapsed time = 60.95s
+Total elapsed time = 68.47s
+Total elapsed time = 73.06s
 
     Nodes    |    Current Node    |     Objective Bounds      |     Work
  Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
 
-     0     0   88.00000    0  564          -   88.00000      -     -   74s
-     0     0   88.00000    0  697          -   88.00000      -     -  106s
-     0     0   88.00000    0  720          -   88.00000      -     -  108s
-H    0     0                      88.0000000   88.00000  0.00%     -  172s
-     0     0   88.00000    0  567   88.00000   88.00000  0.00%     -  177s
+     0     0   88.00000    0  536          -   88.00000      -     -   75s
+     0     0   88.00000    0  688          -   88.00000      -     -   90s
+     0     0   88.00000    0  679          -   88.00000      -     -   92s
+H    0     0                      88.0000000   88.00000  0.00%     -  116s
+     0     0   88.00000    0  550   88.00000   88.00000  0.00%     -  117s
 
 Cutting planes:
-  Cover: 37
-  Clique: 47
-  GUB cover: 25
-  Zero half: 2
-  RLT: 22
+  Cover: 42
+  Clique: 85
+  GUB cover: 18
+  RLT: 28
 
-Explored 1 nodes (111294 simplex iterations) in 177.97 seconds
+Explored 1 nodes (100815 simplex iterations) in 117.68 seconds
 Thread count was 8 (of 8 available processors)
 
 Solution count 1: 88 
@@ -69,7 +65,4 @@ Solution count 1: 88
 Optimal solution found (tolerance 3.00e-01)
 Best objective 8.800000000000e+01, best bound 8.800000000000e+01, gap 0.0000%
 
-
-** TOTAL TIME: 204.3680031299591
-
-
+** TOTAL TIME: 141.28178691864014

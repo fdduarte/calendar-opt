@@ -9,47 +9,25 @@ Changed value of parameter MIPFocus to 1
 Changed value of parameter MIPGap to 0.3
    Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
 
+** VARIABLES TIME: 0.027363061904907227
 
-** VARIABLES TIME: 0.02540421485900879
-
-
-** RESTRICTIONS TIME: 7.037711143493652
-
-
+** RESTRICTIONS TIME: 8.788942098617554
 Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
-Optimize a model with 155376 rows, 6243 columns and 3590393 nonzeros
-Model fingerprint: 0x1ef39cd0
+Optimize a model with 155472 rows, 6243 columns and 3591029 nonzeros
+Model fingerprint: 0x5580cea6
 Variable types: 0 continuous, 6243 integer (6243 binary)
 Coefficient statistics:
   Matrix range     [1e+00, 3e+00]
   Objective range  [1e+00, 1e+00]
   Bounds range     [1e+00, 1e+00]
   RHS range        [1e+00, 2e+00]
-Presolve removed 155058 rows and 5716 columns
-Presolve time: 1.11s
-Presolved: 318 rows, 527 columns, 2551 nonzeros
-Variable types: 0 continuous, 527 integer (527 binary)
+Presolve removed 155089 rows and 5761 columns
+Presolve time: 1.00s
+Presolved: 383 rows, 482 columns, 2752 nonzeros
+Variable types: 0 continuous, 482 integer (482 binary)
+Found heuristic solution: objective 48.0000000
 
-Root relaxation: objective 4.800000e+01, 426 iterations, 0.01 seconds
-
-    Nodes    |    Current Node    |     Objective Bounds      |     Work
- Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
-
-     0     0   48.00000    0  179          -   48.00000      -     -    1s
-     0     0   48.00000    0  225          -   48.00000      -     -    1s
-     0     0   48.00000    0  221          -   48.00000      -     -    1s
-H    0     0                      48.0000000   48.00000  0.00%     -    1s
-     0     0   48.00000    0  226   48.00000   48.00000  0.00%     -    1s
-
-Cutting planes:
-  Gomory: 2
-  Cover: 22
-  Clique: 91
-  GUB cover: 7
-  Zero half: 11
-  RLT: 11
-
-Explored 1 nodes (1929 simplex iterations) in 1.69 seconds
+Explored 0 nodes (0 simplex iterations) in 1.35 seconds
 Thread count was 8 (of 8 available processors)
 
 Solution count 1: 48 
@@ -57,7 +35,4 @@ Solution count 1: 48
 Optimal solution found (tolerance 3.00e-01)
 Best objective 4.800000000000e+01, best bound 4.800000000000e+01, gap 0.0000%
 
-
-** TOTAL TIME: 8.979573965072632
-
-
+** TOTAL TIME: 11.01235294342041

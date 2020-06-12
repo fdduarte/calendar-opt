@@ -5,7 +5,7 @@ import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
 from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, START_TIME, stats
-from modules.output_parser import parse_output
+from modules.model_stats import ModelStats
 
 m = Model("SSTPA V3")
 
@@ -57,7 +57,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"\n\n** VARIABLES TIME: {time.time() - start_model}\n\n")
+print(f"\n** VARIABLES TIME: {time.time() - start_model}")
 
 
 #####################
@@ -76,11 +76,11 @@ for i in I:
   m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
 
 
-# R6 M
-#for i in I:
-#  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
+# R6
+for i in I:
+  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
 
-# R7 M
+# R7
 for i in I:
   m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
 
@@ -136,7 +136,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      if f > F[0]), name="R18")
 
 
-print(f"** RESTRICTIONS TIME: {time.time() - start_model}\n\n")
+print(f"\n** RESTRICTIONS TIME: {time.time() - start_model}")
 
 
 
@@ -150,8 +150,8 @@ m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
 
 m.optimize()
 
-print(f"\n\n** TOTAL TIME: {time.time() - START_TIME}\n\n")
+print(f"\n** TOTAL TIME: {time.time() - START_TIME}")
 
-parse_output(m.getVars(), stats.matches)
+ModelStats.parse_gurobi_output(m.getVars(), stats.matches)
 
 

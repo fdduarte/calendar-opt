@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 from scipy import optimize
 import os
 
+"""
+Módulo de Visualización.
+
+Interpeta stdout de model.py (V3 y V4), para
+generar visualizaciónes del rendimiento.
+"""
 
 class ModelStats:
   def __init__(self, logs_path, name):
@@ -13,11 +19,20 @@ class ModelStats:
     self.presolve_time = []
     self.total_time = []
     self.create_dir(name)
+    self.output_path = "output/visualization"
   
   @staticmethod
   def create_dir(name):
     try:
-      os.mkdir(f"{name}-vis")
+      os.mkdir(f"output")
+    except FileExistsError:
+      pass
+    try:
+      os.mkdir(f"output/visualization")
+    except FileExistsError:
+      pass
+    try:
+      os.mkdir(f"output/visualization/{name}-vis")
     except FileExistsError:
       pass
 
@@ -33,6 +48,27 @@ class ModelStats:
     x = np.array([data[0] for data in variable])
     y = np.array([data[1] for data in variable])
     return x, y
+
+  @staticmethod
+  def parse_gurobi_output(model_vars, matches):
+    file_lines = dict()
+    for var in model_vars:
+      if "x" in str(var):
+        _, var, _, value = str(var).split()
+        match, date = var.split(",")
+        value = int(float(value.strip(")>")))
+        match = int(match.strip("x["))
+        date = int(date.strip("]"))
+        if date not in file_lines.keys():
+          file_lines[date] = list()
+        if value:
+          file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
+    with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
+      infile.write("jornada, local, visita\n")
+      for date in file_lines.keys():
+        infile.write(f"{date},,\n")
+        for line in file_lines[date]:
+          infile.write(line)
 
   def parse_logs(self, logs):
     self.logs = logs
@@ -62,7 +98,7 @@ class ModelStats:
         print(f"{self.logs_path}/log_{log}.txt Not Found")
 
   def gen_linear_reg_scatter(self):
-    path = f"{self.name}-vis/Reg"
+    path = f"{self.output_path}/{self.name}-vis/Reg"
     try:
       os.mkdir(path)
     except FileExistsError:
@@ -97,7 +133,7 @@ class ModelStats:
     plt.close()
 
   def gen_poli_funct_plot(self):
-    path = f"{self.name}-vis/PoliFit"
+    path = f"{self.output_path}/{self.name}-vis/PoliFit"
     try:
       os.mkdir(path)
     except FileExistsError:
@@ -108,11 +144,11 @@ class ModelStats:
     params, _ = optimize.curve_fit(test_funct, x, y)
     self.gen_plot(x, y, f"Function: {params[0]} + x^{params[1]}")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.savefig(f"{path}/total_time_polifit.png")
+    plt.savefig(f"{self.output_path}/{path}/total_time_polifit.png")
     plt.close()
 
   def gen_exp_funct_plot(self):
-    path = f"{self.name}-vis/ExpFit"
+    path = f"{self.output_path}/{self.name}-vis/ExpFit"
     try:
       os.mkdir(path)
     except FileExistsError:
@@ -123,7 +159,7 @@ class ModelStats:
     params, _ = optimize.curve_fit(test_funct, x, y)
     self.gen_plot(x, y, f"Function: {params[0]} + {params[1]}^x")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.savefig(f"{path}/total_time_expfit.png")
+    plt.savefig(f"{self.output_path}/{path}/total_time_expfit.png")
     plt.close()
 
   def gen_csv(self):
@@ -162,7 +198,7 @@ class ModelStats:
       if not found:
         line.append("-")
       csv_lines.append(line)
-    with open(f"{self.name}-vis/data.csv", "w", encoding="UTF-8") as infile:
+    with open(f"{self.output_path}/{self.name}-vis/data.csv", "w", encoding="UTF-8") as infile:
       infile.write("dates,var_loading,res_loading,presolve,total\n")
       for line in csv_lines:
         infile.write(",".join(line))

@@ -18,7 +18,7 @@ Ubicado en la carpeta `ANFP-Calendar-Opt`
 
 - Comando `python3 gen_stats.py`.
 
-- Se crea una carpeta en `SSTPA` llamada `{NAME}-Plots` con distintas visualizaciones.
+- Se crea una carpeta en `output/visualization` llamada `{NAME}-vis` con distintas visualizaciones.
 
 
 ### SSTPA V3
@@ -42,5 +42,13 @@ Ubicado en la carpeta `ANFP-Calendar-Opt`
 ## Modelo 2: FPP
 
 Standby
+
+## To Do
+
+- `pat_gen` refactor.
+
+- Cambiar variables binarias por enteras.
+
+- Sample de patrones para reducción de dimensionalidad.
 
 
