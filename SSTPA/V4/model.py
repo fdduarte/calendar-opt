@@ -11,6 +11,7 @@ m = Model("SSTPA V4")
 
 m.setParam('TimeLimit', TIMELIMIT)
 m.setParam('MIPFocus', 1)
+m.setParam('MIPGap', 0.1)
 
 
 

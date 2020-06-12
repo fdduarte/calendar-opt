@@ -4,7 +4,7 @@ from gurobipy import Model, GRB, quicksum
 import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
-from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, matches
+from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, stats
 from modules.output_parser import parse_output
 
 m = Model("SSTPA V3")
@@ -74,11 +74,11 @@ for i in I:
   m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
 
 
-# R6
-for i in I:
-  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
+# R6 M
+#for i in I:
+#  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
 
-# R7
+# R7 M
 for i in I:
   m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
 
@@ -89,47 +89,33 @@ m.addConstrs((quicksum(p[i, t, f] for t in T) == 1 for i in I
 # R9
 m.addConstrs((quicksum(z[i][g] for g in G[i]) == 1 for i in I), name="R9")
 
-print(f"R9 Lista en {time.time() - start}")
-
 # R10
 m.addConstrs((quicksum(x[n, f] * R[i][n] for n in N if EL[i][n] + EV[i][n]  == 1) == quicksum(z[i][g] * RP[g][f] for g in G[i]) for i in I for f in F), name="R10")
-
-print(f"R10 Lista en {time.time() - start}")
-
-# R11 B
-t_r11 = lambda f, i, g: E[i] + sum([RP[g][l] for l in range(F[0], f + 1)])
-#for i in I:
-#  m.addConstrs((p[i, t_r11(f, i, g), f] >= z[i][g] for g in G[i]
-#                                                   for f in F), name="R11")
                                                   
-# R11 R
+# R11
 m.addConstrs( (p[i, t, f] == quicksum(z[i][g] for g in H[i][f][t]) for f in F
                                                                    for t in T
                                                                    for i in I), name="R11")
 
-
-
-print(f"R11 Lista en {time.time() - start} s")
-
-# R12 B
+# R12
 m.addConstrs((a[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h <= t + 3 * (31 - f)) for i in I
                                                                                                            for j in I
                                                                                                            for t in T
                                                                                                            for f in F
                                                                                                            if f > F[0] and j != i), name="R12")
 
-# R13 B
+# R13
 m.addConstrs((a[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h <= t + 3 * (31 - F[0])) for i in I
                                                                                                      for j in I
                                                                                                      for t in T
                                                                                                      if j != i), name="R13")
 
-# R15 B
+# R15
 m.addConstrs((a[i, f] <= a[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R15")
 
-# R16 B
+# R16
 m.addConstrs((d[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h >= t + 3 * (31 - f)) for i in I
                                                                                                            for j in I
                                                                                                            for t in T
@@ -142,8 +128,7 @@ m.addConstrs((d[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h >= 
                                                                                                      for t in T
                                                                                                      if j != i), name="R17")
 
-# R18 B
-
+# R18
 m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      for f in F
                                      if f > F[0]), name="R18")
@@ -163,6 +148,6 @@ m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
 
 m.optimize()
 
-parse_output(m.getVars(), matches)
+parse_output(m.getVars(), stats.matches)
 
 
