@@ -3,8 +3,8 @@ Using license file /Users/fernandoduarte/gurobi.lic
 Academic license - for non-commercial use only
 Changed value of parameter TimeLimit to 360000.0
    Prev: inf  Min: 0.0  Max: inf  Default: inf
-Variables Listas en 0.023552894592285156
-Restricciones Listas en 8.053560972213745
+** VARIABLES TIME: 0.023552894592285156
+** RESTRICTIONS TIME: 8.053560972213745
 
 
 Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)

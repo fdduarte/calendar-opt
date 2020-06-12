@@ -294,7 +294,7 @@ Solution count 3: 1191 1149 1129
 
 Solve interrupted
 Best objective 1.191000000000e+03, best bound 1.248000000000e+03, gap 4.7859%
-**TOT TIME: 28093.712563991547
+** TOTAL TIME: 28093.712563991547
 
 
 

@@ -2,7 +2,7 @@ import sys, os
 import pandas as pd
 import time
 from modules.params.pat_gen import home_away_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern, result_patterns_gen_v4, check_short_result_pattern
-from modules.params.parser import Stats
+from modules.params.parser import ChampStats
 
 
 ##########################
@@ -15,17 +15,17 @@ from modules.params.parser import Stats
 #* PARAMETROS DE INSTANCIA *#
 #############################
 START_TIME = time.time()
-FECHAINI = 24
+FECHAINI = 20
 FECHAFIN = 30
 TARGET = 30
 BREAKS = 2
 FILENAME = "SSTPA/modules/params/Datos.xlsx"
 TIMELIMIT = (100) * 60 * 60
-MODEL = "V3" # {V3, V4}
+MODEL = "V4" # {V3, V4}
 
 
 # Carga de Datos
-stats = Stats(FILENAME, FECHAINI, FECHAFIN)
+stats = ChampStats(FILENAME, FECHAINI, FECHAFIN)
 
 
 #################
@@ -69,9 +69,9 @@ if MODEL == "V4":
   # G1, G2: Patrones de resultados para la primera y segunda mitad
   dates = FECHAFIN - FECHAINI + 1
   FIRST_HALF = dates // 2
+  SECOND_HALF = dates - FIRST_HALF
   FH = list(range(FECHAINI, FECHAINI + FIRST_HALF))
   SH = list(range(FECHAINI + FIRST_HALF, FECHAFIN + 1))
-  SECOND_HALF = dates - FIRST_HALF
   G1_patterns_list = result_patterns_gen_v4(FIRST_HALF)
   G2_patterns_list = result_patterns_gen_v4(SECOND_HALF)
   G1_full = {i: G1_patterns_list[i] for i in range(len(G1_patterns_list))}
@@ -151,7 +151,6 @@ if MODEL == "V3":
   # Cantidad de puntos asociados al resultado
   # del patrón g en la fecha f
   char_to_int = {"W": 3, "L": 0, "D": 1}
-
   RP = dict()
   for i in I:
     for gi in G[i]:

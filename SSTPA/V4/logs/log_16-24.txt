@@ -3,8 +3,8 @@ Using license file /Users/fernandoduarte/gurobi.lic
 Academic license - for non-commercial use only
 Changed value of parameter TimeLimit to 360000.0
    Prev: inf  Min: 0.0  Max: inf  Default: inf
-** VAR TIME: 0.05740189552307129
-**RES TIME: 13.463451862335205
+** VARIABLES TIME: 0.05740189552307129
+** RESTRICTIONS TIME: 13.463451862335205
 
 
 Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
@@ -57,6 +57,6 @@ Solution count 1: 720
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 7.200000000000e+02, best bound 7.200000000000e+02, gap 0.0000%
-**TOT TIME: 29.547130823135376
+** TOTAL TIME: 29.547130823135376
 
 

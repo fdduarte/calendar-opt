@@ -117,7 +117,7 @@ def results_patterns_gen(filename, teams_stats, start_date, end_date): # estanda
       for pat in patterns:
         if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
           permutations_filtered.add(perm)
-    with open(f"{filename}_results_pattern.txt", "w", encoding="UTF-8") as infile:
+    with open(f"{filename}_results_pattern_{start_date}-{end_date}.txt", "w", encoding="UTF-8") as infile:
       for perm in list(permutations_filtered):
         infile.write(f"{perm}\n")
     return list(permutations_filtered)

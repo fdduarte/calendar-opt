@@ -4,7 +4,7 @@ from gurobipy import Model, GRB, quicksum
 import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
-from modules.params.params import I, T, F, S, N, G1, G2, EL, EV, R, L, PV1, PV2, PE1, VG1, VG2, RP1, RP2, PE2, NE, NV, V, EB, FH, SH, H1, H2, START_TIME, FECHAINI, FECHAFIN, FIRST_HALF, SECOND_HALF, TIMELIMIT, matches
+from modules.params.params import I, T, F, S, N, G1, G2, EL, EV, R, L, PV1, PV2, PE1, VG1, VG2, RP1, RP2, PE2, NE, NV, V, EB, FH, SH, H1, H2, START_TIME, FECHAINI, FECHAFIN, FIRST_HALF, SECOND_HALF, TIMELIMIT, stats
 from modules.output_parser import parse_output
 
 m = Model("SSTPA V4")
@@ -178,4 +178,4 @@ m.optimize()
 
 print(f"\n\n** TOTAL TIME: {time.time() - START_TIME}\n\n")
 
-parse_output(m.getVars(), matches)
+parse_output(m.getVars(), stats.matches)

@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Stats:
+class ChampStats:
 
   @staticmethod
   def open_excel(name, page):
