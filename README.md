@@ -4,11 +4,6 @@ Modelo computacional de optimización del calendario deportivo ANFP.
 
 ## Modo de uso
 
-### Generar Calendario
-
-- Cambiar en `SSTPA/modules/params/params.py` variable `MODEL` por `V3` o `V4`. 
-
-Ubicado en la carpeta `ANFP-Calendar-Opt`
 
 ### Visualizar Rendimiento
 
@@ -26,6 +21,8 @@ Ubicado en la carpeta `ANFP-Calendar-Opt`
 `python3 SSTPA/V3/model.py`
 
 ### SSTPA V4
+
+Rama `modelo-V4`
 
 `python3 SSTPA/V4/model.py`
 
