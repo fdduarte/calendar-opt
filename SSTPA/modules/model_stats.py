@@ -12,9 +12,30 @@ class ModelStats:
     self.restriction_loading_time = []
     self.presolve_time = []
     self.total_time = []
+    self.create_dir(name)
+  
+  @staticmethod
+  def create_dir(name):
+    try:
+      os.mkdir(f"{name}-vis")
+    except FileExistsError:
+      pass
+
+  @staticmethod
+  def gen_plot(x, y, title):
+    plt.plot(x, y, 'o')
+    plt.title(title)
+    plt.xlabel("Fechas")
+    plt.ylabel("Tiempos (minutos)")
+
+  @staticmethod
+  def get_var_cords(variable):
+    x = np.array([data[0] for data in variable])
+    y = np.array([data[1] for data in variable])
+    return x, y
 
   def parse_logs(self, logs):
-    # TO-DO: Auto search log files
+    self.logs = logs
     for log in logs:
       presolve = False
       try:
@@ -41,70 +62,109 @@ class ModelStats:
         print(f"{self.logs_path}/log_{log}.txt Not Found")
 
   def gen_linear_reg_scatter(self):
-    path = f"{self.name}-Plots"
+    path = f"{self.name}-vis/Reg"
     try:
       os.mkdir(path)
     except FileExistsError:
       pass
     # Scatter de carga variables vs fechas
-    x = np.array([data[0] for data in self.variable_loading_time])
-    y = np.array([data[1] for data in self.variable_loading_time])
-    plt.plot(x, y, 'o')
+    x, y = self.get_var_cords(self.variable_loading_time)
     m, b = np.polyfit(x, y, 1)
+    self.gen_plot(x, y, f"Function: {b} + {m}x")
     plt.plot(x, m*x + b)
-    plt.title(f"Function: {m} + x{b}")
     plt.savefig(f"{path}/variable_loading_reg.png")
-    plt.xlabel("Fechas")
-    plt.ylabel("Tiempo (minutos)")
+    plt.close()
+    # Scatter Restricciones vs fechas
+    x, y = self.get_var_cords(self.restriction_loading_time)
+    m, b = np.polyfit(x, y, 1)
+    self.gen_plot(x, y, f"Function: {b} + {m}x")
+    plt.plot(x, m*x + b)
+    plt.savefig(f"{path}/restriction_loading_reg.png")
+    plt.close()
+    # Scatter presolve vs fechas
+    x, y = self.get_var_cords(self.restriction_loading_time)
+    m, b = np.polyfit(x, y, 1)
+    self.gen_plot(x, y, f"Function: {b} + {m}x")
+    plt.plot(x, m*x + b)
+    plt.savefig(f"{path}/presovle_reg.png")
     plt.close()
     # Scatter de tiempo total vs fechas
-    x = np.array([data[0] for data in self.total_time])
-    y = np.array([data[1] for data in self.total_time])
-    plt.plot(x, y, 'o')
-    plt.title(f"Function: {m} + x{b}")
-    plt.xlabel("Fechas")
-    plt.ylabel("Tiempo (minutos)")
+    x, y = self.get_var_cords(self.total_time)
     m, b = np.polyfit(x, y, 1)
+    self.gen_plot(x, y, f"Function: {b} + {m}x")
     plt.plot(x, m*x + b)
     plt.savefig(f"{path}/total_time_reg.png")
     plt.close()
 
   def gen_poli_funct_plot(self):
-    path = f"{self.name}-Plots"
+    path = f"{self.name}-vis/PoliFit"
     try:
       os.mkdir(path)
     except FileExistsError:
       pass
     def test_funct(x, a, b):
       return a + x**b
-    x = np.array([data[0] for data in self.total_time])
-    y = np.array([data[1] for data in self.total_time])
+    x, y = self.get_var_cords(self.total_time)
     params, _ = optimize.curve_fit(test_funct, x, y)
-    plt.plot(x, y, 'o')
+    self.gen_plot(x, y, f"Function: {params[0]} + x^{params[1]}")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.title(f"Function: {params[0]} + x^{params[1]}")
-    plt.xlabel("Fechas")
-    plt.ylabel("Tiempo (minutos)")
-    plt.savefig(f"{path}/total_time_polin_fit.png")
+    plt.savefig(f"{path}/total_time_polifit.png")
     plt.close()
 
   def gen_exp_funct_plot(self):
-    path = f"{self.name}-Plots"
+    path = f"{self.name}-vis/ExpFit"
     try:
       os.mkdir(path)
     except FileExistsError:
       pass
     def test_funct(x, a, b):
       return a + b**x
-    x = np.array([data[0] for data in self.total_time])
-    y = np.array([data[1] for data in self.total_time])
+    x, y = self.get_var_cords(self.total_time)
     params, _ = optimize.curve_fit(test_funct, x, y)
-    plt.plot(x, y, 'o')
+    self.gen_plot(x, y, f"Function: {params[0]} + {params[1]}^x")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.title(f"Function: {params[0]} + {params[1]}^x")
-    plt.xlabel("Fechas")
-    plt.ylabel("Tiempo (minutos)")
-    plt.savefig(f"{path}/total_time_exp_fit.png")
+    plt.savefig(f"{path}/total_time_expfit.png")
     plt.close()
 
-
+  def gen_csv(self):
+    csv_lines = []
+    for logs in self.logs:
+      line = []
+      start, end = logs.split("-")
+      curr_dates = int(end) - int(start) + 1
+      line.append(str(curr_dates))
+      found = False
+      for dates, val in self.variable_loading_time:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
+      found = False
+      for dates, val in self.restriction_loading_time:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
+      found = False
+      for dates, val in self.presolve_time:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
+      found = False
+      for dates, val in self.total_time:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
+      csv_lines.append(line)
+    with open(f"{self.name}-vis/data.csv", "w", encoding="UTF-8") as infile:
+      infile.write("dates,var_loading,res_loading,presolve,total\n")
+      for line in csv_lines:
+        infile.write(",".join(line))
+        infile.write("\n")
+      

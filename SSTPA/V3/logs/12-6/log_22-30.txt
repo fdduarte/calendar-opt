@@ -1,0 +1,68 @@
+Creating Patterns File
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.07562017440795898
+
+
+** RESTRICTIONS TIME: 14.488869905471802
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 255384 rows, 18943 columns and 6959112 nonzeros
+Model fingerprint: 0x92d7f98d
+Variable types: 0 continuous, 18943 integer (18943 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 254755 rows and 12370 columns
+Presolve time: 4.48s
+Presolved: 629 rows, 6573 columns, 40065 nonzeros
+Variable types: 0 continuous, 6573 integer (6573 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    7.2000000e+01   2.725000e+02   0.000000e+00      5s
+    1553    7.2000000e+01   0.000000e+00   0.000000e+00      6s
+
+Root relaxation: objective 7.200000e+01, 1553 iterations, 0.18 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   72.00000    0  406          -   72.00000      -     -    6s
+     0     0   72.00000    0  511          -   72.00000      -     -    7s
+     0     0   72.00000    0  526          -   72.00000      -     -    7s
+H    0     0                      72.0000000   72.00000  0.00%     -    8s
+     0     0   72.00000    0  445   72.00000   72.00000  0.00%     -    9s
+
+Cutting planes:
+  Cover: 32
+  Clique: 47
+  GUB cover: 13
+  Zero half: 4
+  RLT: 7
+
+Explored 1 nodes (19211 simplex iterations) in 9.07 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 72 
+
+Optimal solution found (tolerance 3.00e-01)
+Best objective 7.200000000000e+01, best bound 7.200000000000e+01, gap 0.0000%
+
+
+** TOTAL TIME: 24.31307864189148
+
+

@@ -1,0 +1,75 @@
+Creating Patterns File
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.5461750030517578
+
+
+** RESTRICTIONS TIME: 22.620585918426514
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 333960 rows, 93770 columns and 11230764 nonzeros
+Model fingerprint: 0x575e8fbe
+Variable types: 0 continuous, 93770 integer (93770 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 332241 rows and 13689 columns (presolve time = 5s) ...
+Presolve removed 332807 rows and 14305 columns (presolve time = 10s) ...
+Presolve removed 333038 rows and 14493 columns (presolve time = 15s) ...
+Presolve removed 333076 rows and 14572 columns
+Presolve time: 19.59s
+Presolved: 884 rows, 79198 columns, 659264 nonzeros
+Variable types: 0 continuous, 79198 integer (79198 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    8.8000000e+01   3.400000e+02   0.000000e+00     46s
+    2378    8.8000000e+01   0.000000e+00   0.000000e+00     47s
+
+Root relaxation: objective 8.800000e+01, 2378 iterations, 1.82 seconds
+Total elapsed time = 54.35s
+Total elapsed time = 58.44s
+Total elapsed time = 66.09s
+Total elapsed time = 70.36s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   88.00000    0  564          -   88.00000      -     -   74s
+     0     0   88.00000    0  697          -   88.00000      -     -  106s
+     0     0   88.00000    0  720          -   88.00000      -     -  108s
+H    0     0                      88.0000000   88.00000  0.00%     -  172s
+     0     0   88.00000    0  567   88.00000   88.00000  0.00%     -  177s
+
+Cutting planes:
+  Cover: 37
+  Clique: 47
+  GUB cover: 25
+  Zero half: 2
+  RLT: 22
+
+Explored 1 nodes (111294 simplex iterations) in 177.97 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 88 
+
+Optimal solution found (tolerance 3.00e-01)
+Best objective 8.800000000000e+01, best bound 8.800000000000e+01, gap 0.0000%
+
+
+** TOTAL TIME: 204.3680031299591
+
+

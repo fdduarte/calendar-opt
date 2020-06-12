@@ -1,0 +1,63 @@
+Creating Patterns File
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.03348183631896973
+
+
+** RESTRICTIONS TIME: 8.276797771453857
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 181272 rows, 8216 columns and 4313123 nonzeros
+Model fingerprint: 0x4f6e3921
+Variable types: 0 continuous, 8216 integer (8216 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 180822 rows and 6744 columns
+Presolve time: 2.04s
+Presolved: 450 rows, 1472 columns, 7357 nonzeros
+Variable types: 0 continuous, 1472 integer (1472 binary)
+
+Root relaxation: objective 5.600000e+01, 843 iterations, 0.04 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   56.00000    0  297          -   56.00000      -     -    2s
+     0     0   56.00000    0  371          -   56.00000      -     -    2s
+     0     0   56.00000    0  351          -   56.00000      -     -    2s
+H    0     0                      56.0000000   56.00000  0.00%     -    3s
+     0     0   56.00000    0  315   56.00000   56.00000  0.00%     -    3s
+
+Cutting planes:
+  Gomory: 1
+  Cover: 27
+  Clique: 51
+  GUB cover: 11
+  Zero half: 16
+  RLT: 16
+
+Explored 1 nodes (6739 simplex iterations) in 3.15 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 56 
+
+Optimal solution found (tolerance 3.00e-01)
+Best objective 5.600000000000e+01, best bound 5.600000000000e+01, gap 0.0000%
+
+
+** TOTAL TIME: 11.739850044250488
+
+

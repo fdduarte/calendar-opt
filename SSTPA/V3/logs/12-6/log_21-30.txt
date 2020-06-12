@@ -1,0 +1,69 @@
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.15415191650390625
+
+
+** RESTRICTIONS TIME: 18.43354868888855
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 298640 rows, 39908 columns and 8950030 nonzeros
+Model fingerprint: 0x117de98e
+Variable types: 0 continuous, 39908 integer (39908 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 297706 rows and 9792 columns (presolve time = 5s) ...
+Presolve removed 297871 rows and 10034 columns
+Presolve time: 7.74s
+Presolved: 769 rows, 29874 columns, 210286 nonzeros
+Variable types: 0 continuous, 29874 integer (29874 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    8.0000000e+01   3.020000e+02   0.000000e+00     13s
+    2331    8.0000000e+01   0.000000e+00   0.000000e+00     14s
+
+Root relaxation: objective 8.000000e+01, 2331 iterations, 0.73 seconds
+Total elapsed time = 16.26s
+Total elapsed time = 21.39s
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   80.00000    0  496          -   80.00000      -     -   23s
+     0     0   80.00000    0  618          -   80.00000      -     -   29s
+     0     0   80.00000    0  645          -   80.00000      -     -   30s
+H    0     0                      80.0000000   80.00000  0.00%     -   39s
+     0     0   80.00000    0  515   80.00000   80.00000  0.00%     -   39s
+
+Cutting planes:
+  Cover: 43
+  Clique: 48
+  GUB cover: 16
+  RLT: 24
+
+Explored 1 nodes (52527 simplex iterations) in 39.49 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 80 
+
+Optimal solution found (tolerance 3.00e-01)
+Best objective 8.000000000000e+01, best bound 8.000000000000e+01, gap 0.0000%
+
+
+** TOTAL TIME: 58.9100079536438
+
+

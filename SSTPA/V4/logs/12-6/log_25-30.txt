@@ -1,0 +1,53 @@
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.1
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.029333114624023438
+
+
+** RESTRICTIONS TIME: 10.829142093658447
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 219168 rows, 6450 columns and 3756610 nonzeros
+Model fingerprint: 0x29f00964
+Variable types: 0 continuous, 6450 integer (6450 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+01, 2e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 5e+00]
+Presolve removed 212351 rows and 3739 columns
+Presolve time: 4.08s
+Presolved: 6817 rows, 2711 columns, 100055 nonzeros
+Variable types: 0 continuous, 2711 integer (2711 binary)
+
+Root relaxation: objective 3.962800e+02, 657 iterations, 0.04 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  396.28000    0  245          -  396.28000      -     -    4s
+H    0     0                     325.0000000  396.28000  21.9%     -    4s
+H    0     0                     385.0000000  396.28000  2.93%     -    4s
+     0     0  396.28000    0  245  385.00000  396.28000  2.93%     -    4s
+
+Explored 1 nodes (906 simplex iterations) in 4.76 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 2: 385 325 
+
+Optimal solution found (tolerance 1.00e-01)
+Best objective 3.850000000000e+02, best bound 3.850000000000e+02, gap 0.0000%
+
+
+** TOTAL TIME: 15.883976936340332
+
+

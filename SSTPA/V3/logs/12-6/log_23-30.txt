@@ -1,0 +1,64 @@
+Creating Patterns File
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+
+
+** VARIABLES TIME: 0.04155421257019043
+
+
+** RESTRICTIONS TIME: 11.047443151473999
+
+
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 207168 rows, 11219 columns and 5052903 nonzeros
+Model fingerprint: 0x748cc2d6
+Variable types: 0 continuous, 11219 integer (11219 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve removed 206633 rows and 8479 columns
+Presolve time: 2.18s
+Presolved: 535 rows, 2740 columns, 15117 nonzeros
+Variable types: 0 continuous, 2740 integer (2740 binary)
+
+Root relaxation: objective 6.400000e+01, 1159 iterations, 0.10 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0   64.00000    0  377          -   64.00000      -     -    3s
+     0     0   64.00000    0  446          -   64.00000      -     -    3s
+     0     0   64.00000    0  447          -   64.00000      -     -    3s
+     0     0   64.00000    0  372          -   64.00000      -     -    4s
+     0     0   64.00000    0  429          -   64.00000      -     -    4s
+H    0     0                      64.0000000   64.00000  0.00%     -    4s
+     0     0   64.00000    0  399   64.00000   64.00000  0.00%     -    4s
+
+Cutting planes:
+  Cover: 24
+  Clique: 64
+  GUB cover: 16
+  Zero half: 16
+  RLT: 10
+
+Explored 1 nodes (16611 simplex iterations) in 4.95 seconds
+Thread count was 8 (of 8 available processors)
+
+Solution count 1: 64 
+
+Optimal solution found (tolerance 3.00e-01)
+Best objective 6.400000000000e+01, best bound 6.400000000000e+01, gap 0.0000%
+
+
+** TOTAL TIME: 16.363542079925537
+
+
