@@ -15,12 +15,13 @@ from modules.params.parser import ChampStats
 #* PARAMETROS DE INSTANCIA *#
 #############################
 START_TIME = time.time()
-FECHAINI = 25
+FECHAINI = 20
 FECHAFIN = 30
-TARGET = 30
+TARGET = 5
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos.xlsx"
+FILENAME = "SSTPA/modules/params/Datos2.xlsx"
 TIMELIMIT = (100) * 60 * 60
+print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
 
 # Carga de Datos
@@ -151,6 +152,10 @@ for i in I:
       H[i][f][t] = list()
     for g in G[i]:
       H[i][f][puntos(i, f, g)].append(g)
+
+# Vf: V[fecha]
+# Ponderación de atractivo de fecha f
+V = {f: f - 15  if f - 15 <= TARGET else 0 for f in F}
 
 print("FINISHED LOADING PARAMS")
 

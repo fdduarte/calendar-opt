@@ -144,7 +144,7 @@ class ModelStats:
     params, _ = optimize.curve_fit(test_funct, x, y)
     self.gen_plot(x, y, f"Function: {params[0]} + x^{params[1]}")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.savefig(f"{self.output_path}/{path}/total_time_polifit.png")
+    plt.savefig(f"{path}/total_time_polifit.png")
     plt.close()
 
   def gen_exp_funct_plot(self):
@@ -159,7 +159,7 @@ class ModelStats:
     params, _ = optimize.curve_fit(test_funct, x, y)
     self.gen_plot(x, y, f"Function: {params[0]} + {params[1]}^x")
     plt.plot(x, test_funct(x, params[0], params[1]))
-    plt.savefig(f"{self.output_path}/{path}/total_time_expfit.png")
+    plt.savefig(f"{path}/total_time_expfit.png")
     plt.close()
 
   def gen_csv(self):

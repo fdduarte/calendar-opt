@@ -1,8 +1,9 @@
 from modules.model_stats import ModelStats
 
-LOGS = ["20-30", "21-30", "22-30", "23-30", "24-30", "25-30"]
-PATH = "SSTPA/V3/logs/12-6"
-NAME = "V3"
+
+LOGS = [f"{i}-30" for i in range(18, 24)]
+PATH = "SSTPA/logs/13-6"
+NAME = "V3-t"
 
 plotter = ModelStats(PATH, NAME)
 plotter.parse_logs(LOGS)

@@ -57,7 +57,7 @@ a = m.addVars(I, F, vtype=GRB.BINARY, name="a")
 # 0 en otro caso.
 d = m.addVars(I, F, vtype=GRB.BINARY, name="d")
 
-print(f"\n** VARIABLES TIME: {time.time() - start_model}")
+print(f"** VARIABLES TIME: {time.time() - start_model}")
 
 
 #####################
@@ -136,7 +136,7 @@ m.addConstrs((d[i, f] <= d[i, f - 1] for i in I
                                      if f > F[0]), name="R18")
 
 
-print(f"\n** RESTRICTIONS TIME: {time.time() - start_model}")
+print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
 
 
 
@@ -150,7 +150,7 @@ m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
 
 m.optimize()
 
-print(f"\n** TOTAL TIME: {time.time() - START_TIME}")
+print(f"** TOTAL TIME: {time.time() - START_TIME}")
 
 ModelStats.parse_gurobi_output(m.getVars(), stats.matches)
 

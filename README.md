@@ -7,7 +7,7 @@ Modelo computacional de optimización del calendario deportivo ANFP.
 
 ### Visualizar Rendimiento
 
-- Se guardan los logs en una carpeta, por ejemplo `python3 SSTPA/V3/model.py >> STPA/logs/log_{fi}-{f2}`.
+- Guardar stdout una carpeta, por ejemplo `python3 SSTPA/V3/model.py >> STPA/logs/log_{fi}-{f2}`.
 
 - Se modifican parámetros de `gen_stats.py`. `LOGS` son los nombres de los logs dentro de la ruta `PATH`.
 

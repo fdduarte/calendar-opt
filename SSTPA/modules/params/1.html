@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .error {
+        color: red;
+    }
+  </style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega@5"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-lite@4.8.1"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm//vega-embed@6"></script>
+</head>
+<body>
+  <div id="vis"></div>
+  <script>
+    (function(vegaEmbed) {
+      var spec = {"config": {"background": "white", "view": {"continuousWidth": 400, "continuousHeight": 300}}, "layer": [{"mark": "point", "encoding": {"x": {"type": "quantitative", "field": "total_states"}, "y": {"type": "quantitative", "field": "resizes"}}, "title": "total_states vs resizes"}, {"mark": {"type": "line", "color": "red"}, "encoding": {"x": {"type": "quantitative", "field": "total_states"}, "y": {"type": "quantitative", "field": "resizes"}}, "title": "total_states vs resizes", "transform": [{"on": "total_states", "regression": "resizes", "method": "poly", "order": 1}]}], "data": {"name": "data-7a0b7e0388a1ab9e4e037c9d738bfd93"}, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-7a0b7e0388a1ab9e4e037c9d738bfd93": [{"total_states": 109, "resizes": 5}, {"total_states": 177, "resizes": 6}, {"total_states": 225, "resizes": 6}, {"total_states": 407, "resizes": 7}, {"total_states": 493, "resizes": 7}, {"total_states": 589, "resizes": 7}, {"total_states": 621, "resizes": 7}, {"total_states": 911, "resizes": 8}, {"total_states": 1009, "resizes": 8}, {"total_states": 1713, "resizes": 9}, {"total_states": 1851, "resizes": 9}, {"total_states": 2001, "resizes": 9}, {"total_states": 2081, "resizes": 9}, {"total_states": 2479, "resizes": 9}, {"total_states": 2611, "resizes": 9}, {"total_states": 4321, "resizes": 10}, {"total_states": 5641, "resizes": 10}, {"total_states": 6649, "resizes": 11}, {"total_states": 7297, "resizes": 11}, {"total_states": 8345, "resizes": 11}, {"total_states": 8449, "resizes": 11}, {"total_states": 9465, "resizes": 11}, {"total_states": 10093, "resizes": 11}, {"total_states": 12649, "resizes": 11}, {"total_states": 14651, "resizes": 12}, {"total_states": 16461, "resizes": 12}, {"total_states": 17089, "resizes": 12}, {"total_states": 19937, "resizes": 12}, {"total_states": 21073, "resizes": 12}, {"total_states": 21617, "resizes": 12}, {"total_states": 21913, "resizes": 12}, {"total_states": 28021, "resizes": 13}, {"total_states": 34577, "resizes": 13}, {"total_states": 39601, "resizes": 13}, {"total_states": 41457, "resizes": 13}, {"total_states": 46381, "resizes": 13}, {"total_states": 48853, "resizes": 13}, {"total_states": 55469, "resizes": 14}, {"total_states": 59913, "resizes": 13}, {"total_states": 68225, "resizes": 14}, {"total_states": 76609, "resizes": 14}, {"total_states": 86491, "resizes": 14}, {"total_states": 96781, "resizes": 14}, {"total_states": 101993, "resizes": 14}, {"total_states": 106705, "resizes": 14}, {"total_states": 109607, "resizes": 15}, {"total_states": 113191, "resizes": 15}, {"total_states": 124751, "resizes": 15}, {"total_states": 130449, "resizes": 14}, {"total_states": 139193, "resizes": 14}, {"total_states": 140897, "resizes": 15}, {"total_states": 146361, "resizes": 14}, {"total_states": 157073, "resizes": 14}, {"total_states": 160201, "resizes": 15}, {"total_states": 170065, "resizes": 14}, {"total_states": 185053, "resizes": 15}, {"total_states": 186689, "resizes": 14}, {"total_states": 187689, "resizes": 15}, {"total_states": 196151, "resizes": 15}, {"total_states": 205401, "resizes": 15}, {"total_states": 208945, "resizes": 16}, {"total_states": 209455, "resizes": 16}, {"total_states": 215101, "resizes": 15}, {"total_states": 235937, "resizes": 16}, {"total_states": 257817, "resizes": 15}, {"total_states": 298777, "resizes": 15}, {"total_states": 313649, "resizes": 15}, {"total_states": 342721, "resizes": 15}, {"total_states": 367993, "resizes": 15}, {"total_states": 390113, "resizes": 15}, {"total_states": 403249, "resizes": 15}, {"total_states": 441545, "resizes": 15}, {"total_states": 470537, "resizes": 15}, {"total_states": 485369, "resizes": 15}, {"total_states": 506233, "resizes": 15}, {"total_states": 526929, "resizes": 15}, {"total_states": 533401, "resizes": 15}, {"total_states": 549793, "resizes": 15}, {"total_states": 555721, "resizes": 17}, {"total_states": 600825, "resizes": 16}, {"total_states": 622945, "resizes": 17}, {"total_states": 637465, "resizes": 16}, {"total_states": 654277, "resizes": 17}, {"total_states": 675337, "resizes": 16}, {"total_states": 690445, "resizes": 17}, {"total_states": 709857, "resizes": 16}, {"total_states": 716745, "resizes": 16}, {"total_states": 776649, "resizes": 16}, {"total_states": 797481, "resizes": 16}, {"total_states": 802809, "resizes": 16}, {"total_states": 820321, "resizes": 17}, {"total_states": 854849, "resizes": 16}, {"total_states": 859909, "resizes": 17}, {"total_states": 866913, "resizes": 16}, {"total_states": 879953, "resizes": 16}, {"total_states": 983993, "resizes": 16}, {"total_states": 1019129, "resizes": 16}, {"total_states": 1053329, "resizes": 16}, {"total_states": 1092569, "resizes": 16}, {"total_states": 1133393, "resizes": 16}, {"total_states": 1149937, "resizes": 16}, {"total_states": 1157561, "resizes": 16}, {"total_states": 1183633, "resizes": 16}, {"total_states": 1222865, "resizes": 16}, {"total_states": 1269393, "resizes": 16}, {"total_states": 1288421, "resizes": 18}, {"total_states": 1298249, "resizes": 16}, {"total_states": 1318849, "resizes": 16}, {"total_states": 1375441, "resizes": 18}, {"total_states": 1378465, "resizes": 18}, {"total_states": 1489609, "resizes": 18}, {"total_states": 1590497, "resizes": 18}, {"total_states": 1632193, "resizes": 18}, {"total_states": 1649977, "resizes": 18}, {"total_states": 1763653, "resizes": 18}, {"total_states": 1923541, "resizes": 18}, {"total_states": 2014981, "resizes": 19}, {"total_states": 2033711, "resizes": 19}, {"total_states": 2057133, "resizes": 19}, {"total_states": 2215871, "resizes": 18}, {"total_states": 2589061, "resizes": 19}, {"total_states": 2621831, "resizes": 19}, {"total_states": 2658211, "resizes": 19}, {"total_states": 3000471, "resizes": 19}, {"total_states": 3115201, "resizes": 19}, {"total_states": 3251471, "resizes": 19}]}};
+      var embedOpt = {"mode": "vega-lite"};
+
+      function showError(el, error){
+          el.innerHTML = ('<div class="error" style="color:red;">'
+                          + '<p>JavaScript Error: ' + error.message + '</p>'
+                          + "<p>This usually means there's a typo in your chart specification. "
+                          + "See the javascript console for the full traceback.</p>"
+                          + '</div>');
+          throw error;
+      }
+      const el = document.getElementById('vis');
+      vegaEmbed("#vis", spec, embedOpt)
+        .catch(error => showError(el, error));
+    })(vegaEmbed);
+
+  </script>
+</body>
+</html>
