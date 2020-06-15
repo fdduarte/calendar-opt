@@ -1,6 +1,7 @@
 import sys, os
 import pandas as pd
 import time
+import sys
 from modules.params.pat_gen import home_away_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern, result_patterns_gen_v4, check_short_result_pattern
 from modules.params.parser import ChampStats
 
@@ -14,9 +15,13 @@ from modules.params.parser import ChampStats
 #############################
 #* PARAMETROS DE INSTANCIA *#
 #############################
+
 START_TIME = time.time()
-FECHAINI = 20
+FECHAINI = 25
 FECHAFIN = 30
+if (len(sys.argv)) == 3:
+  FECHAINI = int(sys.argv[1])
+  FECHAFIN = int(sys.argv[2])
 TARGET = 5
 BREAKS = 2
 FILENAME = "SSTPA/modules/params/Datos2.xlsx"

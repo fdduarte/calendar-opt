@@ -1,0 +1,7 @@
+DD
+WL
+LD
+DW
+LW
+WD
+DL
