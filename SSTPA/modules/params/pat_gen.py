@@ -96,6 +96,7 @@ def results_patterns_gen(filename, teams_stats, start_date, end_date): # estanda
   :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
   :return: (list) patrones de resultados.
   """
+  dates = end_date - start_date + 1
   permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
   patterns = set()
   for team in teams_stats.keys():
