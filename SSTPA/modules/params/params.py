@@ -24,7 +24,7 @@ if (len(sys.argv)) == 3:
   FECHAFIN = int(sys.argv[2])
 TARGET = 5
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos2.xlsx"
+FILENAME = "SSTPA/modules/params/Datos_fechaini_23_1000.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
