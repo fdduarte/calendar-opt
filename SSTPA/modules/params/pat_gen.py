@@ -96,40 +96,20 @@ def results_patterns_gen(filename, teams_stats, start_date, end_date): # estanda
   :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
   :return: (list) patrones de resultados.
   """
-  dates = end_date - start_date + 1
-  filename, _ = filename.split(".")
-  filename = os.path.split(filename)
-  filepath = os.path.join(filename[0], 'pat_files')
-  filename = os.path.join(filepath, f"{filename[1]}_results_pattern_{start_date}-{end_date}.txt")
-  try:
-      os.mkdir(filepath)
-  except FileExistsError:
-    pass
-  try:
-    with open(filename, "r", encoding="UTF-8") as infile:
-      permutations = list()
-      for line in infile:
-        permutations.append(line.strip())
-      return permutations
-  except FileNotFoundError:
-    print("Creating Patterns File")
-    permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
-    patterns = set()
-    for team in teams_stats.keys():
-      stats = ["W" for _ in range(teams_stats[team]['wins'])]
-      stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
-      stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
-      stats = "".join(stats)
-      patterns.add(stats)
-    permutations_filtered = set()
-    for perm in permutations:
-      for pat in patterns:
-        if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
-          permutations_filtered.add(perm)
-    with open(filename, "w", encoding="UTF-8") as infile:
-      for perm in list(permutations_filtered):
-        infile.write(f"{perm}\n")
-    return list(permutations_filtered)
+  permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
+  patterns = set()
+  for team in teams_stats.keys():
+    stats = ["W" for _ in range(teams_stats[team]['wins'])]
+    stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
+    stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
+    stats = "".join(stats)
+    patterns.add(stats)
+  permutations_filtered = set()
+  for perm in permutations:
+    for pat in patterns:
+      if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
+        permutations_filtered.add(perm)
+  return list(permutations_filtered)
 
 def result_patterns_gen_v4(length):
   return ["".join(seq) for seq in itertools.product("WDL", repeat=length)]

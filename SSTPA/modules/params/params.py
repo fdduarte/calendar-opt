@@ -17,14 +17,14 @@ from modules.params.parser import ChampStats
 #############################
 
 START_TIME = time.time()
-FECHAINI = 25
+FECHAINI = 23
 FECHAFIN = 30
 if (len(sys.argv)) == 3:
   FECHAINI = int(sys.argv[1])
   FECHAFIN = int(sys.argv[2])
 TARGET = 5
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos_fechaini_23_1000.xlsx"
+FILENAME = "SSTPA/modules/params/Datos.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
