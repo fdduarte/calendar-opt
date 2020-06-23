@@ -17,14 +17,14 @@ from modules.params.parser import ChampStats
 #############################
 
 START_TIME = time.time()
-FECHAINI = 23
+FECHAINI = 25
 FECHAFIN = 30
 if (len(sys.argv)) == 3:
   FECHAINI = int(sys.argv[1])
   FECHAFIN = int(sys.argv[2])
-TARGET = 5
+TARGET = 15
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos.xlsx"
+FILENAME = "SSTPA/modules/params/Datos_w.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
@@ -119,6 +119,7 @@ for i in I:
 # 1 Si el equipo i es local en el partido n
 # 0 En otro caso
 EL = {i: {n: 1 if stats.matches[n]['home'] == i else 0 for n in N} for i in I}
+
 
 # EVin: EV[equipo][partido]
 # 1 Si el equipo i es visita en el partido n

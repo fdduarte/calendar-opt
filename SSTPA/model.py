@@ -153,5 +153,6 @@ m.optimize()
 print(f"** TOTAL TIME: {time.time() - START_TIME}")
 
 ModelStats.parse_gurobi_output(m.getVars(), stats.matches)
+ModelStats.check_valid_output()
 
 

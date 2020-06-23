@@ -74,6 +74,26 @@ class ModelStats:
       with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
         infile.write("Modelo Infactible")
 
+  @staticmethod
+  def check_valid_output():
+    patterns = dict()
+    with open("output/programacion.csv", "r", encoding="UTF-8") as infile:
+      for line in infile:
+        if line[0] == ",":
+          _, home, away = line.strip().split(",")
+          if not home in patterns.keys():
+            patterns[home] = "1"
+          else:
+            patterns[home] += "1"
+          if not away in patterns.keys():
+            patterns[away] = "0"
+          else:
+            patterns[away] += "0"
+    for pattern in patterns.values():
+      if "000" in pattern or "111" in pattern:
+        raise Exception("Modelo arrojó un resultado no valido de local visita.")
+
+
   def parse_logs(self, logs):
     self.logs = logs
     for log in logs:
