@@ -4,7 +4,7 @@ from gurobipy import Model, GRB, quicksum
 import time
 sys.path.append(os.path.abspath(os.path.join('..', 'ANFP-Calendar-Opt', 'SSTPA')))
 
-from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, START_TIME, stats
+from modules.params.params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, START_TIME, stats, S_full
 from modules.model_stats import ModelStats
 
 m = Model("SSTPA V3")
@@ -124,7 +124,7 @@ m.addConstrs((d[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T
                                                                                                            for f in F
                                                                                                            if f > F[0] and j != i), name="R16")
 
-# R17 B
+# R17
 m.addConstrs((d[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h >= t + 3 * (31 - F[0])) for i in I
                                                                                                      for j in I
                                                                                                      for t in T
@@ -144,15 +144,15 @@ print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
 #*  FUNCION OBJETIVO  *#
 ########################
 
-m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
+#m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
 
-#m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in F), GRB.MAXIMIZE) ## CAMBIAR POR PARAMM
+m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in F), GRB.MAXIMIZE)
 
 m.optimize()
 
 print(f"** TOTAL TIME: {time.time() - START_TIME}")
 
-ModelStats.parse_gurobi_output(m.getVars(), stats.matches)
+ModelStats.parse_gurobi_output(m.getVars(), stats.matches, S_full)
 ModelStats.check_valid_output()
 
 

@@ -50,7 +50,7 @@ class ModelStats:
     return x, y
 
   @staticmethod
-  def parse_gurobi_output(model_vars, matches):
+  def parse_gurobi_output(model_vars, matches, patterns):
     file_lines = dict()
     try:
       for var in model_vars:
@@ -64,6 +64,14 @@ class ModelStats:
             file_lines[date] = list()
           if value:
             file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
+        if "y" in str(var):
+          _, var, _, value = str(var).split()
+          value = int(float(value.strip(")>")))
+          var = var.strip("y[").strip("]")
+          team, _ = var.split("-")
+          if value:
+            print(f"{team},{patterns[team][var]}")
+      print("------")
       with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
         infile.write("jornada, local, visita\n")
         for date in file_lines.keys():
@@ -89,9 +97,11 @@ class ModelStats:
             patterns[away] = "0"
           else:
             patterns[away] += "0"
+    for key in patterns.keys():
+      print(f"{key},{patterns[key]}")
     for pattern in patterns.values():
       if "000" in pattern or "111" in pattern:
-        raise Exception("Modelo arrojó un resultado no valido de local visita.")
+        raise Exception(f"Modelo arrojó un resultado no valido de local visita: {pattern}.")
 
 
   def parse_logs(self, logs):

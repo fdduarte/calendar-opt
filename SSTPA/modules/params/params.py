@@ -24,7 +24,7 @@ if (len(sys.argv)) == 3:
   FECHAFIN = int(sys.argv[2])
 TARGET = 15
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos_w.xlsx"
+FILENAME = "SSTPA/modules/params/Datos_SIM2.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
@@ -134,7 +134,7 @@ EV = {i: {n: 1 if stats.matches[n]['away'] == i else 0 for n in N} for i in I}
 L = dict()
 for i in I:
   for s in S[i]:
-    L[s] = {f: 1 if S_full[i][s][FECHAINI - f] == "1" else 0 for f in F}
+    L[s] = {f: 1 if S_full[i][s][f - FECHAINI] == "1" else 0 for f in F}
 
 # RPgf: RP[patron][fecha]
 # Cantidad de puntos asociados al resultado
