@@ -1,5 +1,7 @@
 import itertools
 import os
+import random
+import math
 
 
 def homeaway_filter(breaks):
@@ -127,6 +129,19 @@ def check_short_result_pattern(pattern, teams_stats, team):
 def home_away_patterns(breaks):
   return filter(homeaway_filter(breaks), ["".join(seq) for seq in itertools.product("01", repeat=15)])
 
+def patterns_sample(patterns, threshold, relative_size, seed=1):
+  """
+  :param patterns: (list) Lista de patrones.
+  :param threshold: (int) Valor mínimo al cual se le aplica el sampleo.
+  :param relative_size: (float) porcentaje de sampleo.
+  :param seed: (int)
+  funcion que aplica sampleo a patrones para reduccion de dimencionaloidad.
+  :return: (list) Patrones filtrados.
+  """
+  random.seed(seed)
+  if (len(patterns)) > threshold:
+    k = int(math.floor(len(patterns) * relative_size))
+    random.sample(patterns, k)
 
 
 

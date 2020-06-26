@@ -2,7 +2,7 @@ import sys, os
 import pandas as pd
 import time
 import sys
-from modules.params.pat_gen import home_away_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern, result_patterns_gen_v4, check_short_result_pattern
+from modules.params.pat_gen import home_away_patterns, check_homeaway_pattern, results_patterns_gen, check_results_pattern, result_patterns_gen_v4, check_short_result_pattern, patterns_sample
 from modules.params.parser import ChampStats
 
 
@@ -17,14 +17,16 @@ from modules.params.parser import ChampStats
 #############################
 
 START_TIME = time.time()
-FECHAINI = 25
+FECHAINI = 23
 FECHAFIN = 30
 if (len(sys.argv)) == 3:
   FECHAINI = int(sys.argv[1])
   FECHAFIN = int(sys.argv[2])
-TARGET = 15
+THRESHOLD = 100
+FILTER = 0.6
+TARGET = 7
 BREAKS = 2
-FILENAME = "SSTPA/modules/params/Datos_SIM2.xlsx"
+FILENAME = "SSTPA/modules/params/Datos.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
 
@@ -67,6 +69,7 @@ team_patterns = check_results_pattern(stats.teams_results, full_results_patterns
 G_full = dict()
 for i in I:
   pat = list(set([pat for pat in team_patterns[i]]))
+  patterns_sample(pat, THRESHOLD, FILTER)
   G_full[i] = {f"{i}-{j + 1}": pat[j] for j in range(len(pat))} # Contiene el valor asociado a la llave patron de Gi
 G = {i: list(G_full[i].keys()) for i in I}
 

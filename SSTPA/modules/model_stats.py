@@ -18,6 +18,8 @@ class ModelStats:
     self.restriction_loading_time = []
     self.presolve_time = []
     self.total_time = []
+    self.optimal_value = []
+    self.bound_value = []
     self.create_dir(name)
     self.output_path = "output/visualization"
   
@@ -64,14 +66,6 @@ class ModelStats:
             file_lines[date] = list()
           if value:
             file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
-        if "y" in str(var):
-          _, var, _, value = str(var).split()
-          value = int(float(value.strip(")>")))
-          var = var.strip("y[").strip("]")
-          team, _ = var.split("-")
-          if value:
-            print(f"{team},{patterns[team][var]}")
-      print("------")
       with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
         infile.write("jornada, local, visita\n")
         for date in file_lines.keys():
@@ -97,12 +91,9 @@ class ModelStats:
             patterns[away] = "0"
           else:
             patterns[away] += "0"
-    for key in patterns.keys():
-      print(f"{key},{patterns[key]}")
     for pattern in patterns.values():
       if "000" in pattern or "111" in pattern:
         raise Exception(f"Modelo arrojó un resultado no valido de local visita: {pattern}.")
-
 
   def parse_logs(self, logs):
     self.logs = logs
@@ -126,6 +117,12 @@ class ModelStats:
               _, _, time = line.split()
               presolve = True
               self.presolve_time.append((model_length, float(time.strip("s"))/60))
+            if "Best objective" in line:
+              splitted_line = line.split()
+              obj = float(splitted_line[2].strip(','))
+              bound = float(splitted_line[5].strip(','))
+              self.optimal_value.append((model_length, bound))
+              self.bound_value.append((model_length, obj))
           if not presolve:
             self.presolve_time.append((model_length, 0))
       except FileNotFoundError:
@@ -231,9 +228,21 @@ class ModelStats:
           line.append(str(val))
       if not found:
         line.append("-")
+      for dates, val in self.optimal_value:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
+      for dates, val in self.bound_value:
+        if dates == curr_dates:
+          found = True
+          line.append(str(val))
+      if not found:
+        line.append("-")
       csv_lines.append(line)
     with open(f"{self.output_path}/{self.name}-vis/data.csv", "w", encoding="UTF-8") as infile:
-      infile.write("dates,var_loading,res_loading,presolve,total\n")
+      infile.write("dates,var_loading,res_loading,presolve,total,opt_val,bound_val\n")
       for line in csv_lines:
         infile.write(",".join(line))
         infile.write("\n")

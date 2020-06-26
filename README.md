@@ -15,6 +15,8 @@ Modelo computacional de optimización del calendario deportivo ANFP.
 
 - Se crea una carpeta en `output/visualization` llamada `{NAME}-vis` con distintas visualizaciones.
 
+- Comando para guardar varios logs a una carpeta `for i in {fi..ff}; do python3 SSTPA/model.py $i 30 > SSTPA/logs/folder/log_$i-30; done `, por ejemplo, `for i in {18..25}; do python3 SSTPA/model.py $i 30 > SSTPA/logs/26-6/log_$i-30; done `
+
 
 ### SSTPA V3
 
