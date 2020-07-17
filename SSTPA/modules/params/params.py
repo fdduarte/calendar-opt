@@ -23,12 +23,12 @@ if (len(sys.argv)) == 3:
   FECHAINI = int(sys.argv[1])
   FECHAFIN = int(sys.argv[2])
 THRESHOLD = 100
-FILTER = 0.6
-TARGET = 7
-BREAKS = 2
+FILTER = 0.2
+TARGET = 5
+BREAKS = 1
 FILENAME = "SSTPA/modules/params/Datos.xlsx"
 TIMELIMIT = (100) * 60 * 60
-print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}")
+print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
 
 
 # Carga de Datos
@@ -164,7 +164,7 @@ for i in I:
 
 # Vf: V[fecha]
 # Ponderación de atractivo de fecha f
-V = {f: f - 15  if f - 15 <= TARGET else 0 for f in F}
+V = {f: 0  if f - 15 <= TARGET else f - 15 for f in F}
 
 print("FINISHED LOADING PARAMS")
 

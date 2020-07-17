@@ -20,7 +20,7 @@ Modelo computacional de optimización del calendario deportivo ANFP.
 
 ### SSTPA V3
 
-`python3 SSTPA/V3/model.py fi ff`
+`python3 SSTPA/model.py fi ff`
 
 Donde `fi` y `ff` son la fecha inicial y fecha final a programar.
 

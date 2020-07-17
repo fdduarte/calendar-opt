@@ -118,14 +118,14 @@ m.addConstrs((a[i, f] <= a[i, f - 1] for i in I
                                      if f > F[0]), name="R15")
 
 # R16
-m.addConstrs((d[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h >= t + 3 * (31 - f)) for i in I
+m.addConstrs((d[i, f] <= 1 - p[i, t, f - 1] + quicksum(p[j, h, f - 1] for h in T if h >= t - 3 * (31 - f)) for i in I
                                                                                                            for j in I
                                                                                                            for t in T
                                                                                                            for f in F
                                                                                                            if f > F[0] and j != i), name="R16")
 
 # R17
-m.addConstrs((d[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h >= t + 3 * (31 - F[0])) for i in I
+m.addConstrs((d[i, F[0]] <= 1 - EB[i][t] + quicksum(EB[j][h] for h in T if h >= t - 3 * (31 - F[0])) for i in I
                                                                                                      for j in I
                                                                                                      for t in T
                                                                                                      if j != i), name="R17")
