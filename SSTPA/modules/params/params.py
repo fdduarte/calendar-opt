@@ -25,7 +25,7 @@ if (len(sys.argv)) == 3:
 THRESHOLD = 100
 FILTER = 0.2
 TARGET = 5
-BREAKS = 1
+BREAKS = 2
 FILENAME = "SSTPA/modules/params/Datos.xlsx"
 TIMELIMIT = (100) * 60 * 60
 print(f"PARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")

@@ -1,0 +1,36 @@
+PARAMS:
+Fechas: 24-30
+TARGET: 5
+FILTER: 0.2 (thrs 100)
+BREAKS: 1
+FINISHED LOADING PARAMS
+Using license file /Users/fernandoduarte/gurobi.lic
+Academic license - for non-commercial use only
+Changed value of parameter TimeLimit to 360000.0
+   Prev: inf  Min: 0.0  Max: inf  Default: inf
+Changed value of parameter MIPFocus to 1
+   Prev: 0  Min: 0  Max: 3  Default: 0
+Changed value of parameter MIPGap to 0.3
+   Prev: 0.0001  Min: 0.0  Max: inf  Default: 0.0001
+** VARIABLES TIME: 0.03428006172180176
+** RESTRICTIONS TIME: 10.326865196228027
+Gurobi Optimizer version 9.0.1 build v9.0.1rc0 (mac64)
+Optimize a model with 181384 rows, 8085 columns and 5688975 nonzeros
+Model fingerprint: 0xff9727bd
+Variable types: 0 continuous, 8085 integer (8085 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [9e+00, 2e+01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 2e+00]
+Presolve time: 0.17s
+
+Explored 0 nodes (0 simplex iterations) in 0.39 seconds
+Thread count was 1 (of 8 available processors)
+
+Solution count 0
+No other solutions better than -1e+100
+
+Model is infeasible
+Best objective -, best bound -, gap -
+** TOTAL TIME: 11.362094163894653
