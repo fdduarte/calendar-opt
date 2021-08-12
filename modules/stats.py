@@ -9,7 +9,6 @@ Módulo de Visualización.
 Interpeta stdout de model.py (V3 y V4), para
 generar visualizaciónes del rendimiento.
 """
-
 class ModelStats:
   def __init__(self, logs_path, name):
     self.logs_path = logs_path
@@ -247,3 +246,15 @@ class ModelStats:
         infile.write(",".join(line))
         infile.write("\n")
       
+
+if __name__ == '__main__':
+  LOGS = [f"{i}-30" for i in range(18, 24)]
+  PATH = "SSTPA/logs/13-6"
+  NAME = "V3-t"
+
+  plotter = ModelStats(PATH, NAME)
+  plotter.parse_logs(LOGS)
+  plotter.gen_linear_reg_scatter()
+  plotter.gen_poli_funct_plot()
+  plotter.gen_exp_funct_plot()
+  plotter.gen_csv()
