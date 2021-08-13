@@ -1,4 +1,4 @@
-from models import sstpa3_create_model
+from models import sstpa3_create_model, sstpa_mp_create_model
 from modules import ModelStats, PatternGenerator, ChampStats
 import argparse
 
@@ -34,11 +34,17 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    assert args.model in range(1, 6)
+
     champ_stats = ChampStats(args.filepath, args.start_date, args.end_date)
 
     if args.model == 1:
         m, S_F = sstpa3_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
-        m.optimize()
+
+    if args.model == 3:
+        m, S_F = sstpa_mp_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
+
+    m.optimize()
 
     ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches, S_F)
     ModelStats.check_valid_output()

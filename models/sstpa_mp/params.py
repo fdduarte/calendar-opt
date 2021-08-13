@@ -52,7 +52,7 @@ def get_params(start_date, end_date, pattern_generator, champ_stats):
 
   # Gi: G[equipo]
   # Patrones de resultados asociados al equipo i
-  full_results_patterns = pattern_generator.esults_patterns_gen(FILENAME, champ_stats.teams_results, FECHAINI, FECHAFIN)
+  full_results_patterns = pattern_generator.results_patterns_gen(FILENAME, champ_stats.teams_results, FECHAINI, FECHAFIN)
   team_patterns = pattern_generator.check_results_pattern(champ_stats.teams_results, full_results_patterns)
   G_full = dict()
   for i in I:
