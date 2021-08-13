@@ -1,0 +1,1 @@
+from .sstpa3.model import create_model as sstpa3_create_model

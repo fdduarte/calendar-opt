@@ -1,16 +1,34 @@
-import sys
-import os
 from gurobipy import Model, GRB, quicksum
 import time
-from params import N, F, S, I, T, G, R, EL, EV, L, RP, E, EB, V, H, TIMELIMIT, START_TIME, stats, S_full
+from .params import get_params
 
 
-def create_model():
+def create_model(start_date, end_date, time_limit, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
   m = Model("SSTPA V3")
 
-  m.setParam('TimeLimit', TIMELIMIT)
-  m.setParam('MIPFocus', 1)
-  m.setParam('MIPGap', 0.3)
+  m.setParam('TimeLimit', time_limit)
+  m.setParam('MIPFocus', mip_focus)
+  m.setParam('MIPGap', mip_gap)
+
+  params = get_params(start_date, end_date, pattern_generator, champ_stats)
+
+  # Parse params dict to variables
+
+  N = params['N']
+  F = params['F']
+  S = params['S']
+  I = params['I']
+  T = params['T']
+  G = params['G']
+  R = params['R']
+  H = params['H']
+  L = params['L']
+  V = params['V']
+  EL = params['EL']
+  EV = params['EV']
+  RP = params['RP']
+  EB = params['EB']
+  S_F = params['S_F']
 
 
   start_model = time.time()
@@ -143,15 +161,8 @@ def create_model():
   #*  FUNCION OBJETIVO  *#
   ########################
 
-  #m.setObjective(quicksum(quicksum(x[n, f] for n in N) for f in F), GRB.MAXIMIZE)
-
   m.setObjective(quicksum(quicksum(V[f] * (a[i, f] + d[i, f]) for i in I) for f in F), GRB.MAXIMIZE)
 
-  return m
-
-# print(f"** TOTAL TIME: {time.time() - START_TIME}")
-
-ModelStats.parse_gurobi_output(m.getVars(), stats.matches, S_full)
-ModelStats.check_valid_output()
+  return m, S_F
 
 

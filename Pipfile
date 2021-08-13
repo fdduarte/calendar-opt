@@ -8,6 +8,7 @@ pandas = "*"
 matplotlib = "*"
 scipy = "*"
 gurobipy = "*"
+openpyxl = "*"
 
 [dev-packages]
 
