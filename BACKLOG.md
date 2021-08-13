@@ -1,0 +1,3 @@
+# Backlog
+
+- Refactor `patterns.py`
