@@ -2,15 +2,14 @@
 
 def get_params(start_date, end_date, pattern_generator, champ_stats):
   """
-  Generador de parámetros para SSTPA V3
+  Generador de parámetros para SSTPA V3.
 
   Args:
+  -- pattern_generator: Instancia de generador de patrones
+  -- champ_stats: Instancia de ChampStats
 
-  pattern_generator: Instancia de generador de patrones
-  champ_stats -- Instancia de ChampStats
-
-  return:
-  stats -- (dict) diccionario con parametros del modelo
+  Return:
+  -- stats: (dict) diccionario con parametros del modelo
   """
 
   # PARAMETROS DE INSTANCIA

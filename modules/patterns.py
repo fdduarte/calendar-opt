@@ -8,8 +8,13 @@ class PatternGenerator():
   def homeaway_filter(breaks):
     def valid_homeaway_pattern(string):
       """
-      :param string: string con patron de 1s y 0s
-      :return: (bool) Indica si el patron es valido o no
+      Función que chequea si un patrón es válido o no.
+
+      Args:
+      -- string: (str) string con patron de 1s y 0s.
+
+      Return:
+      -- is_valid: (bool) Booleano que indica si el patrón es válido.
       """
       local = string.count("0")
       visit = string.count("1")
