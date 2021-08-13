@@ -1,0 +1,239 @@
+\documentclass[authoryear,preprint,review,12pt]{elsarticle}
+
+\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[ansinew]{inputenc}
+\usepackage{colortbl}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{anysize}
+\usepackage{ragged2e}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
+\usepackage{stmaryrd}
+\usepackage{setspace}
+\usepackage{color}
+\usepackage[left=0.95in,top=0.95in,right=0.95in,bottom=0.95in]{geometry}
+
+\usepackage{nccmath}
+
+\allowdisplaybreaks
+\hypersetup{pdfstartview = FitH} %hace que la hoja se expanda en anchura, y no se muestre toda la hoja al abrirlo
+
+\journal{European Journal of Operational Research}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\newtheorem{lem}{Lema}
+\newtheorem{defi}{Definition}
+\newtheorem{pro}{Proposition}
+\newtheorem{cor}{Corollary}
+
+%\renewcommand{\tablename}{Table}
+%\renewcommand{\figurename}{Figure}
+%\renewcommand{\abstractname}{Abstract}
+%\renewcommand{\refname}{References}
+
+\title{Modelo Determinístico para calendarización de partidos de fútbol}
+
+%\author[label1]{Alejandro Cataldo}
+%\author[label2]{Guillermo Durán}
+%\author[label3]{Pablo Rey}
+%\author[label4]{Tomás Reyes}
+%\author[label5]{Antoine Sauré}
+%\author[label6]{Denis Sauré}
+%\author[label7]{Gustavo Angulo}
+
+%\address[label1]{School of Engineering, Pontificia Universidad Católica de Chile, Av. Vicuña Mackenna 4860, Santiago, Chile. Corresponding Author. Tel: +56 (2) 2354 1234. Email: aecatald@uc.cl}
+%\address[label2]{XXX, Universidad de Buenos Aires, XXX, Buenos Aires, Argentina.}
+%\address[label3]{XXX, Universidad Tecnológica Metropolitana, XXX, Santiago, Chile.}
+%\address[label4]{School of Engineering, Pontificia Universidad Católica de Chile, Av. Vicuña Mackenna 4860, Santiago, Chile.}
+%\address[label5]{Telfer School of Management, Universidad de Ottawa, 55 Laurier Ave E, Ottawa, Canadá.}
+%\address[label6]{School of Engineering, Universidad de Chile, XXX, Santiago, Chile.}
+%\address[label7]{School of Engineering, Pontificia Universidad Católica de Chile, Av. Vicuña Mackenna 4860, Santiago, Chile.}
+\end{frontmatter}
+
+
+\section{Formulation of the Model}\label{FM}
+Comenzamos la formulación del modelo definiendo la notación que será utilizada en su formulación.
+
+\vspace{0.05in} Los conjuntos:
+
+\begin{tabular}{p{1.6cm}cp{12.69cm}}
+$\mathcal{F}$   & : & conjunto de fechas que restan por jugar en el campeonato.\\
+$\mathcal{I}$   & : & conjunto de equipos que conforman el torneo.\\
+$\mathcal{N}$   & : & conjunto de partidos (equipo local vs equipo visitante) que aún deben enfrentarse en alguna de las fechas restantes del campeonato.\\
+$\mathcal{S}$   & : & conjunto de patrones de localías y visitas posibles en las $K$ fechas que restan por jugar en el torneo.
+\end{tabular}
+
+\vspace{0.05in} Los índices:
+
+\begin{tabular}{p{0.79cm}cp{13.5cm}}
+$f,l$   & : & índice asociado al conjunto de fechas que restan por jugar $(f \in \mathcal{F})$.\\
+$i,j$   & : & índices asociados al conjunto de equipos que conforman el torneo $(i,j \in \mathcal{I})$\\
+$n$     & : & índice asociado al conjunto de partidos (equipo local vs equipo visitante) que debe programarse en alguna de las fechas restantes del torneo $(n \in \mathcal{N})$.\\
+$s$     & : & índice asociado al conjunto de patrones de localías y visitas $(s \in \mathcal{S})$.
+\end{tabular}
+
+\vspace{0.05in} Los parámetros:
+
+\begin{tabular}{p{0.79cm}cp{13.5cm}}
+$PI_i$    & : & parámetro discreto que indica la cantidad de puntos que tiene el equipo $i$ justo al terminar la fecha anterior a la primera de las fechas que quedan por jugar.\\
+\end{tabular}
+\begin{tabular}{p{0.79cm}cp{13.5cm}}
+$R_{in}$    & : & parámetro discreto que toma valor 0, 1 o 3, y que corresponde a la cantidad de puntos que gana el equipo $i$ al jugar el partido $n$ (en el que juegan $i$ vs otro equipo).\\
+$EL_{in}$   & : & parámetro binario que toma valor 1 si el equipo $i$ es local en el partido $n$, y 0 en cualquier otro caso.\\
+$EV_{in}$   & : & parámetro binario que toma valor 1 si el equipo $i$ es visita en el partido $n$, y 0 en cualquier otro caso.\\
+$W_{is}$    & : & parámetro binario que toma valor 1 si al equipo $i$ se le puede asignar el patrón de localías y visitas $s$, y 0 en cualquier otro caso.\\
+$L_{s}^f$   & : & parámetro binario que toma el valor 1 si el patrón de localías y visitas $s$ indica que el partido es de local en la fecha $f$, y 0 en cualquier otro caso.
+\end{tabular}
+
+\vspace{0.05in}
+
+Las variables:
+
+\begin{tabular}{p{0.79cm}cp{13.5cm}}
+$x_{n}^f$   & : & variable binaria que toma valor 1 si el partido $n$ se programa en la fecha $f$, y 0 en cualquier otro caso.\\
+$y_{is}$    & : & variable binaria que toma valor 1 si al equipo $i$ se le asigna el patrón de localías y visitas $s$, y 0 en cualquier otro caso.\\
+$p_{ji}^{lf}$  & : & variable discreta que indica la cantidad de puntos que tiene el equipo $j$ al finalizar la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el mejor conjunto de resultados futuros para el equipo $i$.\\
+$\hat{p}_{ji}^{lf}$  & : & variable discreta que indica la cantidad de puntos que tiene el equipo $j$ al finalizar la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el peor conjunto de resultados futuros para el equipo $i$.\\
+$v_{ni}^{lf}$  & : & variable binaria que toma valor 1 si el equipo local gana el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el mejor conjunto de resultados futuros para el equipo $i$.\\
+$a_{ni}^{lf}$  & : & variable binaria que toma valor 1 si el equipo visitante gana el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el mejor conjunto de resultados futuros para el equipo $i$.\\
+$e_{ni}^{lf}$  & : & variable binaria que toma valor 1 si se empata el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el mejor conjunto de resultados futuros para el equipo $i$.\\
+\end{tabular}
+\begin{tabular}{p{0.79cm}cp{13.5cm}}
+$\hat{v}_{in}^{lf}$  & : & variable binaria que toma valor 1 si el equipo local gana el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el peor conjunto de resultados futuros para el equipo $i$.\\
+$\hat{a}_{in}^{lf}$  & : & variable binaria que toma valor 1 si el equipo visitante gana el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el peor conjunto de resultados futuros para el equipo $i$.\\
+$\hat{e}_{in}^{lf}$  & : & variable binaria que toma valor 1 si se empata el partido $n$ de la fecha $f$ teniendo información finalizada la fecha $l$ $(f > l)$, en el peor conjunto de resultados futuros para el equipo $i$.\\
+$\alpha_{ji}^l$  & : & variable binaria que toma valor 1 si el equipo $j$ termina con menos puntos que el equipo $i$ en el mejor conjunto de resultados futuros para el equipo $i$, teniendo información finalizada la fecha $l$.\\
+$\hat{\alpha}_{ji}^l$  & : & variable binaria que toma valor 1 si el equipo $j$ termina con menos puntos que el equipo $i$ en el peor conjunto de resultados futuros para el equipo $i$, teniendo información finalizada la fecha $l$.\\
+$\beta_{i}^l$  & : & variable discreta que indica la mejor posición que puede alcanzar al final del torneo el equipo $i$ en su mejor conjunto de resultados futuros, teniendo información finalizada la fecha $l$.\\
+$\hat{\beta}_{i}^l$  & : & variable discreta que indica la peor posición que puede alcanzar al final del torneo el equipo $i$ en su peor conjunto de resultados futuros, teniendo información finalizada la fecha $l$.\\
+\end{tabular}
+
+
+\newpage
+\section{Problema maestro}
+\begin{equation}\label{ecFO}
+  \mbox{(SSTPA)}\qquad \text{Max } \sum_{l \in \mathcal{F}} \sum_{i \in \mathcal{I}}\left(\hat{\beta}_i^l - \beta_i^l\right)
+\end{equation}
+
+~~~~~~~~~~~~s.t:
+\begin{equation}\label{ecua1}
+    \sum_{f \in \mathcal{F}} x_n^f = 1 \qquad \forall \,n \in \mathcal{N}.
+\end{equation}
+\begin{equation}\label{ecua2}
+    \sum_{n \in \mathcal{N}: EL_{in} + EV_{in}=1} x_n^f = 1 \qquad \forall \,i \in \mathcal{I}; f \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{ecua3}
+  \sum_{s \in \mathcal{S}: W_{is}=1} y_{is} = 1 \qquad \forall i \in \mathcal{I}.
+\end{equation}
+\begin{equation}\label{ecua4}
+  y_{is} = 0 \qquad \forall i \in \mathcal{I}; s \in \mathcal{S}: W_{i,s} = 0.
+\end{equation}
+\begin{equation}\label{ecua5}
+  \sum_{n \in \mathcal{N}: EL_{in}=1} x_n^f = \sum_{s \in \mathcal{S}: L_s^f = 1} y_{is} \qquad \forall \,i \in \mathcal{I}; f \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{ecua6}
+  \sum_{n \in \mathcal{N}: EV_{in}=1} x_n^f = \sum_{s \in \mathcal{S}: L_s^f = 0} y_{is} \qquad \forall \,i \in \mathcal{I}; f \in \mathcal{F}.
+\end{equation}
+%\begin{multline}\label{ecua9}
+%  p_{ji}^{lf} = PI_j + \sum_{\theta \in  \mathcal{F}: l \geq \theta}\sum\limits_{n \in \mathcal{N}: EL_{jn}+EV_{jn}=1}R_{jn}x_n^\theta + \sum%\limits_{n \in \mathcal{N}: EL_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}3v_{ni}^{l\theta} \\
+%  + \sum\limits_{n \in \mathcal{N}: EV_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}3a_{ni}^{l\theta} + \sum\limits_{n \in \mathcal{N}: EL_{jn}+ EV_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}e_{ni}^{l\theta} \qquad \forall i,j \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+%\end{multline}
+%\begin{multline}\label{ecua10}
+%  \hat{p}_{ji}^{lf} = PI_j + \sum_{\theta \in  \mathcal{F}: l \geq \theta}\sum\limits_{n \in \mathcal{N}: EL_{jn}+EV_{jn}=1}R_{jn}x_n^\theta + \sum\limits_{n \in \mathcal{N}: EL_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}3\hat{v}_{ni}^{l\theta} \\
+%  + \sum\limits_{n \in \mathcal{N}: EV_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}3\hat{a}_{ni}^{l\theta} + \sum\limits_{n \in \mathcal{N}: EL_{jn}+ EV_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}\hat{e}_{ni}^{l\theta} \qquad \forall i,j \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+%\end{multline}
+\begin{equation}\label{ecua13}
+   \beta_{i}^l = \text{Card$(\mathcal{I})$} - \sum_{j\in \mathcal{I}: j \neq i} \alpha_{ji}^l \qquad \forall i \in \mathcal{I}; l \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{ecua14}
+   \hat{\beta}_{i}^l = 1 + \sum_{j\in \mathcal{I}: j \neq i} (1-\hat{\alpha}_{ji}^l) \qquad \forall i \in \mathcal{I}; l \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{ecua29}
+  x_n^f \in\{0,1\} \qquad \forall\, n \in \mathcal{N}; f \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua30}
+  y_{is} \in\{0,1\} \qquad \forall\, i \in \mathcal{I}; s \in \mathcal{S}.\\
+\end{equation}
+\begin{equation}\label{ecua33}
+  \alpha_{ji}^l, \hat{\alpha}_{ji}^l \in \{0,1\} \qquad \forall\, i,j \in \mathcal{I}; l \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua34}
+  \beta_{i}^l, \hat{\beta}_{i}^l \in \mathbb{Z}^+ \qquad \forall\, i \in \mathcal{I}; l \in \mathcal{F}.\\
+\end{equation}
+
+Los subproblemas se encargarán de buscar infactibilidades.  Cada subproblema será para todo equipo $i$,  fecha $l$ (se fijan los índices $i$, $l$) en el caso favorable y en el caso desfavorable.  Además de los parámetros mencionado anteriormente,  se añaden los parámetros $\bar{x}_n^f$,$\bar{\alpha}_{ji}^l$ y $\bar{\hat{\alpha}}_{ji}^l$ que son solución del problema maestro.
+
+\section{Subproblema 1}
+~~~~~~~~~~~~s.t:
+\begin{equation}\label{x_sp1}
+x_n^f= \bar{x}_n^f \qquad \forall n \in \mathcal{N}; f \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{alpha-sp1}
+\alpha_{ji}^l = \bar{\alpha}_{ji}^l \qquad \forall l \in \mathcal{F}; i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua7}
+ x_n^f = v_{ni}^{lf} + e_{ni}^{lf} + a_{ni}^{lf} \qquad \forall n \in \mathcal{N}; i \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+\end{equation}
+\begin{multline}\label{ecua9}
+  p_{ji}^{lf} = PI_j + \sum_{\theta \in  \mathcal{F}: l \geq \theta}\sum\limits_{n \in \mathcal{N}: EL_{jn}+EV_{jn}=1}R_{jn}x_n^\theta + \sum\limits_{n \in \mathcal{N}: EL_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}3v_{ni}^{l\theta} \\
+  + \sum\limits_{n \in \mathcal{N}: EV_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}3a_{ni}^{l\theta} + \sum\limits_{n \in \mathcal{N}: EL_{jn}+ EV_{jn}=1}\sum\limits_{\theta \in \mathcal{F}: f \geq \theta > l}e_{ni}^{l\theta} \qquad \forall i,j \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+\end{multline}
+\begin{equation}\label{ecua11}
+   M\alpha_{ji}^l \geq p_{ii}^{lF} - p_{ji}^{lF} \qquad \forall l \in \mathcal{F}; i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua11a}
+   M(1-\alpha_{ji}^l) \geq p_{ji}^{lF} - p_{ii}^{lF} \qquad \forall l \in \mathcal{F}; i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua29_sp1}
+  x_n^f \in\{0,1\} \qquad \forall\, n \in \mathcal{N}; f \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua33_sp1}
+  \alpha_{ji}^l, \in \{0,1\} \qquad \forall\, i,j \in \mathcal{I}; l \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua31}
+  p_{ji}^{lf} \in \mathbb{Z}^+_0 \qquad \forall\, i,j \in \mathcal{I}; f,l \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua32}
+  v_{ni}^{lf}, e_{ni}^{lf}, a_{ni}^{lf} \in \{0,1\} \qquad \forall\, i \in \mathcal{I}; n \in \mathcal{N}; f,l \in \mathcal{F}.\\
+\end{equation}
+
+\section{Subproblema 2}
+\begin{equation}\label{x_sp2}
+x_n^f= \bar{x}_n^f \qquad \forall n \in \mathcal{N}; f \in \mathcal{F}.
+\end{equation}
+\begin{equation}\label{alpha-sp2}
+\hat{\alpha}_{ji}^l = \bar{\hat{\alpha}}_{ji}^l \qquad \forall l \in \mathcal{F}; i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua8}
+  x_n^f = \hat{v}_{ni}^{lf} + \hat{e}_{ni}^{lf} + \hat{a}_{ni}^{lf} \qquad \forall n \in \mathcal{N}; i \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+\end{equation}
+\begin{multline}\label{ecua10}
+  \hat{p}_{ji}^{lf} = PI_j + \sum_{\theta \in  \mathcal{F}: l \geq \theta}\sum\limits_{n \in \mathcal{N}: EL_{jn}+EV_{jn}=1}R_{jn}x_n^\theta + \sum\limits_{n \in \mathcal{N}: EL_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}3\hat{v}_{ni}^{l\theta} \\
+  + \sum\limits_{n \in \mathcal{N}: EV_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}3\hat{a}_{ni}^{l\theta} + \sum\limits_{n \in \mathcal{N}: EL_{jn}+ EV_{jn}=1}\sum\limits_{l \in \mathcal{F}: f \geq \theta > l}\hat{e}_{ni}^{l\theta} \qquad \forall i,j \in \mathcal{I}; f,l \in \mathcal{F}: f > l.
+\end{multline}
+\begin{equation}\label{ecua12}
+   M\hat{\alpha}_{ji}^l \geq \hat{p}_{ii}^{lF} - \hat{p}_{ji}^{lF} \qquad l \in \mathcal{F}; \forall i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua12a}
+   M(1-\hat{\alpha}_{ji}^l) \geq \hat{p}_{ji}^{lF} - \hat{p}_{ii}^{lF} \qquad l \in \mathcal{F}; \forall i,j \in \mathcal{I}: i \neq j.
+\end{equation}
+\begin{equation}\label{ecua29_sp2}
+  x_n^f \in\{0,1\} \qquad \forall\, n \in \mathcal{N}; f \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua33_sp2}
+  \hat{\alpha}_{ji}^l, \in \{0,1\} \qquad \forall\, i,j \in \mathcal{I}; l \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua31_sp2}
+  \hat{p}_{ji}^{f} \in \mathbb{Z}^+_0 \qquad \forall\, i,j \in \mathcal{I}; f,l \in \mathcal{F}.\\
+\end{equation}
+\begin{equation}\label{ecua32a}
+  \hat{v}_{ni}^{lf},  \hat{e}_{ni}^{lf}, \hat{a}_{ni}^{lf} \in \{0,1\} \qquad \forall\, i \in \mathcal{I}; n \in \mathcal{N}; f,l \in \mathcal{F}.\\
+\end{equation}
+\end{document} 
