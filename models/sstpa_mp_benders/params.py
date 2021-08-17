@@ -1,6 +1,6 @@
 
 
-def get_params(start_date, end_date, pattern_generator, champ_stats):
+def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
   """
   Generador de parámetros para SSTPA MP Benders.
 
@@ -21,7 +21,8 @@ def get_params(start_date, end_date, pattern_generator, champ_stats):
   TARGET = 10
   BREAKS = 2
   FILENAME = "SSTPA/modules/params/Datos.xlsx"
-  print(f"\nPARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
+  if log:
+    print(f"\nPARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
 
   #################
   #*  CONJUNTOS  *#

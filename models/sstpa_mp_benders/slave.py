@@ -72,10 +72,10 @@ def slave(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats)
   #####################
 
   # R14
-  m.addConstrs((x[n, f] == x_opt[n][f] for n in N for f in F), name='R14')
+  m.addConstrs((x[n, f] == x_opt[n, f] for n in N for f in F), name='R14')
 
   # R15
-  m.addConstrs((alfa[i, j, f] == alfa_opt[i][j][f]
+  m.addConstrs((alfa[i, j, f] == alfa_opt[i, j, f]
                                       for i in I
                                       for j in I
                                       for f in F), name='R15')
