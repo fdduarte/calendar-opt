@@ -64,6 +64,7 @@ class Benders():
             s[s_type].optimize()
 
             if s[s_type].status != GRB.OPTIMAL:
+              s[s_type]
               is_optimal = False
               cut = self._generate_cut(x, a[s_type], s_type)
               m.addConstr(cut >= 1)

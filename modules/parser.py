@@ -1,10 +1,25 @@
 import pandas as pd
 
 class ChampStats:
+  def __init__(self, filename, start_date, final_date):
+    self.match_file = self._open_excel(filename, 1)
+    self.teams_file = self._open_excel(filename, 0)
+    self.start_date = start_date
+    self.final_date = final_date
+    self.matches_len = None
+    self._load()
+
+  def _load(self):
+    self.teams_results = self._load_team_stats_in_dates()
+    self.matches = self._load_matches()
+    self.team_points = self._load_team_points()
+    self.team_home_away = self._load_home_away_stats()
+    self.teams = self._load_teams()
 
   @staticmethod
-  def open_excel(name, page):
+  def _open_excel(name, page):
       """
+
       :param name: nombre del archivo a abrir
       :param page: nombre de la pagina de interes
       :return: lista por filas de pagina de excel
@@ -67,8 +82,14 @@ class ChampStats:
     Función que, del archivo en el formato especificado retorna un
     diccionario con las caracteristicas del partido.
     """
-    matches = {i: [] for i in range(1, 241)}
-    match = 240
+    teams = self.teams_results.keys()
+    dates_len = int(float(self.match_file[0][0]))
+    matches_len = int((len(teams) * dates_len) / 2)
+
+    self.matches_len = matches_len
+
+    matches = {(i + 1): [] for i in range(matches_len)}
+    match = matches_len
     for line in self.match_file:
       if line[0] != "nan":
         date = int(float(line[0]))
@@ -129,22 +150,5 @@ class ChampStats:
     teams = {}
     for line in self.teams_file:
       _, _, alias, fr_points, home_left = line
-      teams[alias] = {"fr_points": int(fr_points), "home_left": int(home_left)}
+      teams[alias] = {"fr_points": int(float(fr_points)), "home_left": int(float(home_left))}
     return teams
-
-
-  def load(self):
-    self.teams_results = self._load_team_stats_in_dates()
-    self.matches = self._load_matches()
-    self.team_points = self._load_team_points()
-    self.team_home_away = self._load_home_away_stats()
-    self.teams = self._load_teams()
-
-  def __init__(self, filename, start_date, final_date):
-    self.match_file = self.open_excel(filename, 1)
-    self.teams_file = self.open_excel(filename, 0)
-    self.start_date = start_date
-    self.final_date = final_date
-    self.load()
-  
-  

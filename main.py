@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--timelimit',
         default=10000*60*60, type=int,
-        help='Tiempo limite de ejecución (en segundos)')
+        help='Tiempo limite de ejecucion (en segundos)')
 
     args = parser.parse_args()
 
