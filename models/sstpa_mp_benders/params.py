@@ -158,7 +158,8 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
   # Ponderación de atractivo de fecha f
   V = {f: 0  if f - 15 <= TARGET else f - 15 for f in F}
 
-  print("FINISHED LOADING PARAMS")
+  if log:
+    print("FINISHED LOADING PARAMS")
 
   params = {
     'N': N,

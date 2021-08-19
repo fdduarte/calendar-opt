@@ -2,9 +2,10 @@ from gurobipy import Model, GRB, quicksum
 from .params import get_params
 
 
-def slave(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats):
-  m = Model("SSTPA Benders Slave")
+def subproblem(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats):
+  m = Model("SSTPA Benders subproblem")
   params = get_params(start_date, end_date, pattern_generator, champ_stats)
+  m.setParam('LogToConsole', 0)
 
   # Parse params dict to values
   N = params['N']
@@ -72,13 +73,13 @@ def slave(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats)
   #####################
 
   # R14
-  m.addConstrs((x[n, f] == x_opt[n, f] for n in N for f in F), name='R14')
+  x_r = m.addConstrs((x[n, f] == x_opt[n, f] for n in N for f in F), name='R14')
 
   # R15
-  m.addConstrs((alfa[i, j, f] == alfa_opt[i, j, f]
-                                      for i in I
-                                      for j in I
-                                      for f in F), name='R15')
+  a_r = m.addConstrs((alfa[i, j, f] == alfa_opt[i, j, f]
+                                                for i in I
+                                                for j in I
+                                                for f in F), name='R15')
 
   # R16
   m.addConstrs((x[n, f] == (v[n, i, l, f] + e[n, i, l, f] + a[n, i, l, f]) 
@@ -114,4 +115,4 @@ def slave(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats)
                                                                           for j in I
                                                                           for l in F), name="R13")
 
-  return m
+  return m, x_r, a_r

@@ -45,7 +45,7 @@ if __name__ == '__main__':
         m, S_F = sstpa_mp_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
 
     if args.model == 5:
-        m = sstpa_mp_benders_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
+        m  = sstpa_mp_benders_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
 
     m.optimize()
 
