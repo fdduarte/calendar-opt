@@ -37,27 +37,18 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
   N = list(range(1, champ_stats.matches_len + 1))
 
 
-  patterns = pattern_generator.home_away_patterns()
-  print(patterns)
-
-  sys.exit(0)
-
   # Si: S[equipo]
   # Patrones de localias asociados al equipo i
-  full_homeaway_patterns = list(pattern_generator.home_away_patterns(BREAKS)).copy()
-  patterns = list(set([pat[FECHAINI - 16:FECHAFIN - 15] for pat in full_homeaway_patterns]))
-  patterns = {i + 1: patterns[i] for i in range(len(patterns))}
-
-  S_full = dict()
-  for i in I:
-    pat = pattern_generator.check_homeaway_pattern(i, champ_stats.team_home_away, full_homeaway_patterns, champ_stats.teams, FECHAINI, BREAKS)
-    pat = list(set([p[FECHAINI - 16:FECHAFIN - 15] for p in pat]))
-    S_full[i] = {f"{i}-{j + 1}": pat[j] for j in range(len(pat))}
-  S = {i: list(S_full[i].keys()) for i in I}
-
+  patterns, S = pattern_generator.home_away_patterns()
 
   # F: Fechas
   F = list(range(FECHAINI, FECHAFIN + 1))
+
+  patterns = pattern_generator.results_patterns()
+
+  print(patterns)
+
+  sys.exit()
 
   # Gi: G[equipo]
   # Patrones de resultados asociados al equipo i
