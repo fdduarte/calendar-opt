@@ -23,6 +23,12 @@ if __name__ == '__main__':
         help='Fecha de fin del campeonato')
 
     parser.add_argument(
+        '--breaks',
+        default=2, type=int,
+        help='Cantidad de breaks localia-visita permitidos'
+    )
+
+    parser.add_argument(
         '--filepath',
         default='data/Datos.xlsx', type=str,
         help='Path del archivo de datos')
@@ -37,15 +43,16 @@ if __name__ == '__main__':
     assert args.model in range(1, 6)
 
     champ_stats = ChampStats(args.filepath, args.start_date, args.end_date)
+    pattern_generator = PatternGenerator(args.start_date, args.end_date, args.breaks, champ_stats)
 
     if args.model == 1:
-        m, S_F = sstpa3_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
+        m, S_F = sstpa3_create_model(args.start_date, args.end_date, args.timelimit, args.breaks, pattern_generator, champ_stats)
 
     if args.model == 3:
-        m, S_F = sstpa_mp_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
+        m, S_F = sstpa_mp_create_model(args.start_date, args.end_date, args.timelimit, args.breaks, pattern_generator, champ_stats)
 
     if args.model == 5:
-        m  = sstpa_mp_benders_create_model(args.start_date, args.end_date, args.timelimit, PatternGenerator(), champ_stats)
+        m  = sstpa_mp_benders_create_model(args.start_date, args.end_date, args.timelimit, args.breaks, pattern_generator, champ_stats)
 
     m.optimize()
 

@@ -4,10 +4,11 @@ import time
 from gurobipy import GRB, LinExpr
 
 class Benders():
-    def __init__(self, start_date, end_date, time_limit, pattern_generator, champ_stats):
+    def __init__(self, start_date, end_date, time_limit, breaks, pattern_generator, champ_stats):
         self.start_date = start_date
         self.end_date = end_date
         self.time_limit = time_limit
+        self.breaks = breaks
         self.start_time = time.time()
         self.pattern_generator = pattern_generator
         self.champ_stats = champ_stats
@@ -146,7 +147,7 @@ class Benders():
       print("{:<10}   {:<13}   {:<5}".format(niter, objval, elapsed_time))
 
 
-def create_model(start_date, end_date, time_limit, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
-    m = Benders(start_date, end_date, time_limit, pattern_generator, champ_stats)
+def create_model(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats,  mip_focus=1, mip_gap=0.3):
+    m = Benders(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats)
     return m
     

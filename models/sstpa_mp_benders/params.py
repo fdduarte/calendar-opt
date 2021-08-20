@@ -1,3 +1,5 @@
+import sys
+
 
 
 def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
@@ -33,6 +35,12 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
 
   # N: Partidos
   N = list(range(1, champ_stats.matches_len + 1))
+
+
+  patterns = pattern_generator.home_away_patterns()
+  print(patterns)
+
+  sys.exit(0)
 
   # Si: S[equipo]
   # Patrones de localias asociados al equipo i
