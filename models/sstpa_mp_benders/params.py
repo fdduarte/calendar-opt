@@ -37,6 +37,7 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
   # Patrones de localias asociados al equipo i
   home_away_patterns, S = pattern_generator.home_away_patterns()
 
+
   # F: Fechas
   F = list(range(FECHAINI, FECHAFIN + 1))
 
