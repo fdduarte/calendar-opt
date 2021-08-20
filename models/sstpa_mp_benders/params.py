@@ -47,6 +47,9 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
     S_full[i] = {f"{i}-{j + 1}": pat[j] for j in range(len(pat))}
   S = {i: list(S_full[i].keys()) for i in I}
 
+  print(S, '\n', S_full)
+
+  exit()
 
   # F: Fechas
   F = list(range(FECHAINI, FECHAFIN + 1))
