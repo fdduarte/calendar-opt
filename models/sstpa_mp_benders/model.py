@@ -124,6 +124,7 @@ class Benders():
       """
       x, alpha_m, alpha_p = {}, {}, {}
       for var in model.getVars():
+        print(var)
         name, value = var.VarName, var.X
         if 'x' in name:
           name = name.strip('x[').strip(']')

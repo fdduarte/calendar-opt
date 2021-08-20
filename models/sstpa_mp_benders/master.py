@@ -5,7 +5,7 @@ from .params import get_params
 def master(time_limit, start_date, end_date, pattern_generator, champ_stats):
   m = Model("SSTPA Benders Master")
   m.setParam('TimeLimit', time_limit)
-  m.setParam('LogToConsole', 0)
+  m.setParam('LogToConsole', 1)
 
   params = get_params(start_date, end_date, pattern_generator, champ_stats)
 

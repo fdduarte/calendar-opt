@@ -3,7 +3,7 @@ from gurobipy import Model, GRB, quicksum
 import time
 from .params import get_params
 
-def create_model(start_date, end_date, time_limit, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
+def create_model(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
   m = Model("SSTPA V3")
 
   m.setParam('TimeLimit', time_limit)
@@ -141,11 +141,17 @@ def create_model(start_date, end_date, time_limit, pattern_generator, champ_stat
 
   # R2
   m.addConstrs((quicksum(x[n, f] for f in F) == 1 for n in N), name="R2")
-
+  
   # R3
   m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1 for i in I
                                                                               for f in F), name="R3")
 
+  for i in I:
+    s = 0
+    for n in N:
+      s += EL[i][n] + EV[i][n]
+    print(i, s)                                                                          
+  """
   # R4
   for i in I:
     m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
@@ -221,7 +227,7 @@ def create_model(start_date, end_date, time_limit, pattern_generator, champ_stat
   # R17
   for i in I:
     m.addConstrs(((beta_p[i,l]== 1+(quicksum((1-alfa_p[j,i,l]) for j in I if i!=j))) for l in F),name="R17")
-
+  """
   print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
 
   ########################

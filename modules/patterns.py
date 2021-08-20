@@ -78,8 +78,10 @@ class PatternGenerator():
 
   def results_patterns(self):
     patterns = {}
+    G = {}
     for team, stats in self.champ_stats.teams_results.items():
       pats = self._generate_result_patterns()
       pats = self._check_results_patterns(stats, pats)
-      patterns[team] = pats
-    return patterns
+      patterns[team] = {f'{team}-{i}': p for i, p in enumerate(pats, start=1)}
+      G[team] = [f'{team}-{i + 1}' for i in range(len(pats))]
+    return patterns, G
