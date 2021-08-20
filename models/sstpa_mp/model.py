@@ -150,7 +150,7 @@ def create_model(start_date, end_date, time_limit, pattern_generator, champ_stat
   for i in I:
     m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
 
-
+  
   # R6
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
@@ -158,7 +158,7 @@ def create_model(start_date, end_date, time_limit, pattern_generator, champ_stat
   # R7
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
-
+  
   # R8
   m.addConstrs((x[n,f] == (v_m[n,i,l,f] + e_m[n,i,l,f] + a_m[n,i,l,f])
                                                                   for n in N
@@ -166,7 +166,7 @@ def create_model(start_date, end_date, time_limit, pattern_generator, champ_stat
                                                                   for f in F
                                                                   for l in F
                                                                   if  f > l),name="R8")
-
+  
   # R9
   m.addConstrs((x[n,f] == (v_p[n,i,l,f] + e_p[n,i,l,f] + a_p[n,i,l,f])
                                                                   for n in N
