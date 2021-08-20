@@ -4,159 +4,84 @@ import math
 
 
 class PatternGenerator():
-  @staticmethod
-  def homeaway_filter(breaks):
-    def valid_homeaway_pattern(string):
-      """
-      Función que chequea si un patrón es válido o no.
+  # Types
+  ValidPatterns = dict[str, dict[str, str]]
 
-      Args:
-      -- string: (str) string con patron de 1s y 0s.
+  def __init__(self, start_date: int, end_date: int, breaks: int, champ_stats: any):
+    self.start_date = start_date
+    self.end_date = end_date
+    self.champ_stats = champ_stats
+    self.breaks = breaks
 
-      Return:
-      -- is_valid: (bool) Booleano que indica si el patrón es válido.
-      """
-      local = string.count("0")
-      visit = string.count("1")
-      if local < 7 or visit < 7:
-        return False
-      if "111" in string or "000" in string:
-        return False
-      if string.count("00") > breaks or string.count("11") > breaks:
-        return False
-      return True
-    return valid_homeaway_pattern
+  def _generate_home_away_pattern_string(self):
+    """
+    Función que retorna una lista con todos los patrones posibles
+    de 1 y 0 para el largo del campeonato
+    """
+    length = self.end_date - self.start_date + 1
+    return ["".join(seq) for seq in itertools.product("01", repeat=length)]
 
-  @staticmethod
-  def check_homeaway_pattern(team, home_match, full_patterns, teams, start_date, breaks):
+  def _check_home_away_paterns(self, patterns: list[str], original_pattern: str) -> list[str]:
     """
-    :param team: string alias equipo
-    :home_match: Diccionario home_match[equipo][fecha]
-    :full_patterns: Conjunto de patrones para 15 fechas
-    :return: Conjunto de patrones que son posibles para
-    el equipo
+    Dado un el patrón de localias de un equipo, filtra los patrones que
+    sean validos.
     """
-    if start_date == 16:
-      correct_pat = list()
-      for pattern in full_patterns:
-        # Se revisa si el patrón calza con las localias y visitas faltantes.
-        cond1 = pattern.count("1") == teams[team]['home_left']
-        # Revisa ultimas fechas de primera rueda para evitar tres partidos L o V.
-        if home_match[team][14] and home_match[team][15]:
-          cond2 = pattern[0] == "0"
-        elif not home_match[team][14] and not home_match[team][15]:
-          cond2 = pattern[0] == "1"
-        # Además, revisa si se lleva un break de la primera rueda.
-        elif home_match[team][15] and pattern[0] == 1:
-          cond2 = pattern.count("11") <= breaks - 1
-        elif not home_match[team][15] and pattern[0] == 0:
-          cond2 = pattern.count("00") <= breaks - 1
-        else:
-          cond2 = True
-        # Si se cumplen las condiciones, el patrón es correcto.
-        if cond1 and cond2:
-          correct_pat.append(pattern)
-      return correct_pat
-    correct_pat1 = list()
-    pattern_start = ""
-    # Genera un string con las fechas ya jugadas. Luego, se revisa si
-    # El comienzo del patron calza con el string generado.
-    for date in range(16, start_date):
-      pattern_start += str(home_match[team][date])
-    for pattern in full_patterns:
-      if pattern[:start_date - 16] == pattern_start:
-        correct_pat1.append(pattern)
-    correct_pat2 = list()
-    # Se revisa si se llevo un break de rueda pasada.
-    for pattern in correct_pat1:
-      if home_match[team][15] == "1" and pattern[0] == "1":
-        if pattern.count("11") <= breaks - 1:
-          correct_pat2.append(pattern)
-      elif not home_match[team][15] == "0" and pattern[0] == "0":
-        if pattern.count("00") <= breaks - 1:
-          correct_pat2.append(pattern)
-      else:
-        correct_pat2.append(pattern)
-    # Por último, se revisa que calzen localías restantes
-    correct_pat1 = list()
-    for pattern in correct_pat2:
-      if pattern.count("1") == teams[team]['home_left']:
-        correct_pat1.append(pattern)
-    return correct_pat1
+    # Patrones completos
+    p = [original_pattern[:self.start_date - 1] + pattern for pattern in patterns]
 
-  @staticmethod
-  def check_results_pattern(teams_stats, patterns):
-    """
-    :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
-    :param patterns: (dict) conunto de patrones {int numero: str patron}
-    :return: Diccionario {equipo: [patrones_utiles]}
-    """
-    team_patterns = dict()
-    for team in teams_stats.keys():
-      team_patterns[team] = list()
-    for pattern in patterns:
-      for team in teams_stats.keys():
-        if pattern.count("D") == teams_stats[team]['draws'] and pattern.count("W") == teams_stats[team]['wins'] and pattern.count("L") == teams_stats[team]['loses']:
-          team_patterns[team].append(pattern)
-    return team_patterns
+    # Se eliminan 3 localias o visitas seguidas
+    p = list(filter(lambda x: x.count('000') == 0 and x.count('111') == 0, p))
+    p = list(filter(lambda x: x.count('1') == x.count('0'), p))
 
-  @staticmethod
-  def results_patterns_gen(filename, teams_stats, start_date, end_date): # estandarizar una función q llame a las dos
-    """
-    :param dates: (int) cantidad de fechas a programar
-    :param teams_stats: (dict) diccionario con equipos y cantidad de partidos W,D,L
-    :return: (list) patrones de resultados.
-    """
-    dates = end_date - start_date + 1
-    permutations = ["".join(seq) for seq in itertools.product("WDL", repeat=dates)]
-    patterns = set()
-    for team in teams_stats.keys():
-      stats = ["W" for _ in range(teams_stats[team]['wins'])]
-      stats.extend(["L" for _ in range(teams_stats[team]['loses'])])
-      stats.extend(["D" for _ in range(teams_stats[team]['draws'])])
-      stats = "".join(stats)
-      patterns.add(stats)
-    permutations_filtered = set()
-    for perm in permutations:
-      for pat in patterns:
-        if pat.count("D") == perm.count("D") and pat.count("W") == perm.count("W") and pat.count("L") == perm.count("L"):
-          permutations_filtered.add(perm)
-    return list(permutations_filtered)
+    # Se revisa segunda vuelta
+    p = [pat[self.start_date - 2:] for pat in p]
 
-  @staticmethod
-  def result_patterns_gen_v4(length):
+    # Se eliminan patrones que sobrepasen los breaks
+    p = list(filter(lambda x: x.count('11') <= self.breaks, p))
+    p = list(filter(lambda x: x.count('00') <= self.breaks, p))
+    
+    # Se rescata patron
+    return [pat[1:] for pat in p]
+
+  def home_away_patterns(self) -> tuple[ValidPatterns, dict[str, str]]:
+    """
+    Retorna un diccionario con los patrones de localias de los equipos
+    """
+    valid_patterns = {}
+    S = {}
+    all_patterns = self._generate_home_away_pattern_string()
+
+    for team in self.champ_stats.teams.keys():
+      patterns = all_patterns.copy()
+      original_pattern = ''
+      for i in range(1, self.end_date + 1):
+        original_pattern += str(self.champ_stats.team_home_away[team][i])
+      patterns = self._check_home_away_paterns(patterns, original_pattern)
+      valid_patterns[team] = {f'{team}-{i}': pat for i, pat in enumerate(patterns, start=1)}
+      S[team] = [f'{team}-{i + 1}' for i in range(len(patterns))]
+
+    return valid_patterns, S
+
+  def _generate_result_patterns(self) -> list[str]:
+    """
+    Función que retorna una lista con todos los patrones posibles
+    de W, D y L para el largo del campeonato
+    """
+    length = self.end_date - self.start_date + 1
     return ["".join(seq) for seq in itertools.product("WDL", repeat=length)]
 
-  @staticmethod
-  def check_short_result_pattern(pattern, teams_stats, team):
-    """
-    Chequea si un patrón corto (G1 o G2) es válido para un equipo.
-    Para esto, revisa que no tenga mas victorias y mas derrotas que el equipo.
-    """
-    if pattern.count("D") <= teams_stats[team]['draws'] and pattern.count("W") <= teams_stats[team]['wins']:
-      return 1
-    return 0
+  def _check_results_patterns(self, stats: dict[str, int], patterns: list[str]) -> list[str]:
+    p = list(filter(lambda x: x.count('W') == stats['wins'], patterns))
+    p = list(filter(lambda x: x.count('D') == stats['draws'], p))
+    p = list(filter(lambda x: x.count('L') == stats['loses'], p))
+    return p
 
-  def home_away_patterns(self, breaks):
-    return filter(self.homeaway_filter(breaks), ["".join(seq) for seq in itertools.product("01", repeat=15)])
-
-  @staticmethod
-  def patterns_sample(patterns, threshold, relative_size, seed=1):
-    """
-    :param patterns: (list) Lista de patrones.
-    :param threshold: (int) Valor mínimo al cual se le aplica el sampleo.
-    :param relative_size: (float) porcentaje de sampleo.
-    :param seed: (int)
-    funcion que aplica sampleo a patrones para reduccion de dimencionaloidad.
-    :return: (list) Patrones filtrados.
-    """
-    random.seed(seed)
-    if (len(patterns)) > threshold:
-      k = int(math.floor(len(patterns) * relative_size))
-      random.sample(patterns, k)
-
-
-
-
-
-
+  def results_patterns(self):
+    patterns = {}
+    G = {}
+    for team, stats in self.champ_stats.teams_results.items():
+      pats = self._generate_result_patterns()
+      pats = self._check_results_patterns(stats, pats)
+      patterns[team] = {f'{team}-{i}': p for i, p in enumerate(pats, start=1)}
+      G[team] = [f'{team}-{i + 1}' for i in range(len(pats))]
+    return patterns, G

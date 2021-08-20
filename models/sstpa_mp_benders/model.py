@@ -4,21 +4,23 @@ import time
 from gurobipy import GRB, LinExpr
 
 class Benders():
-    def __init__(self, start_date, end_date, time_limit, pattern_generator, champ_stats):
+    def __init__(self, start_date, end_date, time_limit, breaks, pattern_generator, champ_stats, ModelStats):
         self.start_date = start_date
         self.end_date = end_date
         self.time_limit = time_limit
+        self.breaks = breaks
         self.start_time = time.time()
         self.pattern_generator = pattern_generator
         self.champ_stats = champ_stats
-        self.final_model = None
+        self.ModelStats = ModelStats
+        self.master_model = None
         self.master_vars = {'x': None, 'a': None}
         self.subproblem_restrictions = {'m': {'x': None, 'a': None}, 'p': {'x': None, 'a': None}}
         self.cuts = []
 
     def subproblem(self, x_opt, alpha_opt, model_type):
-        s, x_r, a_r = _subproblem(x_opt, alpha_opt, self.start_date, self.end_date,
-                      self.pattern_generator, self.champ_stats)
+        s, x_r, a_r = _subproblem(x_opt, alpha_opt, model_type, self.start_date,
+                                  self.end_date, self.pattern_generator, self.champ_stats)
         self.subproblem_restrictions[model_type]['x'] = x_r
         self.subproblem_restrictions[model_type]['a'] = a_r
         return s
@@ -35,6 +37,7 @@ class Benders():
         Main Loop
         """
         m = self.master(self.time_limit)
+        self.master_model = m
 
         m.optimize() # Optimizamos solamente para obtener vectores x y alfa
 
@@ -45,7 +48,6 @@ class Benders():
         niter = 1
 
         print("{:<10}   {:<13}   {:<5}".format("Iteration", "Objective", "Time"))
-
         while True:
 
           m.optimize()
@@ -74,10 +76,8 @@ class Benders():
           if time.time() - self.start_time > self.time_limit or is_optimal:
             break
 
-        self.final_model = m
-
     def getVars(self):
-        pass
+        return self.master_model.getVars()
 
     def _set_restriction_values(self, s, x, a):
       """
@@ -146,7 +146,7 @@ class Benders():
       print("{:<10}   {:<13}   {:<5}".format(niter, objval, elapsed_time))
 
 
-def create_model(start_date, end_date, time_limit, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
-    m = Benders(start_date, end_date, time_limit, pattern_generator, champ_stats)
+def create_model(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats,  ModelStats, mip_focus=1, mip_gap=0.3):
+    m = Benders(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats, ModelStats)
     return m
     
