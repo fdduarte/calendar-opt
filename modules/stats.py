@@ -51,7 +51,7 @@ class ModelStats:
     return x, y
 
   @staticmethod
-  def parse_gurobi_output(model_vars, matches, patterns):
+  def parse_gurobi_output(model_vars, matches, name='programacion'):
     file_lines = dict()
     try:
       for var in model_vars:
@@ -65,7 +65,7 @@ class ModelStats:
             file_lines[date] = list()
           if value:
             file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
-      with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
+      with open(f"output/{name}.csv", "w", encoding="UTF-8") as infile:
         infile.write("jornada, local, visita\n")
         for date in file_lines.keys():
           infile.write(f"{date},,\n")

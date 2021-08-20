@@ -5,7 +5,7 @@ from .params import get_params
 def master(time_limit, start_date, end_date, pattern_generator, champ_stats):
   m = Model("SSTPA Benders Master")
   m.setParam('TimeLimit', time_limit)
-  m.setParam('LogToConsole', 1)
+  m.setParam('LogToConsole', 0)
 
   params = get_params(start_date, end_date, pattern_generator, champ_stats)
 
@@ -101,7 +101,7 @@ def master(time_limit, start_date, end_date, pattern_generator, champ_stats):
   #*  FUNCION OBJETIVO  *#
   ########################
 
-  m.setObjective(quicksum(quicksum(beta_p[i,l]-beta_m[i,l] for i in I) for l in F), GRB.MAXIMIZE)
+  m.setObjective(quicksum(quicksum(beta_p[i,l] - beta_m[i,l] for i in I) for l in F), GRB.MAXIMIZE)
 
   alpha = {'m': alfa_m, 'p': alfa_p}
 

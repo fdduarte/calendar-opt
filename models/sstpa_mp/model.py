@@ -144,14 +144,8 @@ def create_model(start_date, end_date, time_limit, breaks, pattern_generator, ch
   
   # R3
   m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1 for i in I
-                                                                              for f in F), name="R3")
-
-  for i in I:
-    s = 0
-    for n in N:
-      s += EL[i][n] + EV[i][n]
-    print(i, s)                                                                          
-  """
+                                                                               for f in F), name="R3")                                                                         
+  
   # R4
   for i in I:
     m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
@@ -160,7 +154,7 @@ def create_model(start_date, end_date, time_limit, breaks, pattern_generator, ch
   # R6
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
-
+  
   # R7
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
@@ -227,13 +221,13 @@ def create_model(start_date, end_date, time_limit, breaks, pattern_generator, ch
   # R17
   for i in I:
     m.addConstrs(((beta_p[i,l]== 1+(quicksum((1-alfa_p[j,i,l]) for j in I if i!=j))) for l in F),name="R17")
-  """
+  
   print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
-
+  
   ########################
   #*  FUNCION OBJETIVO  *#
   ########################
 
-  m.setObjective(quicksum(quicksum(beta_p[i,l]-beta_m[i,l] for i in I) for l in F), GRB.MAXIMIZE)
+  m.setObjective(quicksum(quicksum(beta_p[i,l] - beta_m[i,l] for i in I) for l in F), GRB.MAXIMIZE)
 
   return m, S_F

@@ -30,7 +30,7 @@ def get_params(start_date, end_date, pattern_generator, champ_stats, log=False):
   I = list(champ_stats.teams.keys())
 
   # N: Partidos
-  N = list(range(1, champ_stats.matches_len + 1))
+  N = list(range((FECHAINI - 1) * int(len(I) / 2) + 1, FECHAFIN  * (int(len(I) / 2)) + 1))
 
 
   # Si: S[equipo]

@@ -2,7 +2,7 @@ from gurobipy import Model, GRB, quicksum
 from .params import get_params
 
 
-def subproblem(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_stats):
+def subproblem(x_opt, alfa_opt, s_type, start_date, end_date, pattern_generator, champ_stats):
   m = Model("SSTPA Benders subproblem")
   params = get_params(start_date, end_date, pattern_generator, champ_stats)
   m.setParam('LogToConsole', 0)
@@ -29,12 +29,6 @@ def subproblem(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_s
   # en la fecha f
   # 0 en otro caso.
   x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
-
-  # y_is: y[equipo][patron_localias]
-  # 1 si al equipo i se le asigna el patron
-  # de localias s
-  # 0 en otro caso
-  y = {i: m.addVars(S[i], vtype=GRB.BINARY, name="y") for i in I}
 
   # p_jilf: P[equipo, equipo, fecha, fecha]
   # discreta, cant de puntos del equipo j al finalizar la fecha f con
@@ -103,16 +97,18 @@ def subproblem(x_opt, alfa_opt, start_date, end_date, pattern_generator, champ_s
                                                                               for i in I 
                                                                               for f in F 
                                                                               for l in F), name="R10")
-
+  
   # R18
-  m.addConstrs((((M * (alfa[j, i, l]) >= p[i, i, l, F[-1]] - p[j, i, l, F[-1]]))
-                                                                          for i in I
-                                                                          for j in I
-                                                                          for l in F), name="R12")
+  if s_type == 'm':
+    m.addConstrs((((M * (alfa[j, i, l]) >= p[i, i, l, F[-1]] - p[j, i, l, F[-1]]))
+                                                                            for i in I
+                                                                            for j in I
+                                                                            for l in F), name="R12")
   # R19
-  m.addConstrs((((M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]]))
-                                                                          for i in I
-                                                                          for j in I
-                                                                          for l in F), name="R13")
-
+  if s_type == 'p':
+    m.addConstrs((((M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]]))
+                                                                            for i in I
+                                                                            for j in I
+                                                                            for l in F), name="R13")
+  
   return m, x_r, a_r
