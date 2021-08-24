@@ -6,6 +6,8 @@ def subproblem(x_opt, alfa_opt, s_type, start_date, end_date, pattern_generator,
   m = Model("SSTPA Benders subproblem")
   params = get_params(start_date, end_date, pattern_generator, champ_stats)
   m.setParam('LogToConsole', 0)
+  m.setParam('InfUnbdInfo', 1)
+  m.setParam('LazyConstraints', 1)
 
   # Parse params dict to values
   N = params['N']
@@ -99,13 +101,13 @@ def subproblem(x_opt, alfa_opt, s_type, start_date, end_date, pattern_generator,
                                                                               for l in F), name="R10")
   
   # R18
-  if s_type == 'm':
+  if s_type == 'p':
     m.addConstrs((((M * (alfa[j, i, l]) >= p[i, i, l, F[-1]] - p[j, i, l, F[-1]]))
                                                                             for i in I
                                                                             for j in I
                                                                             for l in F), name="R12")
   # R19
-  if s_type == 'p':
+  if s_type == 'm':
     m.addConstrs((((M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]]))
                                                                             for i in I
                                                                             for j in I
