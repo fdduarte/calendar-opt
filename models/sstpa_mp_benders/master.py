@@ -103,6 +103,4 @@ def master(time_limit, start_date, end_date, pattern_generator, champ_stats):
 
   m.setObjective(quicksum(quicksum(beta_p[i,l] - beta_m[i,l] for i in I) for l in F), GRB.MAXIMIZE)
 
-  alpha = {'m': alfa_m, 'p': alfa_p}
-
-  return m, x, alpha
+  return m
