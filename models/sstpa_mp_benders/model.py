@@ -14,6 +14,7 @@ class Benders():
         self.champ_stats = champ_stats
         self.ModelStats = ModelStats
         self.master_model = None
+        self.subproblem_model = {'m': None, 'p': None}
         self.master_vars = {'x': None, 'a': None}
         self.subproblem_restrictions = {'m': {'x': None, 'a': None}, 'p': {'x': None, 'a': None}}
         self.cuts = []
@@ -23,13 +24,12 @@ class Benders():
                                   self.end_date, self.pattern_generator, self.champ_stats)
         self.subproblem_restrictions[model_type]['x'] = x_r
         self.subproblem_restrictions[model_type]['a'] = a_r
+        self.subproblem_model[model_type] = s
         return s
 
     def master(self, time_limit):
-        m, x, a = _master(time_limit, self.start_date, self.end_date, self.pattern_generator,
+        m = _master(time_limit, self.start_date, self.end_date, self.pattern_generator,
                        self.champ_stats)
-        self.master_vars['x'] = x
-        self.master_vars['a'] = a
         return m
 
     def optimize(self):
@@ -66,9 +66,9 @@ class Benders():
             s[s_type].optimize()
 
             if s[s_type].status != GRB.OPTIMAL:
-              s[s_type]
+              s[s_type].computeIIS()
               is_optimal = False
-              cut = self._generate_cut(x, a[s_type], s_type)
+              cut = self._generate_cut(s_type)
               m.addConstr(cut >= 1)
 
 
@@ -100,20 +100,24 @@ class Benders():
         else: value = 0
         self.subproblem_restrictions['p']['a'][index].rhs = value
 
-    def _generate_cut(self, x, a, s_type):
+    def _generate_cut(self, s_type):
       """
       Dado un subproblema infactible, genera un corte para
       el problema maestro usando los valores de x y alfa.
       """
       cut = LinExpr()
-      for i, value in x.items():
-        if value > 0.5: cut = cut + (1 - self.master_vars['x'][i])
-        else: cut = cut + self.master_vars['x'][i]
+      for var in self.subproblem_model[s_type].getVars():
+        name, value = var.VarName, var.X
+        if 'x' in name or 'alfa' in name:
+          if 'x' in name: r = 'x'
+          else: r = 'a'
 
-      for i, value in a.items():
-        if value > 0.5: cut = cut + (1 - self.master_vars['a'][s_type][i])
-        else: cut = cut + self.master_vars['a'][s_type][i]
+          name = name.strip('x[').strip(']')
+          name = tuple(int(i) for i in name.split(','))
 
+          if self.subproblem_restrictions[s_type][r][name].IISConstr:
+            if value > 0.5: cut += (1 - var)
+            else: cut += var
       return cut
 
     def _parse_master_output(self, model):
