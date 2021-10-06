@@ -13,6 +13,15 @@ Modelo computacional de optimización del calendario deportivo ANFP.
   - `4`: SSTPA MP CPLEX
   - `5`: SSTPA Benders
 
+## Comandos útiles
+
+- Correr campeonato de prueba:
+
+`python main.py --start_date 4 --filepath data/campeonato_prueba.xlsx --model 5 --end_date 6`
+
+- Correr campeonato real:
+
+`python main.py --start_date 28 --filepath data/Datos.xlsx --model 5 --end_date 30`
 
 
 
