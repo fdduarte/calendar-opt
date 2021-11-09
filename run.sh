@@ -9,7 +9,7 @@ TIMESTAMP=$(date +%s)
 LOG=0 # 0 False, 1 True
 MULTIPLE_DATES=0 # 0 False, 1 True
 RANGE=${START}..29
-TOY_EXAMPLE=0 # 0 False, 1 True
+TOY_EXAMPLE=1 # 0 False, 1 True
 
 if [ ${TOY_EXAMPLE} -eq 1 ]; then
   if [ ${LOG} -eq 0 ]; then
