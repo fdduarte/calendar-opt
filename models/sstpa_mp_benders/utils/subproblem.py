@@ -39,7 +39,10 @@ def generate_cut(subproblem, master):
             const = subproblem.getConstrByName(f'R15[{j}]')
             if const.getAttr('IISConstr'):
                 master_var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
-                cut += master_var
+                if master.cbGetSolution(master_var) > 0.5:
+                    cut += 1 - master_var
+                else:
+                    cut += master_var
     return cut
 
 
