@@ -64,7 +64,7 @@ class Benders:
             for i, l, s in self.params['sub_indexes']:
                 # Generate best position cut
                 if s == 'm': 
-                    cut = create_best_position_cut(self.sstpa_model, i, l)
+                    cut = create_best_position_cut(model, self.sstpa_model, i, l, self.params['N'])
                     model.cbLazy(cut)
 
                 # set subproblem values and optimize
