@@ -11,7 +11,7 @@ def set_sstpa_restrictions(model, x):
             value = 0
         model.getConstrByName(f'R1[{i},{j}]').rhs = value
 
-def create_best_position_cut(model, sstpa, i, l, N):
+def create_best_position_cut(model, sstpa, i, l, N, d=2):
     """
     Given the model, a solved instance of the SSTPA model,
     a team i and a date l, generates a cut.
@@ -36,7 +36,7 @@ def create_best_position_cut(model, sstpa, i, l, N):
     beta = model.getVarByName(f'beta_m[{i},{l}]')
     
     # Generate cut
-    cut = beta >= (1 - k) * quicksum((1 - x) for x in S) + k
+    cut = beta >= (1 - k) * (1 / d) * quicksum((1 - x) for x in S) + k
     return cut
 
 def _to_int(value):
