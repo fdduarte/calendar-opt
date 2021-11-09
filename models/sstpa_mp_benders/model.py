@@ -2,7 +2,7 @@ from models.sstpa_mp_benders.utils import callback
 from .subproblem import subproblem as _subproblem
 from .master import master as _master
 from .sstpa_model import create_model as _sstpa
-from .utils import set_subproblem_values, generate_cut, parse_vars, set_sstpa_restrictions, set_cb_sol, create_best_position_cut
+from .utils import set_subproblem_values, generate_cut, parse_vars, set_sstpa_restrictions, set_cb_sol, create_best_position_cut, create_worst_position_cut
 from .params import get_params
 import time
 from gurobipy import GRB
@@ -62,9 +62,11 @@ class Benders:
             self._timeit(self.sstpa_model.optimize, 'sstpa')
 
             for i, l, s in self.params['sub_indexes']:
-                # Generate best position cut
+                # Generate best/worst position cut
                 if s == 'm': 
-                    cut = create_best_position_cut(model, self.sstpa_model, i, l, self.params['N'])
+                    cut = create_best_position_cut(model, self.sstpa_model, i, l)
+                    model.cbLazy(cut)
+                    cut = create_worst_position_cut(model, self.sstpa_model, i, l, self.params['N'])
                     model.cbLazy(cut)
 
                 # set subproblem values and optimize
