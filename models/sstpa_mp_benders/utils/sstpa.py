@@ -1,4 +1,5 @@
 from gurobipy import LinExpr, quicksum
+import time
 
 def set_sstpa_restrictions(model, x):
     """
@@ -11,20 +12,19 @@ def set_sstpa_restrictions(model, x):
             value = 0
         model.getConstrByName(f'R1[{i},{j}]').rhs = value
 
-def create_best_position_cut(model, sstpa, i, l, d=2):
+def create_position_cut(model, self, i, l, d=2):
     """
     Given the model, a solved instance of the SSTPA model,
-    a team i and a date l, generates a cut.
+    a team i and a date l, generates a position cut.
     """
     # Get best possible position k
-    k = int(sstpa.getVarByName(f'beta_m[{i},{l}]').X)
+    k = int(self.sstpa_model.getVarByName(f'beta_m[{i},{l}]').X)
     S_indexes, S = [], []
 
     # Get x^* support S
-    for var in sstpa.getVars():
-        if 'x' in var.VarName:
-            if _to_int(var.X) == 1:
-                S_indexes.append(var.VarName)
+    for (n, f), value in self.last_sol.items():
+        if value > 0.5:
+            S_indexes.append(f'x[{n},{f}]')
 
     # Get the model vars in S
     for index in S_indexes:
@@ -34,34 +34,9 @@ def create_best_position_cut(model, sstpa, i, l, d=2):
     beta = model.getVarByName(f'beta_m[{i},{l}]')
     
     # Generate cut
-    cut = beta >= (1 - k) * (1 / d) * quicksum((1 - x) for x in S) + k
-    return cut
-
-def create_worst_position_cut(model, sstpa, i, l, N, d=2):
-    """
-    Given the model, a solved instance of the SSTPA model,
-    a team i and a date l, generates a cut.
-    """
-    # Get best possible position k
-    k = int(sstpa.getVarByName(f'beta_m[{i},{l}]').X)
-    S_indexes, S = [], []
-
-    # Get x^* support S
-    for var in sstpa.getVars():
-        if 'x' in var.VarName:
-            if _to_int(var.X) == 1:
-                S_indexes.append(var.VarName)
-
-    # Get the model vars in S
-    for index in S_indexes:
-        S.append(model.getVarByName(index))
-
-    # Get the model beta
-    beta = model.getVarByName(f'beta_m[{i},{l}]')
-    
-    # Generate cut
-    cut = beta <= (1 - k) * (len(N) / d) * quicksum((1 - x) for x in S) + k
-    return cut
+    cut1 = beta >= (1 - k) * (1 / d) * quicksum((1 - x) for x in S) + k
+    cut2 = beta <= (1 - k) * (len(self.params['N']) / d) * quicksum((1 - x) for x in S) + k
+    return cut1, cut2
 
 def _to_int(value):
     if value > 0.5:

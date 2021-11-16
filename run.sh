@@ -2,14 +2,14 @@
 
 # Run full champ
 
-START=28
+START=26
 END=30
 MODEL=5
 TIMESTAMP=$(date +%s)
-LOG=0 # 0 False, 1 True
-MULTIPLE_DATES=0 # 0 False, 1 True
+LOG=1 # 0 False, 1 True
+MULTIPLE_DATES=1 # 0 False, 1 True
 RANGE=${START}..29
-TOY_EXAMPLE=1 # 0 False, 1 True
+TOY_EXAMPLE=0 # 0 False, 1 True
 
 if [ ${TOY_EXAMPLE} -eq 1 ]; then
   if [ ${LOG} -eq 0 ]; then
@@ -27,9 +27,9 @@ else
   else
     for i in {${RANGE}}; do 
       if [ ${LOG} -eq 0 ]; then
-      python main.py --start_date ${START} --end_date ${END} --model ${MODEL}
+      python main.py --start_date ${i} --end_date ${END} --model ${MODEL}
       else
-        python main.py --start_date ${START} --end_date ${END} --model ${MODEL} > logs/${TIMESTAMP}-${START}-${END}.log
+        python main.py --start_date ${i} --end_date ${END} --model ${MODEL} > logs/${TIMESTAMP}-${i}-${END}.log
       fi;
       done
   fi
