@@ -2,14 +2,14 @@
 
 # Run full champ
 
-START=26
+START=27
 END=30
 MODEL=5
 TIMESTAMP=$(date +%s)
-LOG=1 # 0 False, 1 True
-MULTIPLE_DATES=1 # 0 False, 1 True
+LOG=0 # 0 False, 1 True
+MULTIPLE_DATES=0 # 0 False, 1 True
 RANGE=${START}..29
-TOY_EXAMPLE=0 # 0 False, 1 True
+TOY_EXAMPLE=1 # 0 False, 1 True
 
 if [ ${TOY_EXAMPLE} -eq 1 ]; then
   if [ ${LOG} -eq 0 ]; then

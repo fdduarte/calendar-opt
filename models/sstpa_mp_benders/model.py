@@ -61,6 +61,7 @@ class Benders:
 
                 # Add solution to visited
                 self.visited_sols.add(str(self.last_sol))
+
         self.times['MIPNode'] += time.time() - start
         start = time.time()
         if where == GRB.Callback.MIPSOL:
@@ -73,11 +74,12 @@ class Benders:
 
             for i, l, s in self.params['sub_indexes']:
                 # Generate best/worst position cut
+                """
                 if s == 'm':
                     cut1, cut2 = self._timeit(create_position_cut, 'generate cut', model, self, i, l) 
                     model.cbLazy(cut1)
                     model.cbLazy(cut2)
-                    self.stats['cuts'] += 2
+                    self.stats['cuts'] += 2"""
                 
                 # set subproblem values and optimize
                 subproblem = self.subproblem_model[i, l, s]
@@ -92,11 +94,12 @@ class Benders:
                     self.stats['betaneq'] += 1
 
                 # If infeasible, add cuts
+
                 if subproblem.Status == GRB.INFEASIBLE:
-                    self._timeit(subproblem.computeIIS, 'IIS')
+                    # self._timeit(subproblem.computeIIS, 'IIS')
                     cut = generate_cut(subproblem, model)
                     model.cbLazy(cut >= 1)
-                
+    
         self.times['MIPSOL'] += time.time() - start
 
     def optimize(self):
@@ -109,6 +112,9 @@ class Benders:
 
     def getVars(self):
         return self.master_model.getVars()
+
+    def write(self, *args):
+        return self.master_model.write(*args)
 
     def _print(self):
         print("\n" + "=" * 20 + "\n")

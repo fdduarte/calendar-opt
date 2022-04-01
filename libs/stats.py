@@ -2,77 +2,122 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import optimize
 import os
+from gurobipy import GRB
 
 """
 Módulo de Visualización.
 
 Interpeta stdout de model.py (V3 y V4), para
 generar visualizaciónes del rendimiento.
+
+To Do:
+
+- Separate plotter from output logger
+- Refactors
 """
 class ModelStats:
-  def __init__(self, logs_path, name):
-    self.logs_path = logs_path
-    self.name = name
-    self.variable_loading_time = []
-    self.restriction_loading_time = []
-    self.presolve_time = []
-    self.total_time = []
-    self.optimal_value = []
-    self.bound_value = []
-    self.create_dir(name)
-    self.output_path = "output/visualization"
-  
   @staticmethod
-  def create_dir(name):
-    try:
-      os.mkdir(f"output")
-    except FileExistsError:
-      pass
-    try:
-      os.mkdir(f"output/visualization")
-    except FileExistsError:
-      pass
-    try:
-      os.mkdir(f"output/visualization/{name}-vis")
-    except FileExistsError:
-      pass
+  def get_vars_normal(model_vars, matches):
+    prog_file_lines = dict()
+    best_case_lines = list()
+    points_lines = list()
+    for var in model_vars:
+      # Refactor: read values correctly (var is gurobipy.Var but acts like string)
+      if "x" in str(var):
+        _, var, _, value = str(var).split()
+        match, date = var.split(",")
+        value = int(float(value.strip(")>")))
+        match = int(match.strip("x["))
+        date = int(date.strip("]"))
+        if date not in prog_file_lines.keys():
+          prog_file_lines[date] = list()
+        if value:
+          prog_file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
+      if "p_m" in str(var):
+        _, var, _, value = str(var).split()
+        team1, team2, obs_date, date = var.strip('p_m[').strip(']').split(',')
+        value = float(value.strip(')>'))
+        if team1 == team2:
+          points_lines.append((team2, obs_date, date, str(value)))
+
+      if "beta_m" in str(var):
+        _, var, _, value = str(var).split()
+        team, date = var.split(",")
+        team = team.strip("beta_m[")
+        date = int(date.strip("]"))
+        value = int(float(value.strip(")>")))
+        best_case_lines.append([team, str(date), str(value)])
+    return prog_file_lines, best_case_lines, points_lines
 
   @staticmethod
-  def gen_plot(x, y, title):
-    plt.plot(x, y, 'o')
-    plt.title(title)
-    plt.xlabel("Fechas")
-    plt.ylabel("Tiempos (minutos)")
+  def get_vars_benders(model, matches):
+    prog_file_lines = dict()
+    best_case_lines = list()
+    points_lines = list()
+    for var in model.getVars():
+      # Refactor: read values correctly (var is gurobipy.Var but acts like string)
+      if "x" in str(var):
+        _, var, _, value = str(var).split()
+        match, date = var.split(",")
+        value = int(float(value.strip(")>")))
+        match = int(match.strip("x["))
+        date = int(date.strip("]"))
+        if date not in prog_file_lines.keys():
+          prog_file_lines[date] = list()
+        if value:
+          prog_file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
+      if "beta_m" in str(var):
+        _, var, _, value = str(var).split()
+        team, date = var.split(",")
+        team = team.strip("beta_m[")
+        date = int(date.strip("]"))
+        value = int(float(value.strip(")>")))
+        best_case_lines.append([team, str(date), str(value)])
+
+    for (i, l, s), subproblem in model.subproblem_model.items():
+      if s == 'm':
+        if subproblem.Status == 3:
+          print(GRB.INFEASIBLE, subproblem.status)
+          print('model', i, l, s, 'is infeasible')
+        for var in subproblem.getVars():
+          if "p" in str(var):
+            try:
+              _, var, _, value = str(var).split()
+              team1, team2, obs_date, date = var.strip('p[').strip(']').split(',')
+              value = float(value.strip(')>'))
+              if team1 == i and team1 == team2 and int(l) == int(obs_date):
+                points_lines.append((team2, obs_date, date, str(value)))
+            except Exception:
+              pass
+    return prog_file_lines, best_case_lines, points_lines
 
   @staticmethod
-  def get_var_cords(variable):
-    x = np.array([data[0] for data in variable])
-    y = np.array([data[1] for data in variable])
-    return x, y
-
-  @staticmethod
-  def parse_gurobi_output(model_vars, matches, name='programacion'):
-    file_lines = dict()
+  def parse_gurobi_output(model_vars, matches, name='programacion', benders=False):
+    BASE_DIR = f'output/{name}'
+    os.mkdir(BASE_DIR)
     try:
-      for var in model_vars:
-        if "x" in str(var):
-          _, var, _, value = str(var).split()
-          match, date = var.split(",")
-          value = int(float(value.strip(")>")))
-          match = int(match.strip("x["))
-          date = int(date.strip("]"))
-          if date not in file_lines.keys():
-            file_lines[date] = list()
-          if value:
-            file_lines[date].append(f",{matches[match]['home']},{matches[match]['away']}\n")
-      with open(f"output/{name}.csv", "w", encoding="UTF-8") as infile:
+      if benders:
+        prog_file_lines, best_case_lines, points_lines = ModelStats.get_vars_benders(model_vars, matches)
+      else:
+        prog_file_lines, best_case_lines, points_lines = ModelStats.get_vars_normal(model_vars, matches)
+      with open(f"{BASE_DIR}/programacion.csv", "w", encoding="UTF-8") as infile:
         infile.write("jornada, local, visita\n")
-        for date in file_lines.keys():
+        for date in prog_file_lines.keys():
           infile.write(f"{date},,\n")
-          for line in file_lines[date]:
+          for line in prog_file_lines[date]:
             infile.write(line)
+      with open(f"{BASE_DIR}/mejor_posicion.csv", "w", encoding="UTF-8") as infile:
+        infile.write("equipo,fecha,posicion\n")
+        for line in best_case_lines:
+          infile.write(",".join(line))
+          infile.write("\n")
+      with open(f"{BASE_DIR}/puntos_equipo.csv", "w", encoding="UTF-8") as infile:
+        infile.write("equipo,fecha_obs,fecha,puntos\n")
+        for line in points_lines:
+          infile.write(",".join(line))
+          infile.write("\n")
     except ValueError:
-      with open("output/programacion.csv", "w", encoding="UTF-8") as infile:
+      with open("{BASE_DIR}/programacion.csv", "w", encoding="UTF-8") as infile:
         infile.write("Modelo Infactible")
 
   @staticmethod

@@ -5,14 +5,14 @@ def set_subproblem_values(master, subproblem):
     i, l, s = _get_subproblem_indexes(subproblem)
     for cons in subproblem.getConstrs():
         name = cons.getAttr('ConstrName')
-        # Set same x vars (R14)
-        if 'R14' in name:
+        # Set same x vars (R13)
+        if 'R13' in name:
             n, f = _get_index(name)
             var = master.getVarByName(f'x[{n},{f}]')
             value = _to_int(master.cbGetSolution(var))
             cons.rhs = value
-        # Set same alpha vars (R15)
-        if 'R15' in name:
+        # Set same alpha vars (R14)
+        if 'R14' in name:
             j = _get_index(name)[0]
             var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
             value = _to_int(master.cbGetSolution(var))
@@ -30,19 +30,19 @@ def generate_cut(subproblem, master):
         name = var.VarName
         if 'x' in name:
             n, f = _get_index(name)
-            const = subproblem.getConstrByName(f'R14[{n},{f}]')
-            if const.getAttr('IISConstr'):
-                master_var = master.getVarByName(name)
-                cut += master_var
+            const = subproblem.getConstrByName(f'R13[{n},{f}]')
+            # if const.getAttr('IISConstr'):
+            master_var = master.getVarByName(name)
+            cut += master_var
         if 'alfa' in name:
             j = _get_index(name)[0]
-            const = subproblem.getConstrByName(f'R15[{j}]')
-            if const.getAttr('IISConstr'):
-                master_var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
-                if master.cbGetSolution(master_var) > 0.5:
-                    cut += 1 - master_var
-                else:
-                    cut += master_var
+            const = subproblem.getConstrByName(f'R14[{j}]')
+            # if const.getAttr('IISConstr'):
+            master_var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
+            if master.cbGetSolution(master_var) > 0.5:
+                cut += 1 - master_var
+            else:
+                cut += master_var
     return cut
 
 

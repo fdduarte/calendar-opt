@@ -5,6 +5,7 @@ from models import (
 )
 from modules import ModelStats, PatternGenerator, ChampStats
 import argparse
+import time
 
 
 if __name__ == "__main__":
@@ -43,7 +44,7 @@ if __name__ == "__main__":
         help="Tiempo limite de ejecucion (en segundos)",
     )
 
-    parser.add_argument("--gap", default=0.3, type=float, help="Gap del modelo.")
+    parser.add_argument("--gap", default=0.0, type=float, help="Gap del modelo.")
 
     args = parser.parse_args()
 
@@ -92,5 +93,8 @@ if __name__ == "__main__":
     if args.model == 5:
         m._print()
 
-    ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches)
-    ModelStats.check_valid_output()
+    if args.model == 5:
+        ModelStats.parse_gurobi_output(m, champ_stats.matches, f'model-{args.model}-{time.time()}', benders=True)
+    else:
+        ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches, f'model-{args.model}-{time.time()}')
+    # ModelStats.check_valid_output()
