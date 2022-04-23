@@ -1,0 +1,6 @@
+[MASTER]
+disable = C0114, F0401
+
+[FORMAT]
+max-line-length=100
+indent-string='  '

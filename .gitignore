@@ -144,3 +144,6 @@ logs/*
 *.out
 *.spl
 *.gz
+
+# output
+ouput/
