@@ -1,5 +1,5 @@
 [MASTER]
-disable = C0114, F0401
+disable = C0114, F0401, C0413
 
 [FORMAT]
 max-line-length=100

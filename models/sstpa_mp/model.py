@@ -3,7 +3,19 @@ from gurobipy import Model, GRB, quicksum
 import time
 from .params import get_params
 
-def create_model(start_date, end_date, time_limit, breaks, pattern_generator, champ_stats, mip_focus=1, mip_gap=0.3):
+
+def create_model(
+  start_date,
+  end_date,
+  time_limit,
+  breaks,
+  file_params,
+  mip_focus=1,
+  mip_gap=0.3
+):
+  """
+  Funcion que crea modelo de optimizacion de multiples posiciones sin descomposicion
+  """
   m = Model("SSTPA V3")
 
   m.setParam('TimeLimit', time_limit)
@@ -11,7 +23,7 @@ def create_model(start_date, end_date, time_limit, breaks, pattern_generator, ch
   m.setParam('MIPGap', mip_gap)
 
 
-  params = get_params(start_date, end_date, pattern_generator, champ_stats)
+  params = get_params(start_date, end_date, file_params)
 
   # Parse params dict to variables
 

@@ -1,6 +1,9 @@
+import sys
+import os
+from libs.stats_parser import FileParams
 
 
-def get_params(start_date, end_date, pattern_generator, champ_stats):
+def get_params(start_date: int, end_date: int, file_params):
   """
   Generador de parámetros para SSTPA V3.
 
@@ -16,15 +19,13 @@ def get_params(start_date, end_date, pattern_generator, champ_stats):
 
   FECHAINI = start_date
   FECHAFIN = end_date
-  THRESHOLD = 100
-  FILTER = 0.25
   TARGET = 10
   BREAKS = 2
-  FILENAME = "SSTPA/modules/params/Datos.xlsx"
-  print(f"\nPARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET: {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
+  # print(f"\nPARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET:
+  # {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
 
   #################
-  #*  CONJUNTOS  *#
+  # * CONJUNTOS * #
   #################
 
   # I: Equipos
