@@ -6,13 +6,13 @@ def set_subproblem_values(master, subproblem):
     for cons in subproblem.getConstrs():
         name = cons.getAttr('ConstrName')
         # Set same x vars (R13)
-        if 'R13' in name:
+        if 'R14' in name:
             n, f = _get_index(name)
             var = master.getVarByName(f'x[{n},{f}]')
             value = _to_int(master.cbGetSolution(var))
             cons.rhs = value
         # Set same alpha vars (R14)
-        if 'R14' in name:
+        if 'R15' in name:
             j = _get_index(name)[0]
             var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
             value = _to_int(master.cbGetSolution(var))
