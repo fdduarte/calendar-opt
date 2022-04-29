@@ -1,6 +1,6 @@
 import argparse
-from src.models import sstpa_mp_create_model
-from src.params import sstpa_mp_generate_params
+from src.models import sstpa_mp_create_model, sstpa_mp_benders_create_model
+from src.params import sstpa_mp_generate_params, sstpa_mp_benders_generate_params
 
 
 if __name__ == "__main__":
@@ -45,17 +45,6 @@ if __name__ == "__main__":
 
   assert args.model in range(1, 6)
 
-  """
-  if args.model == 1:
-    m, S_F = sstpa3_create_model(
-      args.start_date,
-      args.end_date,
-      args.timelimit,
-      args.breaks,
-      champ_stats,
-    )
-  """
-
   if args.model == 3:
     sstpa_mp_generate_params(args.filepath, args.start_date)
     m = sstpa_mp_create_model(
@@ -66,24 +55,25 @@ if __name__ == "__main__":
       mip_gap=args.gap,
     )
 
-  """
   if args.model == 5:
+    sstpa_mp_benders_generate_params(args.filepath, args.start_date)
     m = sstpa_mp_benders_create_model(
       args.start_date,
-      args.end_date,
+      args.filepath,
       args.timelimit,
       args.breaks,
-      instance_params,
       mip_gap=args.gap,
-    )"""
+    )
 
   m.optimize()
 
-  if args.model == 5:
-    m._print()
+  # if args.model == 5:
+  #   m.print_stats()
 
   # if args.model == 5:
-  #  ModelStats.parse_gurobi_output(m, champ_stats.matches, f'model-{args.model}-{time.time()}', benders=True)
+  #  ModelStats.parse_gurobi_output(m, champ_stats.matches, f'model-{args.model}-{time.time()}',
+  # benders=True)
   # else:
-  #  ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches, f'model-{args.model}-{time.time()}')
+  #  ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches, f'model-{args.model}-
+  # {time.time()}')
   # ModelStats.check_valid_output()

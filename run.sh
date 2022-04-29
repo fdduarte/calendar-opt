@@ -4,7 +4,7 @@
 
 START=27
 END=30
-MODEL=3
+MODEL=5
 TIMESTAMP=$(date +%s)
 LOG=0 # 0 False, 1 True
 MULTIPLE_DATES=0 # 0 False, 1 True

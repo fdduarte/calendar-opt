@@ -10,21 +10,23 @@ from .utils import (
   set_sstpa_restrictions,
   set_cb_sol,
 )
-from .params import get_params
+from .parse_params import parse_params
 
 
+# pylint: disable=invalid-name
 class Benders:
   """Clase del modelo de optimización SSTPA con descomposición de benders"""
   def __init__(
     self,
     start_date,
-    end_date,
+    filepath,
     time_limit,
     breaks,
-    instance_params,
     mip_gap
   ):
-    self.params = get_params(start_date, end_date, instance_params)
+    self.params = parse_params(filepath, start_date)
+    self.subproblem_indexes = [(i, l, s) for i in self.params['I']
+                               for l in self.params['F'] for s in ["m", "p"]]
 
     self.mip_gap = mip_gap
     self.time_limit = time_limit
@@ -32,8 +34,8 @@ class Benders:
     # Models
     self.sstpa_model = _sstpa(self.params)
     self.master_model = _master(self.params)
-    self.subproblem_model = dict()
-    for i, l, s in self.params.subproblem_indexes:
+    self.subproblem_model = {}
+    for i, l, s in self.subproblem_indexes:
       self.subproblem_model[i, l, s] = _subproblem(i, l, s, self.params)
     self.times = {
       'IIS': 0,
@@ -123,12 +125,15 @@ class Benders:
     self.times['total'] = time.time() - start_time
 
   def getVars(self):
+    """Retorna las variables del modelo maestro"""
     return self.master_model.getVars()
 
   def write(self, *args):
+    """Escribe el modelo maestro"""
     return self.master_model.write(*args)
 
-  def _print(self):
+  def print_stats(self):
+    """Imprime estadisticas de tiempo del modelo"""
     print("\n" + "=" * 20 + "\n")
     print('TIME:')
     print('Total time:', self.times['total'])
@@ -146,19 +151,18 @@ class Benders:
 
 def create_model(
   start_date,
-  end_date,
+  filepath,
   time_limit,
   breaks,
-  instance_params,
   mip_focus=1,
   mip_gap=0.3,
 ):
+  """Crea modelo SSTPA MP Benders"""
   m = Benders(
     start_date,
-    end_date,
+    filepath,
     time_limit,
     breaks,
-    instance_params,
     mip_gap=mip_gap,
   )
   return m

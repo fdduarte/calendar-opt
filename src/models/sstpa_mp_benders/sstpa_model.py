@@ -11,19 +11,16 @@ def create_model(params, time_limit=3600, mip_focus=1, mip_gap=0.3):
 
     # Parse params dict to variables
     # pylint: disable=invalid-name
-    N = params.matches
-    F = params.dates
-    S = params.local_patterns['indexes']
-    I = params.teams
-    R = params.team_matches_points
-    L = params.local_pattern_localties
-    M = params.big_m
-    EL = params.team_localties
-    EV = params.team_aways
-    PI = params.team_points
-    S_F = params.local_patterns['full_patterns']
-
-    start_model = time.time()
+    N = params['N']
+    F = params['F']
+    S = params['S']
+    I = params['I']
+    R = params['R']
+    L = params['L']
+    M = 10 ** 10
+    EL = params['EL']
+    EV = params['EV']
+    PI = params['PI']
 
     #################
     # *  VARIABLES  *#
@@ -119,8 +116,6 @@ def create_model(params, time_limit=3600, mip_focus=1, mip_gap=0.3):
     # torneo, mirando desde la fecha l en el PEOR
     # conjunto de resultados futuros para el equipo i
     beta_p = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_p")
-
-    print(f"** VARIABLES TIME: {time.time() - start_model}")
 
     #####################
     # *  RESTRICCIONES  *#
@@ -262,8 +257,6 @@ def create_model(params, time_limit=3600, mip_focus=1, mip_gap=0.3):
              for l in F),
             name="R17",
         )
-
-    print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
 
     ########################
     # *  FUNCION OBJETIVO  *#

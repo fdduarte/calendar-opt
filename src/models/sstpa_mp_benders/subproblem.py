@@ -1,8 +1,10 @@
-from gurobipy import Model, GRB, quicksum
-from .params import get_params
+from gurobipy import Model, GRB, quicksum, LinExpr
 
 
+# pylint: disable=invalid-name
 def subproblem(i, l, s, params):
+  """Genera el subproblema de SSTPA"""
+
   m = Model(f"SSTPA Benders subproblem: {i}-{l}-{s}")
   m.setParam('LogToConsole', 0)
   m.setParam('InfUnbdInfo', 1)
@@ -10,17 +12,17 @@ def subproblem(i, l, s, params):
   m.setParam('IISMethod', 0)
 
   # Parse params dict to values
-  N = params.matches
-  F = params.dates
-  I = params.teams
-  R = params.team_matches_points
-  M = params.big_m
-  EL = params.team_localties
-  EV = params.team_aways
-  PI = params.team_points
+  N = params['N']
+  F = params['F']
+  I = params['I']
+  R = params['R']
+  M = 10 ** 10
+  EL = params['EL']
+  EV = params['EV']
+  PI = params['PI']
 
   #################
-  #*  VARIABLES  *#
+  # * VARIABLES * #
   #################
 
   # x_nf: x[partido, fecha]
@@ -61,38 +63,51 @@ def subproblem(i, l, s, params):
   alfa = m.addVars(I, [i], [l], vtype=GRB.BINARY, name="alfa")
 
   #####################
-  #*  RESTRICCIONES  *#
+  # * RESTRICCIONES * #
   #####################
 
-  # R13
-  m.addConstrs((x[n, f] == 0 for n in N for f in F), name='R13')
-
   # R14
-  m.addConstrs((alfa[j, i, l] == 0 for j in I), name='R14')
+  m.addConstrs((x[n, f] == 0 for n in N for f in F), name='R14')
 
   # R15
-  m.addConstrs((x[n, f] == (v[n, i, l, f] + e[n, i, l, f] + a[n, i, l, f])
-    for n in N for f in F if  f > l),name="R15")
+  m.addConstrs((alfa[j, i, l] == 0 for j in I), name='R15')
 
   # R16
-  m.addConstrs(((p[j,i,l,f] == PI[j] +
-    quicksum(quicksum(R[j][n] * x[n,theta] for n in N if EL[j][n] + EV[j][n]  == 1)
-                                           for theta in F if theta <= l) + # > 5 ?
-    quicksum(quicksum(3 * v[n,i,l,theta] for theta in F if theta > l and theta <= f)
-                                           for n in N if EL[j][n] == 1) +
-    quicksum(quicksum(3 * a[n,i,l,theta] for theta in F if theta > l and theta <= f)
-                                           for n in N if EV[j][n] == 1) +
-    quicksum(quicksum(e[n,i,l,theta] for theta in F if theta > l and theta <= f)
-                                       for n in N if EL[j][n] + EV[j][n] == 1))
-      for j in I for f in F), name="R16")
+  for n in N:
+    for f in F:
+      if f > l:
+        _exp = LinExpr(v[n, i, l, f] + e[n, i, l, f] + a[n, i, l, f])
+        m.addConstr(x[n, f] == _exp, name=f"R9-{n}-{i}-{f}-{l}")
 
   # R17
-  m.addConstrs((((M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]]))
-    for j in I if i != j), name="R17")
+  for j in I:
+    for f in F:
+      _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                               for n in N if EL[j][n] + EV[j][n] == 1)
+                      for theta in F if theta <= l))
+      _exp2 = LinExpr(quicksum(quicksum(3 * v[n, i, l, theta]
+                               for theta in F if theta > l and theta <= f)
+                      for n in N if EL[j][n] == 1))
+      _exp3 = LinExpr(quicksum(quicksum(3 * a[n, i, l, theta]
+                               for theta in F if theta > l and theta <= f)
+                      for n in N if EV[j][n] == 1))
+      _exp4 = LinExpr(quicksum(quicksum(e[n, i, l, theta]
+                               for theta in F if theta > l and theta <= f)
+                      for n in N if EL[j][n] + EV[j][n] == 1))
+      m.addConstr(p[j, i, l, f] == PI[j] + _exp1 + _exp2 + _exp3 + _exp4,
+                  name=f"R17-{j}-{i}-{f}-{l}")
 
   # R18
-  m.addConstrs((((M * (alfa[j, i, l]) >= p[i, i, l, F[-1]] - p[j, i, l, F[-1]]))
-    for j in I if i != j), name="R18")
+  if s == 'm':
+    for j in I:
+      if j != i:
+        m.addConstr(M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+                    name=f"R18-{l}-{i}-{j}")
+  else:
+    for j in I:
+      if j != i:
+        m.addConstr(M * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+                    name=f"R13-{l}-{i}-{j}")
 
   m.update()
 
