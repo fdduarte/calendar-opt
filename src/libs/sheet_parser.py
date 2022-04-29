@@ -4,7 +4,7 @@ El siguiente módulo se encarga de leer el archivo en formato
 """
 import math
 import pandas as pd
-from .data_classes import TeamData, MatchData
+from ..types import TeamData, MatchData
 
 
 def read_teams_file(filename: str) -> dict[str, TeamData]:

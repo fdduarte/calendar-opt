@@ -1,4 +1,4 @@
 [flake8]
 max-line-length = 100
 indent-size = 2
-ignore = F401, E731, E402
+ignore = F401, E731, E402, E741

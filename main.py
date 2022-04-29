@@ -1,9 +1,6 @@
 import argparse
-import time
-from models import (sstpa3_create_model,
-                    sstpa_mp_create_model,
-                    sstpa_mp_benders_create_model)
-from libs.stats_parser import generate_params
+from src.models import sstpa_mp_create_model
+from src.params import sstpa_mp_generate_params
 
 
 if __name__ == "__main__":
@@ -48,8 +45,6 @@ if __name__ == "__main__":
 
   assert args.model in range(1, 6)
 
-  instance_params = generate_params(args.filepath, args.start_date, args.end_date, args.breaks)
-
   """
   if args.model == 1:
     m, S_F = sstpa3_create_model(
@@ -60,16 +55,18 @@ if __name__ == "__main__":
       champ_stats,
     )
   """
+
   if args.model == 3:
-    m, S_F = sstpa_mp_create_model(
+    sstpa_mp_generate_params(args.filepath, args.start_date)
+    m = sstpa_mp_create_model(
       args.start_date,
-      args.end_date,
+      args.filepath,
       args.timelimit,
       args.breaks,
-      instance_params,
       mip_gap=args.gap,
     )
 
+  """
   if args.model == 5:
     m = sstpa_mp_benders_create_model(
       args.start_date,
@@ -78,7 +75,7 @@ if __name__ == "__main__":
       args.breaks,
       instance_params,
       mip_gap=args.gap,
-    )
+    )"""
 
   m.optimize()
 

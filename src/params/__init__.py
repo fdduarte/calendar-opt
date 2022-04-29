@@ -1,0 +1,1 @@
+from .sstpa_normal import generate_params as sstpa_mp_generate_params

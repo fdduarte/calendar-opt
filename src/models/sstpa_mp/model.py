@@ -1,13 +1,15 @@
-from gurobipy import Model, GRB, quicksum
-from .params import get_params
+import json
+import os
+from gurobipy import Model, GRB, quicksum, LinExpr
+from .parse_params import parse_params
+from ...types import SSTPAParams
 
 
+# pylint: disable=invalid-name
 def create_model(
   start_date,
-  end_date,
+  filepath,
   time_limit,
-  breaks,
-  instance_params,
   mip_focus=1,
   mip_gap=0.3
 ):
@@ -20,21 +22,19 @@ def create_model(
   m.setParam('MIPFocus', mip_focus)
   m.setParam('MIPGap', mip_gap)
 
-  params = get_params(start_date, end_date, instance_params)
-
   # Parse params dict to variables
-  # pylint: disable=invalid-name
-  N = params.matches
-  F = params.dates
-  S = params.local_patterns['indexes']
-  I = params.teams
-  R = params.team_matches_points
-  L = params.local_pattern_localties
-  M = params.big_m
-  EL = params.team_localties
-  EV = params.team_aways
-  PI = params.team_points
-  S_F = params.local_patterns['full_patterns']
+  params = parse_params(filepath, start_date)
+
+  N = params['N']
+  F = params['F']
+  S = params['S']
+  I = params['I']
+  R = params['R']
+  L = params['L']
+  M = 10 ** 10
+  EL = params['EL']
+  EV = params['EV']
+  PI = params['PI']
 
   #################
   # * VARIABLES * #
@@ -139,8 +139,10 @@ def create_model(
   m.addConstrs((quicksum(x[n, f] for f in F) == 1 for n in N), name="R2")
 
   # R3
-  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1
-                for i in I for f in F), name="R3")                                                                        
+  for i in I:
+    for f in F:
+      m.addConstr((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1),
+                  name=f"R3-{i}-{f}")
 
   # R4
   for i in I:
@@ -220,4 +222,4 @@ def create_model(
   m.setObjective(quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F),
                  GRB.MAXIMIZE)
 
-  return m, S_F
+  return m

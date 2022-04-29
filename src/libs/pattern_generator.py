@@ -92,7 +92,7 @@ def _check_win_patterns(
   return patterns
 
 
-# To Do: refactor a dos clases -> colapsada de métodos.
+# To Do: refactor a dos clases -> colapsada de argumentos.
 def generate_patterns(
   team_local_patterns: dict[str, str],
   team_win_patterns: dict[str, str],
