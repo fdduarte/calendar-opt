@@ -150,3 +150,6 @@ ouput/
 
 # Data
 data/json/
+
+# VSCode
+.vscode
