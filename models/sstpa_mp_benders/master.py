@@ -1,7 +1,9 @@
-from gurobipy import Model, GRB, quicksum
+from gurobipy import Model, GRB, quicksum, LinExpr
 
 
 def master(params, time_limit=3600, mip_gap=1):
+  """Genera el modelo maestro de SSTPA"""
+
   m = Model("SSTPA Benders Master")
   m.setParam("TimeLimit", time_limit)
   m.setParam("LogToConsole", 1)
@@ -9,13 +11,13 @@ def master(params, time_limit=3600, mip_gap=1):
   m.setParam("MIPGap", mip_gap)
 
   # Parse params dict to values
-  N = params["N"]
-  F = params["F"]
-  S = params["S"]
-  I = params["I"]
-  L = params["L"]
-  EL = params["EL"]
-  EV = params["EV"]
+  N = params.matches
+  F = params.dates
+  S = params.local_patterns['indexes']
+  I = params.teams
+  L = params.local_pattern_localties
+  EL = params.team_localties
+  EV = params.team_aways
 
   #################
   # *  VARIABLES  *#
@@ -25,7 +27,6 @@ def master(params, time_limit=3600, mip_gap=1):
   # 1 si el partido n se programa finalmente
   # en la fecha f
   # 0 en otro caso.
-
   x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
 
   # y_is: y[equipo][patron_localias]
@@ -68,11 +69,13 @@ def master(params, time_limit=3600, mip_gap=1):
   #####################
 
   # R2
-  m.addConstrs((quicksum(x[n, f] for f in F) == 1 for n in N), name="R2")
+  for n in N:
+    m.addConstr((quicksum(x[n, f] for f in F) == 1), name="R2")
 
   # R3
-  m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1
-        for i in I for f in F), name="R3")
+  for i in I:
+    for f in F:
+      m.addConstr((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1), name="R3")
 
   # R4
   m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")

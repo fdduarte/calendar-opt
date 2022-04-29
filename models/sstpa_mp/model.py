@@ -1,6 +1,4 @@
-
 from gurobipy import Model, GRB, quicksum
-import time
 from .params import get_params
 
 
@@ -9,7 +7,7 @@ def create_model(
   end_date,
   time_limit,
   breaks,
-  file_params,
+  instance_params,
   mip_focus=1,
   mip_gap=0.3
 ):
@@ -22,30 +20,25 @@ def create_model(
   m.setParam('MIPFocus', mip_focus)
   m.setParam('MIPGap', mip_gap)
 
-
-  params = get_params(start_date, end_date, file_params)
+  params = get_params(start_date, end_date, instance_params)
 
   # Parse params dict to variables
-
-  N = params['N']
-  F = params['F']
-  S = params['S']
-  I = params['I']
-  R = params['R']
-  L = params['L']
-  M = params['M']
-  EL = params['EL']
-  EV = params['EV']
-  PI = params['PI']
-  S_F = params['S_F']
-
-  start_model = time.time()
-
+  # pylint: disable=invalid-name
+  N = params.matches
+  F = params.dates
+  S = params.local_patterns['indexes']
+  I = params.teams
+  R = params.team_matches_points
+  L = params.local_pattern_localties
+  M = params.big_m
+  EL = params.team_localties
+  EV = params.team_aways
+  PI = params.team_points
+  S_F = params.local_patterns['full_patterns']
 
   #################
-  #*  VARIABLES  *#
+  # * VARIABLES * #
   #################
-
 
   # x_nf: x[partido, fecha]
   # 1 si el partido n se programa finalmente
@@ -71,7 +64,6 @@ def create_model(
   # en el PEOR conjunto de resultados futuros para el equipo i
   p_p = m.addVars(I, I, F, F, vtype=GRB.INTEGER, name="p_p")
 
-
   # v_nilf : v[partido, equipo, fecha, fecha]
   # binaria,  1 si el equipo local gana el partido n
   # de la fecha f teniendo informacion finalizada la fecha l
@@ -84,13 +76,11 @@ def create_model(
   # en el MEJOR conjunto de resultados futuros para el equipo i
   v_p = m.addVars(N, I, F, F, vtype=GRB.BINARY, name="v_p")
 
-
   # a_nilf: a[partido,equipo,fecha,fecha]
   # 1 si el equipo visitante gana el partido n de la fecha f
   # teniendo información finalizada la fecha l
   # en el MEJOR conjunto de resultados para el equipo i
   a_m = m.addVars(N, I, F, F, vtype=GRB.BINARY, name="a_m")
-
 
   # a_nilf: a[partido,equipo,fecha,fecha]
   # 1 si el equipo visitante gana el partido n de la fecha f
@@ -98,21 +88,19 @@ def create_model(
   # en el PEOR conjunto de resultados para el equipo i
   a_p = m.addVars(N, I, F, F, vtype=GRB.BINARY, name="a_p")
 
-
-  #e_nilf: e[partido,equipo,fecha,fecha]
-  #binaria, toma el valor 1 si se empata el 
-  #partido n de la fecha f, con la info
-  #de los resultados hasta la fecha l inclusive
+  # e_nilf: e[partido,equipo,fecha,fecha]
+  # binaria, toma el valor 1 si se empata el
+  # partido n de la fecha f, con la info
+  # de los resultados hasta la fecha l inclusive
   # en el MEJOR conjunto de resultados futuros para el euqipo i
   e_m = m.addVars(N, I, F, F, vtype=GRB.BINARY, name="e_m")
 
-  #e_nilf: e[partido,equipo,fecha,fecha]
-  #binaria, toma el valor 1 si se empata el 
-  #partido n de la fecha f, con la info
-  #de los resultados hasta la fecha l inclusive
+  # e_nilf: e[partido,equipo,fecha,fecha]
+  # binaria, toma el valor 1 si se empata el
+  # partido n de la fecha f, con la info
+  # de los resultados hasta la fecha l inclusive
   # en el PEOR- conjunto de resultados futuros para el euqipo i
   e_p = m.addVars(N, I, F, F, vtype=GRB.BINARY, name="e_p")
-
 
   # alfa_jil : alfa[equipo,equipo,fecha]
   # binaria, toma el valor 1 si el equipo j termina con menos puntos
@@ -129,52 +117,47 @@ def create_model(
   # se está en la fecha l
   alfa_p = m.addVars(I, I, F, vtype=GRB.BINARY, name="alfa_p")
 
-  #beta_il: beta[equipo,fecha]
-  #discreta, indica la mejor posicion
-  #que puede alcanzar el equipo i al final del 
-  #torneo, mirando desde la fecha l en el MEJOR
-  #conjunto de resultados futuros para el equipo i
+  # beta_il: beta[equipo,fecha]
+  # discreta, indica la mejor posicion
+  # que puede alcanzar el equipo i al final del 
+  # torneo, mirando desde la fecha l en el MEJOR
+  # conjunto de resultados futuros para el equipo i
   beta_m = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_m")
 
-  #beta_il: beta[equipo, fecha]
-  #discreta, indica la mejor posicion
-  #que puede alcanzar el equipo i al final del 
-  #torneo, mirando desde la fecha l en el PEOR
-  #conjunto de resultados futuros para el equipo i
+  # beta_il: beta[equipo, fecha]
+  # discreta, indica la mejor posicion
+  # que puede alcanzar el equipo i al final del 
+  # torneo, mirando desde la fecha l en el PEOR
+  # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_p")
 
-
-  print(f"** VARIABLES TIME: {time.time() - start_model}")
-
-
   #####################
-  #*  RESTRICCIONES  *#
+  # * RESTRICCIONES * #
   #####################
 
   # R2
   m.addConstrs((quicksum(x[n, f] for f in F) == 1 for n in N), name="R2")
-  
+
   # R3
   m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1
-    for i in I for f in F), name="R3")                                                                         
-  
+                for i in I for f in F), name="R3")                                                                        
+
   # R4
   for i in I:
     m.addConstr((quicksum(y[i][s] for s in S[i]) == 1), name="R4")
 
-  
   # R6
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EL[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 1) for f in F), name="R6")
-  
+
   # R7
   for i in I:
     m.addConstrs((quicksum(x[n, f] for n in N if EV[i][n] == 1) == quicksum(y[i][s] for s in S[i] if L[s][f] == 0) for f in F), name="R7")
-  
+
   # R8
   m.addConstrs((x[n, f] == (v_m[n, i, l, f] + e_m[n, i, l, f] + a_m[n, i, l, f])
     for n in N for i in I for f in F for l in F if  f > l), name="R8")
-  
+
   # R9
   m.addConstrs((x[n, f] == (v_p[n, i, l, f] + e_p[n, i, l, f] + a_p[n, i, l, f])
     for n in N for i in I for f in F for l in F if  f > l), name="R9")
@@ -221,23 +204,20 @@ def create_model(
 
   # R16
   for i in I:
-    m.addConstrs(((beta_m[i, l] == len(I) -
-                  (quicksum(alfa_m[j, i, l] for j in I if i != j)))
-      for l in F), name="R16")
-
+    m.addConstrs(((beta_m[i, l] == len(I) - (quicksum(alfa_m[j, i, l] for j in I if i != j)))
+                                             for l in F), name="R16")
 
   # R17
   for i in I:
     m.addConstrs(((beta_p[i, l] == 1 +
                   (quicksum((1 - alfa_p[j, i, l]) for j in I if i != j)))
       for l in F), name="R17")
-  
-  print(f"** RESTRICTIONS TIME: {time.time() - start_model}")
-  
+
   ########################
-  #*  FUNCION OBJETIVO  *#
+  # * FUNCION OBJETIVO * #
   ########################
 
-  m.setObjective(quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F), GRB.MAXIMIZE)
+  m.setObjective(quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F),
+                 GRB.MAXIMIZE)
 
   return m, S_F

@@ -32,3 +32,5 @@ class FileParams:
   team_points: dict[str, int]
   team_local_patterns: dict[str, list[str]]
   team_win_patterns: dict[str, list[str]]
+  matches_points: dict[str, dict[int, int]]
+  team_localties: dict[str, dict[int, str]]

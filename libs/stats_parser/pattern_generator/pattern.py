@@ -69,17 +69,33 @@ def _generate_result_patterns(start_date: int, end_date: int) -> list[str]:
   return ["".join(seq) for seq in itertools.product("WDL", repeat=length)]
 
 
-def _check_win_patterns(patterns: list[str]) -> list[str]:
+def _check_win_patterns(
+  patterns: list[str],
+  team_pattern: str,
+  start_date: int,
+  second_round_date: int
+) -> list[str]:
   """
-  Chequea si se le puede asignar un patrón de resultados 
+  Chequea si se le puede asignar un patrón de resultados
   a un equipo
   """
-  # stub
+  team_pattern = team_pattern[(start_date - second_round_date):]
+  patterns = [p[(start_date - second_round_date):] for p in patterns]
+
+  wins = team_pattern.count('W')
+  losses = team_pattern.count('L')
+  draws = team_pattern.count('D')
+
+  patterns = list(filter(lambda x: x.count('W') == wins, patterns))
+  patterns = list(filter(lambda x: x.count('D') == draws, patterns))
+  patterns = list(filter(lambda x: x.count('L') == losses, patterns))
   return patterns
 
 
+# To Do: refactor a dos clases -> colapsada de métodos.
 def generate_patterns(
-  team_patterns: dict[str, str],
+  team_local_patterns: dict[str, str],
+  team_win_patterns: dict[str, str],
   second_round_date: int,
   start_date: int,
   end_date: int,
@@ -88,10 +104,11 @@ def generate_patterns(
   """Funcion que retorna los posibles patrones de localia-visita para un equipo."""
   # Se generan patrones para toda la segunda vuelta.
   pats = _generate_home_away_pattern_string(second_round_date, end_date, breaks)
-  win_pats = _generate_result_patterns(start_date, end_date)
+  win_pats = _generate_result_patterns(second_round_date, end_date)
   team_pats, team_win_pats = {}, {}
-  for team in team_patterns.keys():
+  for team in team_local_patterns.keys():
     team_pats[team] = _check_home_away_paterns(
-      pats, team_patterns[team], 1, start_date, second_round_date)
-    team_win_pats[team] = _check_win_patterns(win_pats)
+      pats, team_local_patterns[team], 1, start_date, second_round_date)
+    team_win_pats[team] = _check_win_patterns(
+      win_pats, team_win_patterns[team], start_date, second_round_date)
   return team_pats, team_win_pats

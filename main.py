@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
   assert args.model in range(1, 6)
 
-  champ_stats = generate_params(args.filepath, args.start_date, args.end_date, args.breaks)
+  instance_params = generate_params(args.filepath, args.start_date, args.end_date, args.breaks)
 
   """
   if args.model == 1:
@@ -66,23 +66,19 @@ if __name__ == "__main__":
       args.end_date,
       args.timelimit,
       args.breaks,
-      champ_stats,
+      instance_params,
       mip_gap=args.gap,
     )
 
-  """
   if args.model == 5:
     m = sstpa_mp_benders_create_model(
       args.start_date,
       args.end_date,
       args.timelimit,
       args.breaks,
-      pattern_generator,
-      champ_stats,
-      ModelStats,
+      instance_params,
       mip_gap=args.gap,
     )
-  """
 
   m.optimize()
 

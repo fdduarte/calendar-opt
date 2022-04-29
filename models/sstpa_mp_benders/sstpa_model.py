@@ -10,18 +10,18 @@ def create_model(params, time_limit=3600, mip_focus=1, mip_gap=0.3):
     m.setParam("MIPGap", mip_gap)
 
     # Parse params dict to variables
-
-    N = params["N"]
-    F = params["F"]
-    S = params["S"]
-    I = params["I"]
-    R = params["R"]
-    L = params["L"]
-    M = params["M"]
-    EL = params["EL"]
-    EV = params["EV"]
-    PI = params["PI"]
-    S_F = params["S_F"]
+    # pylint: disable=invalid-name
+    N = params.matches
+    F = params.dates
+    S = params.local_patterns['indexes']
+    I = params.teams
+    R = params.team_matches_points
+    L = params.local_pattern_localties
+    M = params.big_m
+    EL = params.team_localties
+    EV = params.team_aways
+    PI = params.team_points
+    S_F = params.local_patterns['full_patterns']
 
     start_model = time.time()
 

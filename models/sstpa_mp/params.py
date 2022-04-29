@@ -1,161 +1,191 @@
-import sys
-import os
 from libs.stats_parser import FileParams
+from .params_data import ParamsData
 
 
-def get_params(start_date: int, end_date: int, file_params):
-  """
-  Generador de parámetros para SSTPA V3.
-
-  Args:
-  -- pattern_generator: Instancia de generador de patrones
-  -- champ_stats: Instancia de ChampStats
-
-  Return:
-  -- stats: (dict) diccionario con parametros del modelo
-  """
-
-  # PARAMETROS DE INSTANCIA
-
-  FECHAINI = start_date
-  FECHAFIN = end_date
-  TARGET = 10
-  BREAKS = 2
-  # print(f"\nPARAMS:\nFechas: {FECHAINI}-{FECHAFIN}\nTARGET:
-  # {TARGET}\nFILTER: {FILTER} (thrs {THRESHOLD})\nBREAKS: {BREAKS}")
+def get_params(start_date: int, end_date: int, file_params: FileParams) -> ParamsData:
+  """Generador de parámetros para SSTPA V3."""
 
   #################
   # * CONJUNTOS * #
   #################
 
   # I: Equipos
-  I = list(champ_stats.teams.keys())
-
-  # N: Partidos
-  N = list(range((FECHAINI - 1) * int(len(I) / 2) + 1, FECHAFIN  * (int(len(I) / 2)) + 1))
-
-
-  # Si: S[equipo]
-  # Patrones de localias asociados al equipo i
-  home_away_patterns, S = pattern_generator.home_away_patterns()
+  teams = file_params.teams
 
   # F: Fechas
-  F = list(range(FECHAINI, FECHAFIN + 1))
+  dates = list(filter(lambda x: x >= start_date, file_params.dates))
+
+  # N: Partidos
+  # partidos por fecha
+  matches_per_date = int(len(teams) / 2)
+  dates_to_plan = dates[-1] - start_date + 1
+
+  matches = list(range(1, dates_to_plan * matches_per_date + 1))
+
+  # Si: S[equipo]
+  # Patrones de localias asociados al equipo i. Si es un conjunto de
+  # indices que corresponden a cada patron. Para acceder al detalle
+  # de un patron, local_patterns[patron] lo retorna.
+
+  # A cada patron se le asigna un indice.
+  local_patterns_full = {}
+  local_patterns_indexes: dict[str, list[str]] = {}
+  for team in teams:
+    local_patterns_indexes[team] = []
+    team_local_patterns = file_params.team_local_patterns[team]
+    for idx, pattern in enumerate(team_local_patterns):
+      local_patterns_full[f"{team}-{idx}"] = pattern
+      local_patterns_indexes[team].append(f"{team}-{idx}")
+
+  local_patterns = {
+    'indexes': local_patterns_indexes,
+    'full_patterns': local_patterns_full
+  }
 
   # Gi: G[equipo]
   # Patrones de resultados asociados al equipo i
-  results_patterns, G = pattern_generator.results_patterns()
+  result_patterns_full = {}
+  result_patterns_indexes: dict[str, list[str]] = {}
+  for team in teams:
+    result_patterns_indexes[team] = []
+    team_result_patterns = file_params.team_win_patterns[team]
+    for idx, pattern in enumerate(team_result_patterns):
+      result_patterns_full[f"{team}-{idx}"] = pattern
+      result_patterns_indexes[team].append(f"{team}-{idx}")
+
+  result_patterns = {
+    'indexes': result_patterns_indexes,
+    'full_patterns': result_patterns_full
+  }
 
   # T: Puntos
-  max_points = max([champ_stats.team_points[i] for i in I]) + 3 * (FECHAFIN + 1 - FECHAINI)
-  min_points = min([champ_stats.team_points[i] for i in I])
-  T = list(range(min_points, max_points + 1))
+  points = file_params.available_points
 
+  #############################
+  # * PARAMETROS DEL MODELO * #
+  #############################
 
-  ############################
-  #* PARAMETROS DEL MODELO *#
-  ############################
-
-  # M
-  M = 10**10
+  #  M
+  big_m = 10**10
 
   # PIi: PI[equipo]
   # cantidad de puntos del equipo i la fecha anterior a la primera
   # de las fechas que quedan por jugar
-  PI = {i: champ_stats.team_points[i] for i in I}
+  team_points = file_params.team_points
 
   # EBit: EB[equipo][puntos]
   # 1 si equipo i tiene t puntos la fecha anterior a la primera
   # de las fechas que quedan por jugar
   # 0 en otro caso
-  EB = {i: {t: 1 if champ_stats.team_points[i] == t else 0 for t in T} for i in I}
-
+  team_points_discrete = {team: {point: 1 if file_params.team_points[team] == point else 0
+                                 for point in points} for team in teams}
 
   # Rin: R[equipo][partido]:
   # Puntos que gana el equipo i al jugar partido n
-  R = dict()
-  for i in I:
-    R[i] = dict()
-    for n in N:
-      if i == champ_stats.matches[n]['home']:
-        if champ_stats.matches[n]['winner'] == "H":
-          R[i][n] = 3
-        elif champ_stats.matches[n]['winner'] == "D":
-          R[i][n] = 1
-        else:
-          R[i][n] = 0
-      elif i == champ_stats.matches[n]['away']:
-        if champ_stats.matches[n]['winner'] == "A":
-          R[i][n] = 3
-        elif champ_stats.matches[n]['winner'] == "D":
-          R[i][n] = 1
-        else:
-          R[i][n] = 0
+  team_matches_points: dict[str, dict[int, int]] = {}
+  for team in teams:
+    team_matches_points[team] = {}
+    for match in matches:
+      if match in file_params.matches_points[team].keys():
+        team_matches_points[team][match] = file_params.matches_points[team][match]
       else:
-        R[i][n] = 0
+        team_matches_points[team][match] = 0
 
-  # EL: EL[equipo][partido]
+  # ELin: EL[equipo][partido]
   # 1 Si el equipo i es local en el partido n
   # 0 En otro caso
-  EL = {i: {n: 1 if champ_stats.matches[n]['home'] == i else 0 for n in N} for i in I}
-
+  team_localties: dict[str, dict[int, int]] = {}
+  for team in teams:
+    team_localties[team] = {}
+    for match in matches:
+      if match in file_params.team_localties[team].keys() and (
+         file_params.team_localties[team][match] == 'L'):
+        team_localties[team][match] = 1
+      else:
+        team_localties[team][match] = 0
 
   # EVin: EV[equipo][partido]
   # 1 Si el equipo i es visita en el partido n
   # 0 En otro caso
-  EV = {i: {n: 1 if champ_stats.matches[n]['away'] == i else 0 for n in N} for i in I}
-
+  team_aways: dict[str, dict[int, int]] = {}
+  for team in teams:
+    team_aways[team] = {}
+    for match in matches:
+      if match in file_params.team_localties[team].keys() and (
+         file_params.team_localties[team][match] == 'V'):
+        team_aways[team][match] = 1
+      else:
+        team_aways[team][match] = 0
 
   # Lsf: L[patron][fecha]
   # 1 Si el patron s indica que la fecha f
   # es local
   # 0 en otro caso
-  L = dict()
-  for i in I:
-    for s in S[i]:
-      L[s] = {f: 1 if home_away_patterns[i][s][f - FECHAINI] == "1" else 0 for f in F}
+  local_pattern_localties: dict[str, dict[int, int]] = {}
+  for index, pattern in local_patterns_full.items():
+    local_pattern_localties[index] = {}
+    for date in dates:
+      if pattern[date - dates[0]] == '1':
+        local_pattern_localties[index][date] = 1
+      else:
+        local_pattern_localties[index][date] = 0
 
   # RPgf: RP[patron][fecha]
   # Cantidad de puntos asociados al resultado
   # del patrón g en la fecha f
   char_to_int = {"W": 3, "L": 0, "D": 1}
-  RP = dict()
-  for i in I:
-    for gi in G[i]:
-      RP[gi] = {f: char_to_int[results_patterns[i][gi][f - FECHAINI]] for f in F}
+  result_patterns_points: dict[str, dict[int, int]] = {}
+  for index, pattern in result_patterns_full.items():
+    result_patterns_points[index] = {}
+    for date in dates:
+      value = char_to_int[pattern[date - dates[0]]]
+      result_patterns_points[index][date] = value
 
   # GTift: G[equipo][fecha][puntos]
   # Patrones tales que el equipo i tiene
   # t puntos en la fecha f
-  H = dict()
-  puntos = lambda i, f, g: PI[i] + sum([RP[g][l] for l in range(F[0], f + 1)])
-  for i in I:
-    H[i] = dict()
-    for f in F:
-      H[i][f] = dict()
-      for t in T:
-        H[i][f][t] = list()
-      for g in G[i]:
-        H[i][f][puntos(i, f, g)].append(g)
+  def get_team_points_with_pattern(team, pattern, date):
+    points = team_points[team]
+    for curr_date in range(0, date - dates[0] + 1):
+      if pattern[curr_date] == 'W':
+        points += 3
+      if pattern[curr_date] == 'D':
+        points += 1
+    return points
+
+  pattern_team_points: dict[str, dict[int, dict[int, list[str]]]] = {}
+  for team in teams:
+    pattern_team_points[team] = {}
+    for date in dates:
+      pattern_team_points[team][date] = {}
+      for point in points:
+        pattern_team_points[team][date][point] = []
+      for pattern_idx in result_patterns_indexes[team]:
+        pattern = result_patterns_full[pattern_idx]
+        point = get_team_points_with_pattern(team, pattern, date)
+        pattern_team_points[team][date][point].append(pattern_idx)
 
   # Vf: V[fecha]
   # Ponderación de atractivo de fecha f
-  V = {f: 0  if f - 15 <= TARGET else f - 15 for f in F}
+  attractiveness = {date: date - dates[0] + 1 for date in dates}
 
-  print("FINISHED LOADING PARAMS")
-
-  params = {
-    'N': N,
-    'F': F,
-    'S': S,
-    'I': I,
-    'R': R,
-    'L': L,
-    'M': M,
-    'EL': EL,
-    'EV': EV,
-    'PI': PI,
-    'S_F': home_away_patterns
-  }
+  params = ParamsData(
+    teams=teams,
+    dates=dates,
+    matches=matches,
+    points=points,
+    local_patterns=local_patterns,
+    result_patterns=result_patterns,
+    big_m=big_m,
+    team_points=team_points,
+    team_points_discrete=team_points_discrete,
+    team_matches_points=team_matches_points,
+    team_localties=team_localties,
+    team_aways=team_aways,
+    local_pattern_localties=local_pattern_localties,
+    result_patterns_points=result_patterns_points,
+    pattern_team_points=pattern_team_points,
+    attractiveness=attractiveness
+  )
 
   return params

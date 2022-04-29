@@ -77,6 +77,32 @@ class TestStringMethods(unittest.TestCase):
     self.assertEqual(set(self.file_params_small_5.team_local_patterns['A']), team_a)
     self.assertEqual(set(self.file_params_small_5.team_local_patterns['B']), team_b)
 
+  def test_win_patterns(self):
+    """Test patrón de victorias"""
+    # Instancia que parte en la fecha 4
+    team_a = set(['DLW', 'DWL', 'LWD', 'LDW', 'WDL', 'WLD'])
+    self.assertEqual(set(self.file_params_small_4.team_win_patterns['A']), team_a)
+
+    # Instancia que parte en la fecha 5
+    team_a = set(['WL', 'LW'])
+    self.assertEqual(set(self.file_params_small_5.team_win_patterns['A']), team_a)
+
+  def test_matches_points(self):
+    """Test de puntos que gana un equipo en el partido n"""
+    team_a = {1: 3, 4: 0, 7: 1}
+    team_b = {3: 0, 5: 1, 7: 1}
+
+    self.assertEqual(team_a, self.file_params_small_4.matches_points['A'])
+    self.assertEqual(team_b, self.file_params_small_4.matches_points['B'])
+
+  def test_team_localties(self):
+    """Test de localias de equipos en partido n"""
+    team_a = {1: 'L', 4: 'V', 7: 'V'}
+    team_b = {3: 'V', 5: 'L', 7: 'L'}
+
+    self.assertEqual(team_a, self.file_params_small_4.team_localties['A'])
+    self.assertEqual(team_b, self.file_params_small_4.team_localties['B'])
+
 
 if __name__ == '__main__':
   unittest.main()

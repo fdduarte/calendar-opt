@@ -10,14 +10,14 @@ def subproblem(i, l, s, params):
   m.setParam('IISMethod', 0)
 
   # Parse params dict to values
-  N = params['N']
-  F = params['F']
-  I = params['I']
-  R = params['R']
-  M = params['M']
-  EL = params['EL']
-  EV = params['EV']
-  PI = params['PI']
+  N = params.matches
+  F = params.dates
+  I = params.teams
+  R = params.team_matches_points
+  M = params.big_m
+  EL = params.team_localties
+  EV = params.team_aways
+  PI = params.team_points
 
   #################
   #*  VARIABLES  *#
