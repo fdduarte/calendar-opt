@@ -144,3 +144,9 @@ logs/*
 *.out
 *.spl
 *.gz
+
+# output
+ouput/
+
+# Data
+data/json/

@@ -1,0 +1,8 @@
+[MASTER]
+disable = C0114, F0401, C0413
+
+[FORMAT]
+max-line-length=100
+indent-string='  '
+extension-pkg-whitelist=gurobipy
+generated-members=gurobipy
