@@ -85,7 +85,7 @@ class Benders:
       set_sstpa_restrictions(self.sstpa_model, self.last_sol)
       self._timeit(self.sstpa_model.optimize, 'sstpa')
 
-      for i, l, s in self.params.subproblem_indexes:
+      for i, l, s in self.subproblem_indexes:
         # Generate best/worst position cut
         """
         if s == 'm':
