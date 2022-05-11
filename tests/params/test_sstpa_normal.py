@@ -7,6 +7,7 @@ from typing import Optional
 path_to_parser = os.path.join(os.getcwd())
 sys.path.append(path_to_parser)
 
+from src.libs.argsparser import args
 from src.params.sstpa_normal import generate_params
 
 
@@ -24,8 +25,13 @@ def get_pattern_key(team: str, pattern: str, patterns: dict[str, str]) -> Option
 class TestStringMethods(unittest.TestCase):
   """Unit test para param generator"""
   def setUp(self):
-    generate_params('./data/campeonato_prueba.xlsx', 4)
-    generate_params('./data/campeonato_prueba.xlsx', 5)
+    args.start_date = 4
+    args.end_date = 6
+    # args.verbose = False
+    args.filepath = "data/campeonato_prueba.xlsx"
+    generate_params()
+    args.start_date = 5
+    generate_params()
 
     with open('./data/json/params_campeonato_prueba_4.json', 'r', encoding='UTF-8') as infile:
       self.small_4_params = json.load(infile)
@@ -114,6 +120,12 @@ class TestStringMethods(unittest.TestCase):
 
     self.assertEqual(expected_team_a, set(team_a))
 
+    # Instancia que parte en la fecha 5
+    expected_team_a = {f"A-{i}" for i in range(2)}
+    team_a = self.small_5_params['G']['A']
+
+    self.assertEqual(expected_team_a, set(team_a))
+
   def test_points(self):
     """Test parametro T: Puntos disponibles"""
     points = self.small_4_params['T']
@@ -128,8 +140,8 @@ class TestStringMethods(unittest.TestCase):
     # Instancia que parte en la fecha 4
     expected_team_a = 12
     expected_team_b = 3
-    team_a = self.small_4_params['PT']['A']
-    team_b = self.small_4_params['PT']['B']
+    team_a = self.small_4_params['PI']['A']
+    team_b = self.small_4_params['PI']['B']
 
     self.assertEqual(expected_team_a, team_a)
     self.assertEqual(expected_team_b, team_b)
@@ -137,8 +149,8 @@ class TestStringMethods(unittest.TestCase):
     # Instancia que parte en la fecha 5
     expected_team_a = 13
     expected_team_b = 4
-    team_a = self.small_5_params['PT']['A']
-    team_b = self.small_5_params['PT']['B']
+    team_a = self.small_5_params['PI']['A']
+    team_b = self.small_5_params['PI']['B']
 
     self.assertEqual(expected_team_a, team_a)
     self.assertEqual(expected_team_b, team_b)
@@ -244,7 +256,7 @@ class TestStringMethods(unittest.TestCase):
     pats_idx = [get_pattern_key('A', pat, self.small_4_result_patterns) for pat in pats]
     self.assertEqual(self.small_4_params['GT']['A']['6']['12'], [])
     self.assertEqual(self.small_4_params['GT']['A']['5']['12'], [])
-    self.assertEqual(self.small_4_params['GT']['A']['4']['12'], pats_idx)
+    self.assertEqual(set(self.small_4_params['GT']['A']['4']['12']), set(pats_idx))
 
   def test_attractivness(self):
     """Test de ponderadores de atractivo 'Vf'"""

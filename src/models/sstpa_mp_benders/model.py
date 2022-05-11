@@ -16,21 +16,10 @@ from .parse_params import parse_params
 # pylint: disable=invalid-name
 class Benders:
   """Clase del modelo de optimización SSTPA con descomposición de benders"""
-  def __init__(
-    self,
-    start_date,
-    filepath,
-    time_limit,
-    breaks,
-    mip_gap
-  ):
-    self.params = parse_params(filepath, start_date)
+  def __init__(self):
+    self.params = parse_params()
     self.subproblem_indexes = [(i, l, s) for i in self.params['I']
                                for l in self.params['F'] for s in ["m", "p"]]
-
-    self.mip_gap = mip_gap
-    self.time_limit = time_limit
-    self.breaks = breaks
     # Models
     self.sstpa_model = _sstpa(self.params)
     self.master_model = _master(self.params)
@@ -149,20 +138,6 @@ class Benders:
     print('Betas not equal:', self.stats['betaneq'])
 
 
-def create_model(
-  start_date,
-  filepath,
-  time_limit,
-  breaks,
-  mip_focus=1,
-  mip_gap=0.3,
-):
+def create_model():
   """Crea modelo SSTPA MP Benders"""
-  m = Benders(
-    start_date,
-    filepath,
-    time_limit,
-    breaks,
-    mip_gap=mip_gap,
-  )
-  return m
+  return Benders()
