@@ -1,11 +1,15 @@
 import os
 import json
 from ...types import SSTPAParams
+from ...libs.argsparser import args
 
 
 # pylint: disable=invalid-name
-def parse_params(filepath: str, start_date: int):
+def parse_params():
   """Funcion que lee el archivo .json de los parametros"""
+  filepath = args.filepath
+  start_date = args.start_date
+
   filename = os.path.split(filepath)[1]
   filename_wo_extension = filename.split('.')[0]
   infile_path = f'./data/json/params_{filename_wo_extension}_{start_date}.json'

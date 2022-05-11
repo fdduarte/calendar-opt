@@ -153,3 +153,6 @@ data/json/
 
 # VSCode
 .vscode
+
+# data cache
+data/patterns/*

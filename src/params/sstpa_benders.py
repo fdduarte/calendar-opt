@@ -1,7 +1,9 @@
 import json
 import os
 from ..libs import sheet_parser
+from ..libs.argsparser import args
 from ..libs import pattern_generator
+from ..libs.timer import timer
 from ..types import SSTPAParams
 from .helpers import (
   get_team_local_patterns,
@@ -13,11 +15,17 @@ from .helpers import (
 
 
 # pylint: disable=invalid-name
-def generate_params(filepath: str, start_date: int, breaks: int = 1):
+@timer.timeit('gen params benders')
+def generate_params():
   """
   Funcion encargada de crear un archivo .json con los parametros de
   la instancia
   """
+  print('comenzando generación de parámetros')
+  filepath = args.filepath
+  start_date = args.start_date
+  breaks = args.breaks
+
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
 

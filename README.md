@@ -29,7 +29,7 @@ Detalles de los parámetros se encuentran en `scripts/run.sh`.
 
 ### Manual
 
-`main.py [-h] [--model MODEL] [--start_date START_DATE] [--end_date END_DATE] [--filepath FILEPATH] [--timelimit TIMELIMIT]`
+`main.py [-h] [--model MODEL] [--start_date START_DATE] [--end_date END_DATE] [--filepath FILEPATH] [--timelimit TIMELIMIT] [--mip_gap GAP] [--mip_focus FOCUS`
 
 - `MODEL`:
   - `1`: SSTPA V3

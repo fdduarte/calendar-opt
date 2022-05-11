@@ -101,7 +101,7 @@ def subproblem(i, l, s, params):
   if s == 'm':
     for j in I:
       if j != i:
-        m.addConstr(M - M * alfa[j, i, l] >= p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+        m.addConstr(M - M * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
                     name=f"R18-{l}-{i}-{j}")
   else:
     for j in I:

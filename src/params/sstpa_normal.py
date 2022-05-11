@@ -2,6 +2,9 @@ import json
 import os
 from ..libs import sheet_parser
 from ..libs import pattern_generator
+from ..libs.timer import timer
+from ..libs.argsparser import args
+from ..libs.logger import log
 from ..types import SSTPAParams
 from .helpers import (
   get_team_local_patterns,
@@ -11,13 +14,18 @@ from .helpers import (
   get_team_localties
 )
 
-
 # pylint: disable=invalid-name
-def generate_params(filepath: str, start_date: int, breaks: int = 1):
+@timer.timeit('generate_params')
+def generate_params():
   """
   Funcion encargada de crear un archivo .json con los parametros de
   la instancia
   """
+  log('params', 'comenzando la generación de parámetros')
+  filepath: str = args.filepath
+  start_date: int = args.start_date
+  breaks: int = args.breaks
+
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
 
@@ -41,6 +49,7 @@ def generate_params(filepath: str, start_date: int, breaks: int = 1):
   team_original_local_patterns = get_team_local_patterns(teams_data, results_data, F)
   team_original_result_patterns = get_team_result_patterns(teams_data, results_data, F)
 
+  log("params", "comenzando la generación de patrones")
   # se genera diccionario con equipos y sus respectivos patrones.
   teams_local_patterns, teams_result_patterns = pattern_generator.generate_patterns(
     team_original_local_patterns, team_original_result_patterns,
@@ -50,6 +59,7 @@ def generate_params(filepath: str, start_date: int, breaks: int = 1):
   # Patrones de localias asociados al equipo i. 'Si' es un conjunto de
   # indices que corresponden a cada patron. Para acceder al detalle
   # de un patron, revisar archivo correspondiente con detalle.
+  log("params", "generación de patrones terminada")
 
   # A cada patron se le asigna un indice.
   local_patterns_full = {}
@@ -177,6 +187,7 @@ def generate_params(filepath: str, start_date: int, breaks: int = 1):
   # Ponderación de atractivo de fecha f
   V = {f: f - F[0] + 1 for f in F}
 
+
   params: SSTPAParams = {
     'I': I,
     'F': F,
@@ -208,3 +219,5 @@ def generate_params(filepath: str, start_date: int, breaks: int = 1):
   outfile_path = f'./data/json/patterns/local_patterns_{filename_wo_extension}_{start_date}.json'
   with open(outfile_path, 'w', encoding='UTF-8') as outfile:
     outfile.write(json.dumps(local_patterns_full, indent=4))
+
+  log("params", "generación de parámetros terminada.")

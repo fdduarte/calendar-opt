@@ -3,19 +3,20 @@ import os
 from gurobipy import Model, GRB, quicksum, LinExpr
 from .parse_params import parse_params
 from ...types import SSTPAParams
+from ...libs.argsparser import args
 
 
 # pylint: disable=invalid-name
-def create_model(
-  start_date,
-  filepath,
-  time_limit,
-  mip_focus=1,
-  mip_gap=0.3
-):
+def create_model():
   """
   Funcion que crea modelo de optimizacion de multiples posiciones sin descomposicion
   """
+  start_date = args.start_date
+  filepath = args.filepath
+  time_limit = args.time_limit
+  mip_focus = args.mip_focus
+  mip_gap = args.mip_gap
+
   m = Model("SSTPA V3")
 
   m.setParam('TimeLimit', time_limit)
@@ -225,7 +226,7 @@ def create_model(
     for i in I:
       for j in I:
         if j != i:
-          m.addConstr(M - M * alfa_m[j, i, l] >= p_m[j, i, l, F[-1]] - p_m[i, i, l, F[-1]],
+          m.addConstr(M - M * alfa_m[j, i, l] >= 1 + p_m[j, i, l, F[-1]] - p_m[i, i, l, F[-1]],
                       name=f"R12-{l}-{i}-{j}")
 
   # R13
