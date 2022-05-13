@@ -2,7 +2,7 @@
 
 # Run full champ
 
-START=26
+START=25
 END=30
 MODEL=5
 TIMESTAMP=$(date +%s)
