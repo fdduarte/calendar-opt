@@ -28,16 +28,4 @@ def parse_params(filepath: str, start_date: int):
   for key in params['EV'].keys():
     params['EV'][key] = {int(k): v for k, v in params['EV'][key].items()}
 
-  # RP
-  for key in params['RP'].keys():
-    params['RP'][key] = {int(k): v for k, v in params['RP'][key].items()}
-
-  # GT
-  GT: dict[str, dict[int, dict[int, list[str]]]] = {}
-  for key1 in params['GT'].keys():
-    GT[key1] = {}
-    for key2 in params['GT'][key1].keys():
-      GT[key1][int(key2)] = {int(k): v for k, v in params['GT'][key1][key2].items()}
-  params['GT'] = GT
-
   return params

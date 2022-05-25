@@ -2,9 +2,9 @@
 
 # Run full champ
 
-START=26
+START=25
 END=30
-MODEL=5
+MODEL=3
 TIMESTAMP=$(date +%s)
 LOG=0 # 0 False, 1 True
 MULTIPLE_DATES=0 # 0 False, 1 True

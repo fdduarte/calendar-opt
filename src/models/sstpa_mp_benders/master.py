@@ -1,15 +1,19 @@
 from gurobipy import Model, GRB, quicksum, LinExpr
+from ...libs.argsparser import args
 
 
 # pylint: disable=invalid-name
 def master(params, time_limit=3600, mip_gap=1):
   """Genera el modelo maestro de SSTPA"""
 
+  local_patterns = not args.no_local_patterns
+
   m = Model("SSTPA Benders Master")
-  m.setParam("TimeLimit", time_limit)
-  m.setParam("LogToConsole", 1)
-  m.setParam("LazyConstraints", 1)
-  m.setParam("MIPGap", mip_gap)
+  if args.gurobi_no_log_console:
+    m.Params.LogToConsole = 0
+  m.Params.TimeLimit = time_limit
+  m.Params.LazyConstraints = 1
+  m.Params.MIPGap = mip_gap
 
   # Parse params dict to values
   N = params['N']
@@ -79,21 +83,24 @@ def master(params, time_limit=3600, mip_gap=1):
       m.addConstr((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1), name="R3")
 
   # R4
-  m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
+  if local_patterns:
+    m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
 
   # R6
-  for f in F:
-    for i in I:
-      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
-      m.addConstr(_exp1 == _exp2, name=f"R6-{f}-{i}")
+  if local_patterns:
+    for f in F:
+      for i in I:
+        _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
+        _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
+        m.addConstr(_exp1 == _exp2, name=f"R6-{f}-{i}")
 
   # R7
-  for f in F:
-    for i in I:
-      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
-      m.addConstr(_exp1 == _exp2, name=f"R7-{f}-{i}")
+  if local_patterns:
+    for f in F:
+      for i in I:
+        _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
+        _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
+        m.addConstr(_exp1 == _exp2, name=f"R7-{f}-{i}")
 
   # R8
   for i in I:

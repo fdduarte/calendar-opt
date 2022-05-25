@@ -22,7 +22,7 @@ def get_pattern_key(team: str, pattern: str, patterns: dict[str, str]) -> Option
   return None
 
 
-class TestStringMethods(unittest.TestCase):
+class TestSSTPASmall(unittest.TestCase):
   """Unit test para param generator"""
   def setUp(self):
     args.start_date = 4

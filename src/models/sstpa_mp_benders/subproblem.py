@@ -6,10 +6,10 @@ def subproblem(i, l, s, params):
   """Genera el subproblema de SSTPA"""
 
   m = Model(f"SSTPA Benders subproblem: {i}-{l}-{s}")
-  m.setParam('LogToConsole', 0)
-  m.setParam('InfUnbdInfo', 1)
-  m.setParam('LazyConstraints', 1)
-  m.setParam('IISMethod', 0)
+  m.Params.LogToConsole = 0
+  m.Params.InfUnbdInfo = 1
+  m.Params.LazyConstraints = 1
+  m.Params.IISMethod = 0
 
   # Parse params dict to values
   N = params['N']
