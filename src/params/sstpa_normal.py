@@ -13,6 +13,7 @@ from .helpers import (
   get_team_localties
 )
 
+
 # pylint: disable=invalid-name
 @timer.timeit('generate_params')
 def generate_params():
@@ -133,7 +134,6 @@ def generate_params():
   # Vf: V[fecha]
   # Ponderación de atractivo de fecha f
   V = {f: f - F[0] + 1 for f in F}
-
 
   params: SSTPAParams = {
     'I': I,

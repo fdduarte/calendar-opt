@@ -9,10 +9,10 @@ def master(params, time_limit=3600, mip_gap=1):
   local_patterns = not args.no_local_patterns
 
   m = Model("SSTPA Benders Master")
-  m.setParam("TimeLimit", time_limit)
-  m.setParam("LogToConsole", 1)
-  m.setParam("LazyConstraints", 1)
-  m.setParam("MIPGap", mip_gap)
+  m.Params.TimeLimit = time_limit
+  m.Params.LogToConsole = 1
+  m.Params.LazyConstraints = 1
+  m.Params.MIPGap = mip_gap
 
   # Parse params dict to values
   N = params['N']

@@ -17,9 +17,9 @@ def create_model():
 
   m = Model("SSTPA V3")
 
-  m.setParam('TimeLimit', time_limit)
-  m.setParam('MIPFocus', mip_focus)
-  m.setParam('MIPGap', mip_gap)
+  m.Params.TimeLimit = time_limit
+  m.Params.MIPFocus = mip_focus
+  m.Params.MIPGap = mip_gap
 
   # Parse params dict to variables
   params = parse_params(filepath, start_date)

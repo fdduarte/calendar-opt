@@ -5,11 +5,11 @@ from ..libs.argsparser import args
 from ..libs import pattern_generator
 from ..libs.timer import timer
 from ..types import SSTPAParams
+from ..libs.logger import log
 from .helpers import (
   get_team_local_patterns,
   get_team_matches_points,
   get_team_points,
-  get_team_result_patterns,
   get_team_localties
 )
 
@@ -21,10 +21,9 @@ def generate_params():
   Funcion encargada de crear un archivo .json con los parametros de
   la instancia
   """
-  print('comenzando generación de parámetros')
+  log('params', 'comenzando generación de parámetros')
   filepath = args.filepath
   start_date = args.start_date
-  breaks = args.breaks
 
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
@@ -44,15 +43,17 @@ def generate_params():
   N = list(range(1, dates_to_program * matches_per_date + 1))
 
   # se generan los patrones originales de los equipos
-  second_round_date = int((F[-1] / 2) + 1)
+  team_original_patterns = get_team_local_patterns(teams_data, results_data, F)
 
-  team_original_local_patterns = get_team_local_patterns(teams_data, results_data, F)
-  team_original_result_patterns = get_team_result_patterns(teams_data, results_data, F)
-
+  log("params", "comenzando la generación de patrones")
   # se genera diccionario con equipos y sus respectivos patrones.
-  teams_local_patterns, teams_result_patterns = pattern_generator.generate_patterns(
-    team_original_local_patterns, team_original_result_patterns,
-    second_round_date, start_date, F[-1], breaks)
+  teams_local_patterns = pattern_generator.create_local_patterns(team_original_patterns, F[-1])
+
+  # Si: S[equipo]
+  # Patrones de localias asociados al equipo i. 'Si' es un conjunto de
+  # indices que corresponden a cada patron. Para acceder al detalle
+  # de un patron, revisar archivo correspondiente con detalle.
+  log("params", "generación de patrones terminada")
 
   # Si: S[equipo]
   # Patrones de localias asociados al equipo i. 'Si' es un conjunto de
@@ -68,17 +69,6 @@ def generate_params():
     for idx, pattern in enumerate(team_local_patterns):
       local_patterns_full[f"{i}-{idx}"] = pattern
       S[i].append(f"{i}-{idx}")
-
-  # Gi: G[equipo]
-  # Patrones de resultados asociados al equipo i
-  result_patterns_full = {}
-  G: dict[str, list[str]] = {}
-  for i in I:
-    G[i] = []
-    team_result_patterns = teams_result_patterns[i]
-    for idx, pattern in enumerate(team_result_patterns):
-      result_patterns_full[f"{i}-{idx}"] = pattern
-      G[i].append(f"{i}-{idx}")
 
   # PIi: PI[equipo]
   # cantidad de puntos del equipo i la fecha anterior a la primera
@@ -137,17 +127,6 @@ def generate_params():
       else:
         EV[i][n] = 0
 
-  # RPgf: RP[patron][fecha]
-  # Cantidad de puntos asociados al resultado
-  # del patrón g en la fecha f
-  char_to_int = {"W": 3, "L": 0, "D": 1}
-  RP: dict[str, dict[int, int]] = {}
-  for g, pattern in result_patterns_full.items():
-    RP[g] = {}
-    for f in F:
-      value = char_to_int[pattern[f - F[0]]]
-      RP[g][f] = value
-
   # Lsf: L[patron][fecha]
   # 1 Si el patron s indica que la fecha f
   # es local
@@ -156,30 +135,6 @@ def generate_params():
   for i in I:
     for s in S[i]:
       L[s] = {f: 1 if local_patterns_full[s][f - start_date] == "1" else 0 for f in F}
-
-  # GTift: G[equipo][fecha][puntos]
-  # Patrones tales que el equipo i tiene
-  # t puntos en la fecha f
-  def get_team_points_with_pattern(team, pattern, date):
-    points = PI[team]
-    for curr_date in range(0, date - F[0] + 1):
-      if pattern[curr_date] == 'W':
-        points += 3
-      if pattern[curr_date] == 'D':
-        points += 1
-    return points
-
-  GT: dict[str, dict[int, dict[int, list[str]]]] = {}
-  for i in I:
-    GT[i] = {}
-    for f in F:
-      GT[i][f] = {}
-      for t in T:
-        GT[i][f][t] = []
-      for pattern_idx in G[i]:
-        pattern = result_patterns_full[pattern_idx]
-        t = get_team_points_with_pattern(i, pattern, f)
-        GT[i][f][t].append(pattern_idx)
 
   # Vf: V[fecha]
   # Ponderación de atractivo de fecha f
@@ -190,15 +145,12 @@ def generate_params():
     'F': F,
     'N': N,
     'S': S,
-    'G': G,
     'T': T,
     'PI': PI,
     'EB': EB,
     'R': R,
     'EL': EL,
     'EV': EV,
-    'RP': RP,
-    'GT': GT,
     'L': L,
     'V': V
   }
@@ -208,10 +160,6 @@ def generate_params():
   outfile_path = f'./data/json/params_{filename_wo_extension}_{start_date}.json'
   with open(outfile_path, 'w', encoding='UTF-8') as outfile:
     outfile.write(json.dumps(params, indent=4))
-
-  outfile_path = f'./data/json/patterns/result_patterns_{filename_wo_extension}_{start_date}.json'
-  with open(outfile_path, 'w', encoding='UTF-8') as outfile:
-    outfile.write(json.dumps(result_patterns_full, indent=4))
 
   outfile_path = f'./data/json/patterns/local_patterns_{filename_wo_extension}_{start_date}.json'
   with open(outfile_path, 'w', encoding='UTF-8') as outfile:
