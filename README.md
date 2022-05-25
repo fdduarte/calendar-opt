@@ -29,7 +29,7 @@ Detalles de los parámetros se encuentran en `scripts/run.sh`.
 
 ### Manual
 
-`main.py [-h] [--model MODEL] [--start_date START_DATE] [--end_date END_DATE] [--filepath FILEPATH] [--timelimit TIMELIMIT] [--mip_gap GAP] [--mip_focus FOCUS`
+`main.py [-h] [--model MODEL] [--start_date START_DATE] [--filepath FILEPATH] [--timelimit TIMELIMIT] [--mip_gap GAP] [--mip_focus FOCUS`
 
 - `MODEL`:
   - `1`: SSTPA V3
@@ -42,12 +42,12 @@ Detalles de los parámetros se encuentran en `scripts/run.sh`.
 
 - Correr campeonato de prueba:
 
-`python main.py --start_date 4 --filepath data/campeonato_prueba.xlsx --model 5 --end_date 6`
+`python main.py --start_date 4 --filepath data/campeonato_prueba.xlsx --model 5`
 
 - Correr campeonato de prueba mediano
 
-`python main.py --start_date 6 --filepath data/campeonato_prueba_10eq.xlsx --model 5 --end_date 10`
+`python main.py --start_date 10 --filepath data/campeonato_prueba_10eq.xlsx --model 3`
 
 - Correr campeonato real:
 
-`python main.py --start_date 28 --filepath data/Datos.xlsx --model 5 --end_date 30`
+`python main.py --start_date 28 --filepath data/Datos.xlsx --model 5`

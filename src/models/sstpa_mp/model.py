@@ -1,8 +1,5 @@
-import json
-import os
 from gurobipy import Model, GRB, quicksum, LinExpr
 from .parse_params import parse_params
-from ...types import SSTPAParams
 from ...libs.argsparser import args
 
 
@@ -16,6 +13,7 @@ def create_model():
   time_limit = args.time_limit
   mip_focus = args.mip_focus
   mip_gap = args.mip_gap
+  local_patterns = not args.no_local_patterns
 
   m = Model("SSTPA V3")
 
@@ -147,21 +145,24 @@ def create_model():
       m.addConstr(_exp == 1, name=f"R3-{i}-{f}")
 
   # R4
-  m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
+  if local_patterns:
+    m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
 
   # R6
-  for f in F:
-    for i in I:
-      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
-      m.addConstr(_exp1 == _exp2, name=f"R6-{f}-{i}")
+  if local_patterns:
+    for f in F:
+      for i in I:
+        _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
+        _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
+        m.addConstr(_exp1 == _exp2, name=f"R6-{f}-{i}")
 
   # R7
-  for f in F:
-    for i in I:
-      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
-      m.addConstr(_exp1 == _exp2, name=f"R7-{f}-{i}")
+  if local_patterns:
+    for f in F:
+      for i in I:
+        _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
+        _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
+        m.addConstr(_exp1 == _exp2, name=f"R7-{f}-{i}")
 
   # R8
   for n in N:
@@ -255,5 +256,7 @@ def create_model():
 
   _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
   m.setObjective(_obj, GRB.MAXIMIZE)
+
+  m.update()
 
   return m

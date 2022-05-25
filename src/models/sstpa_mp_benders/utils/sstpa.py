@@ -1,16 +1,35 @@
-from gurobipy import LinExpr, quicksum
-import time
+from gurobipy import quicksum
 
-def set_sstpa_restrictions(model, x):
+def create_sstpa_restrictions(self, model, var):
     """
-    Set SSTPA model rhs for R1
+    Dada una familia de variables del modelo sstpa, crea restricciones del tipo
+    for var in fam_var: var = 0. Esta restricción permite posteriormente fijar
+    el lado derecho para así fijar la variable.
     """
-    for (i, j), value in x.items():
+    for n in self.params['N']:
+        for f in self.params['F']:
+            var = model.getVarByName(f'x[{n},{f}]')
+            model.addConstr(var == 0, name=f'R-x[{n},{f}]')
+
+    model.update()
+
+
+def set_sstpa_restrictions(model, var_name, var):
+    """
+    Setea el lado derecho (rhs) de la restriccion de la variable var para
+    el modelo SSTPA.
+    """
+    assert var_name in ['x'], 'Variable no soportada'
+    for index, value in var.items():
         if value > 0.5:
             value = 1
         else:
             value = 0
-        model.getConstrByName(f'R1[{i},{j}]').rhs = value
+        if var_name == 'x':
+            n, f = index
+            model.getConstrByName(f'R-x[{n},{f}]').rhs = value
+    
+    model.update()
 
 def create_position_cut(model, self, i, l, d=2):
     """

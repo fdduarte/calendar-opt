@@ -2,13 +2,14 @@ import time
 from gurobipy import GRB
 from .subproblem import subproblem as _subproblem
 from .master import master as _master
-from .sstpa_model import create_model as _sstpa
+from ..sstpa_mp import create_model as _sstpa
 from .utils import (
   set_subproblem_values,
   generate_cut,
   parse_vars,
   set_sstpa_restrictions,
   set_cb_sol,
+  create_sstpa_restrictions
 )
 from .parse_params import parse_params
 
@@ -21,25 +22,11 @@ class Benders:
     self.subproblem_indexes = [(i, l, s) for i in self.params['I']
                                for l in self.params['F'] for s in ["m", "p"]]
     # Models
-    self.sstpa_model = _sstpa(self.params)
+    self.sstpa_model = _sstpa()
     self.master_model = _master(self.params)
     self.subproblem_model = {}
     for i, l, s in self.subproblem_indexes:
       self.subproblem_model[i, l, s] = _subproblem(i, l, s, self.params)
-    self.times = {
-      'IIS': 0,
-      'subproblem': 0,
-      'sstpa': 0,
-      'relax': 0,
-      'MIPNode': 0,
-      'MIPSOL': 0,
-      'generate cut': 0,
-      'total': 0
-    }
-    self.stats = {
-      'betaneq': 0,
-      'cuts': 0,
-    }
     self.last_sol = None
     self.visited_sols = set()
 
@@ -50,9 +37,10 @@ class Benders:
     return ret
 
   def _lazy_cb(self, model, where):
-    start = time.time()
+    """Gurobi callback"""
+
     if where == GRB.Callback.MIPNODE:
-      if not str(self.last_sol) in self.visited_sols:
+      if self.last_sol and not str(self.last_sol) in self.visited_sols:
         # Set SSTPA x values and optimize
         set_sstpa_restrictions(self.sstpa_model, self.last_sol)
         self._timeit(self.sstpa_model.optimize, 'sstpa')
@@ -65,14 +53,11 @@ class Benders:
         # Add solution to visited
         self.visited_sols.add(str(self.last_sol))
 
-    self.times['MIPNode'] += time.time() - start
-    start = time.time()
     if where == GRB.Callback.MIPSOL:
-      self.last_sol = parse_vars(model, 'x', callback=True)
+      self.last_sol = None
 
-      # Set SSTPA x values and optimize
-      set_sstpa_restrictions(self.sstpa_model, self.last_sol)
-      self._timeit(self.sstpa_model.optimize, 'sstpa')
+
+      print('=' * 6, 'MIPSOL', '=' * 6)
 
       for i, l, s in self.subproblem_indexes:
         # Generate best/worst position cut
@@ -87,31 +72,43 @@ class Benders:
         # set subproblem values and optimize
         subproblem = self.subproblem_model[i, l, s]
         set_subproblem_values(model, subproblem)
-        self._timeit(subproblem.optimize, 'subproblem')
+        subproblem.optimize()
 
         # ver != de betas
+        """
         beta1 = self.sstpa_model.getVarByName(f'beta_m[{i},{l}]').X
         var = model.getVarByName(f'beta_m[{i},{l}]')
         beta2 = model.cbGetSolution(var)
         if beta1 != beta2:
           self.stats['betaneq'] += 1
+        """
 
         # If infeasible, add cuts
 
         if subproblem.Status == GRB.INFEASIBLE:
+          print('Subproblem', i, l, s, 'created cut')
           # self._timeit(subproblem.computeIIS, 'IIS')
           cut = generate_cut(subproblem, model)
+          print(cut)
           model.cbLazy(cut >= 1)
-
-    self.times['MIPSOL'] += time.time() - start
+      print('=' * 6, 'END MIPSOL', '=' * 6)
 
   def optimize(self):
     """
     Main Loop
     """
-    start_time = time.time()
     self.master_model.optimize(lambda x, y: self._lazy_cb(x, y))
-    self.times['total'] = time.time() - start_time
+    x = parse_vars(self.master_model, 'x')
+    print(self.master_model.objVal)
+    # le pasamos el x a sstpa
+    print(x)
+
+    # creamos una instancia del sstpa
+    sstpa = _sstpa()
+    create_sstpa_restrictions(self, sstpa, 'x')
+    set_sstpa_restrictions(sstpa, 'x', x)
+    sstpa.optimize()
+
 
   def getVars(self):
     """Retorna las variables del modelo maestro"""
