@@ -52,6 +52,7 @@ class Benders:
       # solucón del nodo.
       self.last_sol = parse_vars(self.master_model, 'x', callback=True)
 
+      all_feasable = True
       for i, l, s in self.subproblem_indexes:
         # Se setean las restricciones que fijan a x y alpha en el subproblema
         # y se resuelve.
@@ -62,15 +63,17 @@ class Benders:
         # Si el modelo es infactible, se agregan cortes de factibilidad
         if subproblem.Status == GRB.INFEASIBLE:
           # self._timeit(subproblem.computeIIS, 'IIS')
+          all_feasable = False
           cut = generate_cut(subproblem, model)
           model.cbLazy(cut >= 1)
+      if all_feasable:
+        print('Todos factibles. Debería terminar.')
 
   def optimize(self):
     """
     Optimiza el maestro con callbacks.
     """
-    # self.master_model.optimize(lambda x, y: self._lazy_cb(x, y))
-    self.master_model.optimize()
+    self.master_model.optimize(lambda x, y: self._lazy_cb(x, y))
     x = parse_vars(self.master_model, 'x')
     # le pasamos el x a sstpa
 
@@ -82,12 +85,14 @@ class Benders:
     sstpa.optimize()
 
     # creamos una instancia de sstpa con x irrestricto
-    sstpa_irr = _sstpa()
-    sstpa_irr.Params.LogToConsole = 0
-    sstpa_irr.optimize()
+    irr = False
+    if irr:
+      sstpa_irr = _sstpa()
+      sstpa_irr.Params.LogToConsole = 0
+      sstpa_irr.optimize()
+      print('SSTPA Irr ObjVal:', sstpa_irr.objVal)
     print('Benders objVal:  ', self.master_model.objVal)
     print('SSTPA objVal:    ', sstpa.objVal)
-    print('SSTPA Irr ObjVal:', sstpa_irr.objVal)
 
   def getVars(self):
     """Retorna las variables del modelo maestro"""

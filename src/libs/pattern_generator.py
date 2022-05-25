@@ -5,17 +5,16 @@ from .logger import log
 from .argsparser import args
 
 
-def _generate_home_away_pattern_string(end_date: int) -> list[str]:
+def _generate_home_away_pattern_string(second_round_date: int, end_date: int) -> list[str]:
   """
   Función que retorna una lista con todos los patrones posibles
   de 1 y 0 para el largo del campeonato
   """
   log('params', 'generando patrones de localia')
 
-  start_date = args.start_date
   breaks = args.breaks
 
-  length = end_date - start_date + 1
+  length = end_date - second_round_date + 1
   patterns = ["".join(seq) for seq in itertools.product("01", repeat=length)]
 
   # Se eliminan patrones que rompan maximo dos (0 o 1) seguidos
@@ -77,12 +76,14 @@ def load_patterns(path: str) -> dict[str, list[str]]:
     pats = json.load(infile)
   return pats
 
+
 def save_patterns(path: str, patterns: dict[str, list[str]]):
   """Funcion que guarda patrones de un path"""
   with open(path, 'w', encoding='UTF-8') as outfile:
     outfile.write(json.dumps(patterns, indent=4))
 
-def create_local_patterns(team_local_patterns: dict[str, str], end_date: int) -> dict[str, list[str]]:
+
+def create_local_patterns(team_patterns: dict[str, str], end_date: int) -> dict[str, list[str]]:
   """Función que crea los patrones de localía de un equipo."""
   start_date = args.start_date
   breaks = args.breaks
@@ -101,11 +102,11 @@ def create_local_patterns(team_local_patterns: dict[str, str], end_date: int) ->
     log('params', 'patrones de localia cargados de cache.')
   # Si no estan se crean
   else:
-    pats = _generate_home_away_pattern_string(end_date)
+    pats = _generate_home_away_pattern_string(second_round_date, end_date)
     log('params', 'filtrando patrones de localia por equipos.')
-    for team in team_local_patterns.keys():
+    for team in team_patterns.keys():
       patterns['hola'] = ['hola']
-      patterns[team] = filter_local_patterns(pats, team_local_patterns[team], second_round_date)
+      patterns[team] = filter_local_patterns(pats, team_patterns[team], second_round_date)
     log('params', 'patrones de localia por equipos filtrados.')
     save_patterns(pattern_file_path, patterns)
   return patterns

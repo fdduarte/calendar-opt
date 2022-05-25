@@ -66,6 +66,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+  "--gurobi_no_log_console",
+  action='store_true',
+  default=False,
+  help="Gurobi logea a la consola",
+)
+
+parser.add_argument(
   "--gap",
   default=0.0,
   type=float,

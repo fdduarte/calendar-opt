@@ -17,6 +17,8 @@ def create_model():
 
   m = Model("SSTPA V3")
 
+  if args.gurobi_no_log_console:
+    m.Params.LogToConsole = 0
   m.Params.TimeLimit = time_limit
   m.Params.MIPFocus = mip_focus
   m.Params.MIPGap = mip_gap
