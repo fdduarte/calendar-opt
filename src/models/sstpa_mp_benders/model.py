@@ -28,6 +28,7 @@ class Benders:
     self._init_subproblems()
     self.last_sol = None
     self.visited_sols = set()
+    self.current_cuts = 'benders'
 
   def _init_sstpa_model(self):
     """Instancia el modelo SSTPA"""
@@ -77,30 +78,35 @@ class Benders:
       # solucón del nodo.
       self.last_sol = parse_vars(self.master_model, 'x', callback=True)
 
+      new_benders_cuts = False
       for i, l, s in self.subproblem_indexes:
-        # Se setean las restricciones que fijan a x y alpha en el subproblema
-        # y se resuelve.
-        subproblem = self.subproblem_model[i, l, s]
-        set_subproblem_values(model, subproblem)
-        subproblem.optimize()
+        if self.current_cuts == 'benders':
+          # Se resuelve la relajación y agregan cortes de Benders
+          subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
+          subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
 
-        # Si el modelo es infactible, se agregan cortes de factibilidad
-        if subproblem.Status == GRB.INFEASIBLE:
-          if args.IIS:
-            subproblem.computeIIS()
-          cut = generate_cut(subproblem, model, IIS=args.IIS)
-          model.cbLazy(cut >= 1)
+          set_subproblem_values(model, subproblem_relaxed)
+          subproblem_relaxed.optimize()
 
-        # Se resuelve la relajación y agregan cortes de Benders
-        subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
-        subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
+          if subproblem_relaxed.Status == GRB.INFEASIBLE:
+            new_benders_cuts = True
+            cut = generate_benders_cut(self, subproblem_relaxed_res, subproblem_relaxed, model)
+            model.cbLazy(cut <= 0)
+        else:
+          # Se setean las restricciones que fijan a x y alpha en el subproblema
+          # y se resuelve.
+          subproblem = self.subproblem_model[i, l, s]
+          set_subproblem_values(model, subproblem)
+          subproblem.optimize()
 
-        set_subproblem_values(model, subproblem_relaxed)
-        subproblem_relaxed.optimize()
-
-        if subproblem_relaxed.Status == GRB.INFEASIBLE:
-          cut = generate_benders_cut(self, subproblem_relaxed_res, subproblem_relaxed, model)
-          model.cbLazy(cut <= 0)
+          # Si el modelo es infactible, se agregan cortes de factibilidad
+          if subproblem.Status == GRB.INFEASIBLE:
+            if args.IIS:
+              subproblem.computeIIS()
+            cut = generate_cut(subproblem, model, IIS=args.IIS)
+            model.cbLazy(cut >= 1)
+      if not new_benders_cuts:
+        self.current_cuts = 'hamming'
 
   def optimize(self):
     """
