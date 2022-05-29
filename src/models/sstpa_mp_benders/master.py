@@ -3,9 +3,10 @@ from ...libs.argsparser import args
 
 
 # pylint: disable=invalid-name
-def master(params, time_limit=3600, mip_gap=1):
+def master(params):
   """Genera el modelo maestro de SSTPA"""
-
+  mip_gap = args.mip_gap
+  time_limit = args.time_limit
   local_patterns = not args.no_local_patterns
 
   m = Model("SSTPA Benders Master")
@@ -28,11 +29,14 @@ def master(params, time_limit=3600, mip_gap=1):
   # *  VARIABLES  *#
   #################
 
+  variables = {}
+
   # x_nf: x[partido, fecha]
   # 1 si el partido n se programa finalmente
   # en la fecha f
   # 0 en otro caso.
   x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
+  variables['x'] = x
 
   # y_is: y[equipo][patron_localias]
   # 1 si al equipo i se le asigna el patron
@@ -47,6 +51,7 @@ def master(params, time_limit=3600, mip_gap=1):
   # resultados futuros para el equipo i considerando que
   # se está en la fecha l
   alfa_m = m.addVars(I, I, F, vtype=GRB.BINARY, name="alfa_m")
+  variables['alpha_m'] = alfa_m
 
   # alfa_jil : alfa[equipo,equipo,fecha]
   # binaria, toma el valor 1 si el equipo j tiene termina
@@ -54,6 +59,7 @@ def master(params, time_limit=3600, mip_gap=1):
   # resultados futuros para el equipo i considerando que
   # se está en la fecha l
   alfa_p = m.addVars(I, I, F, vtype=GRB.BINARY, name="alfa_p")
+  variables['alpha_p'] = alfa_p
 
   # beta_il: beta[equipo,fecha]
   # discreta, indica la mejor posicion
@@ -121,4 +127,4 @@ def master(params, time_limit=3600, mip_gap=1):
   _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
   m.setObjective(_obj, GRB.MAXIMIZE)
 
-  return m
+  return m, variables

@@ -157,6 +157,8 @@ data/json/
 # data cache
 data/patterns/*
 
+commands.txt
+
 # MS Excel
 
 ~*.xslx

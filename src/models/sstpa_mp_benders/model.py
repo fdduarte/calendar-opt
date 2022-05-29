@@ -8,8 +8,10 @@ from .utils import (
   parse_vars,
   set_sstpa_restrictions,
   set_cb_sol,
-  create_sstpa_restrictions
+  create_sstpa_restrictions,
+  generate_benders_cut
 )
+from ...libs.argsparser import args
 from .parse_params import parse_params
 
 
@@ -21,15 +23,39 @@ class Benders:
     self.subproblem_indexes = [(i, l, s) for i in self.params['I']
                                for l in self.params['F'] for s in ["m", "p"]]
     # Models
+    self._init_sstpa_model()
+    self._init_master_model()
+    self._init_subproblems()
+    self.last_sol = None
+    self.visited_sols = set()
+
+  def _init_sstpa_model(self):
+    """Instancia el modelo SSTPA"""
     self.sstpa_model = _sstpa()
     self.sstpa_model.Params.LogToConsole = 0
     create_sstpa_restrictions(self, self.sstpa_model, 'x')
-    self.master_model = _master(self.params)
+
+  def _init_master_model(self):
+    """Instancia modelo maestro"""
+    m, variables = _master(self.params)
+    self.master_model = m
+    self.master_vars = variables
+
+  def _init_subproblems(self, relaxed=True):
+    """Instancia los subproblemas"""
     self.subproblem_model = {}
+    self.subproblem_res = {}
+    if relaxed:
+      self.subproblem_relaxed_model = {}
+      self.subproblem_relaxed_res = {}
     for i, l, s in self.subproblem_indexes:
-      self.subproblem_model[i, l, s] = _subproblem(i, l, s, self.params)
-    self.last_sol = None
-    self.visited_sols = set()
+      m, res = _subproblem(i, l, s, self.params)
+      self.subproblem_model[i, l, s] = m
+      self.subproblem_res[i, l, s] = res
+      if relaxed:
+        m, res = _subproblem(i, l, s, self.params, True)
+        self.subproblem_relaxed_model[i, l, s] = m
+        self.subproblem_relaxed_res[i, l, s] = res
 
   def _lazy_cb(self, model, where):
     """Gurobi callback"""
@@ -41,8 +67,7 @@ class Benders:
 
         # Pass solution to current model and get incumbent
         set_cb_sol(model, self.sstpa_model)
-        obj_val = model.cbUseSolution()
-        print(' ' * 34, obj_val)
+        model.cbUseSolution()
 
         # Add solution to visited
         self.visited_sols.add(str(self.last_sol))
@@ -52,7 +77,6 @@ class Benders:
       # solucón del nodo.
       self.last_sol = parse_vars(self.master_model, 'x', callback=True)
 
-      all_feasable = True
       for i, l, s in self.subproblem_indexes:
         # Se setean las restricciones que fijan a x y alpha en el subproblema
         # y se resuelve.
@@ -62,18 +86,30 @@ class Benders:
 
         # Si el modelo es infactible, se agregan cortes de factibilidad
         if subproblem.Status == GRB.INFEASIBLE:
-          # self._timeit(subproblem.computeIIS, 'IIS')
-          all_feasable = False
-          cut = generate_cut(subproblem, model)
+          if args.IIS:
+            subproblem.computeIIS()
+          cut = generate_cut(subproblem, model, IIS=args.IIS)
           model.cbLazy(cut >= 1)
-      if all_feasable:
-        print('Todos factibles. Debería terminar.')
+
+        # Se resuelve la relajación y agregan cortes de Benders
+        subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
+        subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
+
+        set_subproblem_values(model, subproblem_relaxed)
+        subproblem_relaxed.optimize()
+
+        if subproblem_relaxed.Status == GRB.INFEASIBLE:
+          cut = generate_benders_cut(self, subproblem_relaxed_res, subproblem_relaxed, model)
+          model.cbLazy(cut <= 0)
 
   def optimize(self):
     """
     Optimiza el maestro con callbacks.
     """
     self.master_model.optimize(lambda x, y: self._lazy_cb(x, y))
+    if self.master_model.Status == GRB.INFEASIBLE:
+      print('Modelo Infactible')
+      return
     x = parse_vars(self.master_model, 'x')
     # le pasamos el x a sstpa
 
@@ -85,7 +121,7 @@ class Benders:
     sstpa.optimize()
 
     # creamos una instancia de sstpa con x irrestricto
-    irr = False
+    irr = True
     if irr:
       sstpa_irr = _sstpa()
       sstpa_irr.Params.LogToConsole = 0

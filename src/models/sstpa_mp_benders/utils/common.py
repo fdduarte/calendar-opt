@@ -1,22 +1,25 @@
-def parse_vars(model, val, callback=False, is_integer=True):
-    """
-    Parse the {val} var from a model to dict
-    """
-    vars = dict()
-    for var in model.getVars():
-        name = var.VarName
-        if val in name:
-            name = name.strip(f"{val}[").strip("]").split(",")
-            name = tuple([int(i) if i.isdigit() else i for i in name])
-            if callback:
-                value = model.cbGetSolution(var)
-            else:
-                value = var.X
-            if is_integer:
-                if value > 0.5:
-                    vars[name] = 1
-                else:
-                    vars[name] = 0
-            else:
-                vars[name] = value
-    return vars
+def parse_vars(model, var_name, callback=False, is_binary=True):
+  """
+  Parsea la variable "var_name" de un modelo, retornando un diccionario.
+  """
+  _vars = {}
+  for var in model.getVars():
+    name = var.VarName
+    if var_name in name:
+      name = name.strip(f"{var_name}[").strip("]").split(",")
+      name = (int(i) if i.isdigit() else i for i in name)
+      if callback:
+        value = model.cbGetSolution(var)
+      else:
+        value = var.X
+      if is_binary:
+        value = value_to_binary(value)
+      _vars[name] = value
+  return _vars
+
+
+def value_to_binary(value: float):
+  """Funcion que aproxima un float a el binario mas cercano"""
+  if value > 0.5:
+    return 1
+  return 0
