@@ -64,7 +64,9 @@ def generate_benders_cut(self, subproblem_res, subproblem):
   N = self.params['N']
   F = self.params['F']
   I = self.params['I']
-  M = 10**10
+  EL = self.params['EL']
+  EV = self.params['EV']
+  M = 61
   cut = LinExpr()
   for n in N:
     for f in F:
@@ -75,8 +77,15 @@ def generate_benders_cut(self, subproblem_res, subproblem):
   for j in I:
     for f in F:
       if f > l:
+        x_sum = LinExpr()
+        for theta in F:
+          if l >= theta:
+            for n in N:
+              if EL[j][n] + EV[j][n] == 1:
+                x = self.master_vars['x'][n, theta]
+                x_sum += x
         r17 = subproblem_res['R17'][j, i, f, l]
-        cut += r17.farkasDual * self.params['PI'][j]
+        cut += r17.farkasDual * self.params['PI'][j] * (x_sum)
   if s == 'm':
     for j in I:
       if j != i:
@@ -110,5 +119,4 @@ def _get_index(name):
 def _to_int(value):
   if value > 0.5:
     return 1
-  else:
-    return 0
+  return 0
