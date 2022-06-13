@@ -40,9 +40,9 @@ Detalles de los parámetros se encuentran en `scripts/run.sh`.
 
 #### Comandos útiles
 
-- Correr campeonato de prueba:
+- Correr campeonato de prueba sin restricción de patrones:
 
-`python main.py --start_date 4 --filepath data/campeonato_prueba.xlsx --model 5`
+`python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx" --no_local_patterns`
 
 - Correr campeonato de prueba mediano
 

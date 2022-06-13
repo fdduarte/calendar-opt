@@ -56,7 +56,7 @@ def generate_cut(subproblem, master, IIS=False):
   return cut
 
 
-def generate_benders_cut(self, subproblem_res, subproblem, master):
+def generate_benders_cut(self, subproblem_res, subproblem):
   """
   Dado un subproblema relajado, crea cortes de benders.
   """
@@ -74,8 +74,9 @@ def generate_benders_cut(self, subproblem_res, subproblem, master):
         cut += r16.farkasDual * x
   for j in I:
     for f in F:
-      r17 = subproblem_res['R17'][j, i, f, l]
-      cut += r17.farkasDual * self.params['PI'][j]
+      if f > l:
+        r17 = subproblem_res['R17'][j, i, f, l]
+        cut += r17.farkasDual * self.params['PI'][j]
   if s == 'm':
     for j in I:
       if j != i:
@@ -87,7 +88,7 @@ def generate_benders_cut(self, subproblem_res, subproblem, master):
       if j != i:
         r18 = subproblem_res['R18'][l, i, j]
         alpha = self.master_vars['alpha_p'][j, i, l]
-        cut += r18.farkasDual * (-1 - M * alpha)
+        cut += r18.farkasDual * (M * alpha - 1)
 
   return cut
 

@@ -14,6 +14,7 @@ def master(params):
     m.Params.LogToConsole = 0
   m.Params.TimeLimit = time_limit
   m.Params.LazyConstraints = 1
+  m.Params.InfUnbdInfo = 1
   m.Params.MIPGap = mip_gap
 
   # Parse params dict to values
@@ -119,6 +120,14 @@ def master(params):
     for l in F:
       _exp = LinExpr(quicksum(alfa_p[j, i, l] for j in I if i != j))
       m.addConstr(beta_p[i, l] == len(I) - _exp, name=f"R9-{i}-{l}")
+
+  # R10
+  # for i in I:
+  #   for l in F[:-1]:
+  #     m.addConstr(beta_m[i, l] <= beta_m[i, l + 1], name=f"R10[{i},{l}]")
+
+  # R11
+  # for
 
   #########################
   # *  FUNCION OBJETIVO  *#
