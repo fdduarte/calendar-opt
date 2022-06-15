@@ -16,7 +16,7 @@ def subproblem(i, l, s, params, relaxed=False):
   F = params['F']
   I = params['I']
   R = params['R']
-  M = 61
+  M = params['M']
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
@@ -126,13 +126,13 @@ def subproblem(i, l, s, params, relaxed=False):
   if s == 'm':
     for j in I:
       if j != i:
-        r = m.addConstr(M - M * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+        r = m.addConstr(M[i] - M[i] * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
                         name=f"R18[{l},{i},{j}]")
         res['R18'][l, i, j] = r
   else:
     for j in I:
       if j != i:
-        r = m.addConstr(M * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+        r = m.addConstr(M[i] * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
                         name=f"R18[{l},{i},{j}]")
         res['R18'][l, i, j] = r
 

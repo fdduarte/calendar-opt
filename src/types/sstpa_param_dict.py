@@ -15,3 +15,4 @@ class SSTPAParams(TypedDict):
   EV: dict[str, dict[int, int]]
   V: dict[int, int]
   L: dict[str, dict[int, int]]
+  M: dict[str, int]

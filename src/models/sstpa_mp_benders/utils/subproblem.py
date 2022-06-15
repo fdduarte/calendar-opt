@@ -66,7 +66,7 @@ def generate_benders_cut(self, subproblem_res, subproblem):
   I = self.params['I']
   EL = self.params['EL']
   EV = self.params['EV']
-  M = 61
+  M = self.params['M']
   cut = LinExpr()
   for n in N:
     for f in F:
@@ -91,13 +91,13 @@ def generate_benders_cut(self, subproblem_res, subproblem):
       if j != i:
         r18 = subproblem_res['R18'][l, i, j]
         alpha = self.master_vars['alpha_m'][j, i, l]
-        cut += r18.farkasDual * (M - 1 - M * alpha)
+        cut += r18.farkasDual * (M[i] - 1 - M[i] * alpha)
   if s == 'p':
     for j in I:
       if j != i:
         r18 = subproblem_res['R18'][l, i, j]
         alpha = self.master_vars['alpha_p'][j, i, l]
-        cut += r18.farkasDual * (M * alpha - 1)
+        cut += r18.farkasDual * (M[i] * alpha - 1)
 
   return cut
 

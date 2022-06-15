@@ -135,6 +135,10 @@ def generate_params():
   # Ponderación de atractivo de fecha f
   V = {f: f - F[0] + 1 for f in F}
 
+  # Mi: M[equipo]
+  # Cantidád máxima de puntos que puede alcanzar el equipo i + 1.
+  M = {i: PI[i] + dates_number * 3 + 1 for i in I}
+
   params: SSTPAParams = {
     'I': I,
     'F': F,
@@ -147,7 +151,8 @@ def generate_params():
     'EL': EL,
     'EV': EV,
     'L': L,
-    'V': V
+    'V': V,
+    'M': M
   }
 
   filename = os.path.split(filepath)[1]
