@@ -86,5 +86,19 @@ parser.add_argument(
   help="Si se usa IIS para el subproblema."
 )
 
+parser.add_argument(
+  "--no_preprocess",
+  action="store_true",
+  default=False,
+  help="Si se usa IIS para el subproblema."
+)
+
+parser.add_argument(
+  "--save_model",
+  action="store_true",
+  default=False,
+  help="Si se usa IIS para el subproblema."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS

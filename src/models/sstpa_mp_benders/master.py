@@ -68,6 +68,7 @@ def master(params):
   # torneo, mirando desde la fecha l en el MEJOR
   # conjunto de resultados futuros para el equipo i
   beta_m = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_m")
+  variables['beta_m'] = beta_m
 
   # beta_il: beta[equipo, fecha]
   # discreta, indica la mejor posicion
@@ -75,6 +76,7 @@ def master(params):
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_p")
+  variables['beta_p'] = beta_m
 
   #####################
   # *  RESTRICCIONES  *#
@@ -135,5 +137,7 @@ def master(params):
 
   _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
   m.setObjective(_obj, GRB.MAXIMIZE)
+
+  m.update()
 
   return m, variables

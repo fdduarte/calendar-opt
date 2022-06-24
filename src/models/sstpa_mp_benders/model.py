@@ -9,7 +9,8 @@ from .utils import (
   set_sstpa_restrictions,
   set_cb_sol,
   create_sstpa_restrictions,
-  generate_benders_cut
+  generate_benders_cut,
+  preprocess
 )
 from ...libs.argsparser import args
 from ...libs.timer import timer
@@ -116,7 +117,15 @@ class Benders:
     """
     Optimiza el maestro con callbacks.
     """
-    self.master_model.optimize(lambda x, y: self._lazy_cb(x, y))
+    # Currying
+    def callback(x, y):
+      self._lazy_cb(x, y)
+
+    if not args.no_preprocess:
+      preprocess(self)
+
+    self.master_model.write('logs/model/master.mps')
+    self.master_model.optimize(callback)
     if self.master_model.Status == GRB.INFEASIBLE:
       print('Modelo Infactible')
       return

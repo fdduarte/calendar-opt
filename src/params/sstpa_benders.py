@@ -143,6 +143,7 @@ def generate_params():
   # Mi: M[equipo]
   # Cantidád máxima de puntos que puede alcanzar el equipo i + 1.
   M = {i: PI[i] + dates_number * 3 + 1 for i in I}
+  # M = {i: 10**10 for i in I}
 
   params: SSTPAParams = {
     'I': I,
