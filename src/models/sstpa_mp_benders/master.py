@@ -7,7 +7,7 @@ def master(params):
   """Genera el modelo maestro de SSTPA"""
   mip_gap = args.mip_gap
   time_limit = args.time_limit
-  local_patterns = not args.no_local_patterns
+  local_patterns = args.local_patterns
 
   m = Model("SSTPA Benders Master")
   if args.gurobi_no_log_console:
@@ -45,22 +45,22 @@ def master(params):
   # 0 en otro caso
   y = {i: m.addVars(S[i], vtype=GRB.BINARY, name="y") for i in I}
 
-  # alfa_jil : alfa[equipo,equipo,fecha]
+  # alpha_jil : alfa[equipo,equipo,fecha]
   # binaria, toma el valor 1 si el equipo j termina con menos puntos
   # que el equipo i en el
   # MEJOR conjunto de
   # resultados futuros para el equipo i considerando que
   # se está en la fecha l
-  alfa_m = m.addVars(I, I, F, vtype=GRB.BINARY, name="alfa_m")
-  variables['alpha_m'] = alfa_m
+  alpha_m = m.addVars(I, I, F, vtype=GRB.BINARY, name="alpha_m")
+  variables['alpha_m'] = alpha_m
 
-  # alfa_jil : alfa[equipo,equipo,fecha]
+  # alpha_jil : alfa[equipo,equipo,fecha]
   # binaria, toma el valor 1 si el equipo j tiene termina
   # con menos puntos que el equipo i, en el PEOR conjunto de
   # resultados futuros para el equipo i considerando que
   # se está en la fecha l
-  alfa_p = m.addVars(I, I, F, vtype=GRB.BINARY, name="alfa_p")
-  variables['alpha_p'] = alfa_p
+  alpha_p = m.addVars(I, I, F, vtype=GRB.BINARY, name="alpha_p")
+  variables['alpha_p'] = alpha_p
 
   # beta_il: beta[equipo,fecha]
   # discreta, indica la mejor posicion
@@ -84,44 +84,45 @@ def master(params):
 
   # R2
   for n in N:
-    m.addConstr((quicksum(x[n, f] for f in F) == 1), name=f"R2-{n}")
+    m.addConstr((quicksum(x[n, f] for f in F) == 1), name=f"R2[{n}]")
 
   # R3
   for i in I:
     for f in F:
-      m.addConstr((quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1) == 1), name="R3")
+      exp = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1))
+      m.addConstr(exp == 1, name=f"R3[{i},{f}]")
 
   # R4
   if local_patterns:
     m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
 
-  # R6
+  # R5
   if local_patterns:
     for f in F:
       for i in I:
         _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
         _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
-        m.addConstr(_exp1 == _exp2, name=f"R6-{f}-{i}")
+        m.addConstr(_exp1 == _exp2, name=f"R5[{f},{i}]")
 
-  # R7
+  # R6
   if local_patterns:
     for f in F:
       for i in I:
         _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
         _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
-        m.addConstr(_exp1 == _exp2, name=f"R7-{f}-{i}")
+        m.addConstr(_exp1 == _exp2, name=f"R6[{f},{i}]")
+
+  # R7
+  for i in I:
+    for l in F:
+      _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+      m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R7[{i},{l}]")
 
   # R8
   for i in I:
     for l in F:
-      _exp = LinExpr(quicksum(alfa_m[j, i, l] for j in I if i != j))
-      m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R8-{i}-{l}")
-
-  # R9
-  for i in I:
-    for l in F:
-      _exp = LinExpr(quicksum(alfa_p[j, i, l] for j in I if i != j))
-      m.addConstr(beta_p[i, l] == len(I) - _exp, name=f"R9-{i}-{l}")
+      _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+      m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R8[{i},{l}]")
 
   # R10
   # for i in I:

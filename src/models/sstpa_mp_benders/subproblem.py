@@ -70,15 +70,15 @@ def subproblem(i, l, s, params, relaxed=False):
   else:
     e = m.addVars(N, [i], [l], F, vtype=GRB.BINARY, name="e")
 
-  # alfa_jil : alfa[equipo, equipo, fecha]
+  # alpha_jil : alpha[equipo, equipo, fecha]
   # binaria, toma el valor 1 si el equipo j termina con menos
   # puntos que el equipo i en el MEJOR/PEOR conjunto de
   # resultados futuros para el equipo i considerando que
   # se está en la fecha l
   if relaxed:
-    alfa = m.addVars(I, [i], [l], vtype=GRB.CONTINUOUS, name="alfa", lb=0, ub=1)
+    alpha = m.addVars(I, [i], [l], vtype=GRB.CONTINUOUS, name="alpha", lb=0, ub=1)
   else:
-    alfa = m.addVars(I, [i], [l], vtype=GRB.BINARY, name="alfa")
+    alpha = m.addVars(I, [i], [l], vtype=GRB.BINARY, name="alpha")
 
   #####################
   # * RESTRICCIONES * #
@@ -86,23 +86,30 @@ def subproblem(i, l, s, params, relaxed=False):
 
   res = {}
 
+  # R13
+  res['R13'] = {}
+  for n in N:
+    for f in F:
+      r = m.addConstr(x[n, f] == 0, name=f'R13[{n},{f}]')
+      res['R13'][n, f] = r
+
   # R14
-  m.addConstrs((x[n, f] == 0 for n in N for f in F), name='R14')
+  res['R14'] = {}
+  for j in I:
+    r = m.addConstr(alpha[j, i, l] == 0, name=f'R14[{j},{i},{l}]')
+    res['R14'][j, i, l] = r
 
   # R15
-  m.addConstrs((alfa[j, i, l] == 0 for j in I), name='R15')
-
-  # R16
-  res['R16'] = {}
+  res['R15'] = {}
   for n in N:
     for f in F:
       if f > l:
         _exp = LinExpr(v[n, i, l, f] + e[n, i, l, f] + a[n, i, l, f])
-        r = m.addConstr(x[n, f] == _exp, name=f"R16[{n},{i},{f},{l}]")
-        res['R16'][n, i, f, l] = r
+        r = m.addConstr(x[n, f] == _exp, name=f"R15[{n},{i},{f},{l}]")
+        res['R15'][n, i, f, l] = r
 
-  # R17
-  res['R17'] = {}
+  # R16
+  res['R16'] = {}
   for j in I:
     for f in F:
       _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
@@ -118,21 +125,22 @@ def subproblem(i, l, s, params, relaxed=False):
                                for theta in F if theta > l and theta <= f)
                       for n in N if EL[j][n] + EV[j][n] == 1))
       r = m.addConstr(p[j, i, l, f] == PI[j] + _exp1 + _exp2 + _exp3 + _exp4,
-                      name=f"R17[{j},{i},{f},{l}]")
-      res['R17'][j, i, f, l] = r
+                      name=f"R16[{j},{i},{f},{l}]")
+      res['R16'][j, i, f, l] = r
 
-  # R18
+  # R17
+  res['R17'] = {}
   res['R18'] = {}
   if s == 'm':
     for j in I:
       if j != i:
-        r = m.addConstr(M[i] - M[i] * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
-                        name=f"R18[{l},{i},{j}]")
-        res['R18'][l, i, j] = r
+        r = m.addConstr(M[i] - M[i] * alpha[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+                        name=f"R17[{l},{i},{j}]")
+        res['R17'][l, i, j] = r
   else:
     for j in I:
       if j != i:
-        r = m.addConstr(M[i] * alfa[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
+        r = m.addConstr(M[i] * alpha[j, i, l] >= 1 + p[j, i, l, F[-1]] - p[i, i, l, F[-1]],
                         name=f"R18[{l},{i},{j}]")
         res['R18'][l, i, j] = r
 

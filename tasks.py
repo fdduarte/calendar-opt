@@ -14,14 +14,18 @@ def delete_cache(context, full=False):
 
 
 @task
-def run_small(context, start=6, patterns=False, no_preprocess=False):
+def run_small(con, start=6, patterns=False, no_preprocess=False, no_benders=False, no_iis=False):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_6_1.xlsx"'
   if not patterns:
     com += ' --no_local_patterns'
   if no_preprocess:
     com += ' --no_preprocess'
-  context.run(com)
+  if no_benders:
+    com += ' --no_benders_cuts'
+  if no_iis:
+    com += ' --no_IIS'
+  con.run(com)
 
 
 @task

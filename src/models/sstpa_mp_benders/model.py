@@ -4,7 +4,7 @@ from .master import master as _master
 from ..sstpa_mp import create_model as _sstpa
 from .utils import (
   set_subproblem_values,
-  generate_cut,
+  generate_hamming_cut,
   parse_vars,
   set_sstpa_restrictions,
   set_cb_sol,
@@ -88,29 +88,30 @@ class Benders:
         # y se resuelve.
         timer.timestamp('cortes de hamming')
         subproblem = self.subproblem_model[i, l, s]
-        set_subproblem_values(model, subproblem)
+        set_subproblem_values(self, model, (i, l, s))
         subproblem.optimize()
 
         # Si el modelo es infactible, se agregan cortes de factibilidad
         if subproblem.Status == GRB.INFEASIBLE:
           if args.IIS:
             timer.timeit_nd(subproblem.computeIIS, 'IIS')
-          cut = generate_cut(subproblem, model, IIS=args.IIS)
+          cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
           model.cbLazy(cut >= 1)
         timer.timestamp('cortes de hamming')
 
-        # Se resuelve la relajación y agregan cortes de Benders
-        timer.timestamp('cortes de benders')
-        subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
-        subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
+        if args.benders_cuts:
+          # Se resuelve la relajación y agregan cortes de Benders
+          timer.timestamp('cortes de benders')
+          subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
+          subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
 
-        set_subproblem_values(model, subproblem_relaxed)
-        subproblem_relaxed.optimize()
+          # set_subproblem_values(self, model, (i, l, s))
+          subproblem_relaxed.optimize()
 
-        if subproblem_relaxed.Status == GRB.INFEASIBLE:
-          cut = generate_benders_cut(self, subproblem_relaxed_res, subproblem_relaxed)
-          model.cbLazy(cut <= 0)
-        timer.timestamp('cortes de benders')
+          if subproblem_relaxed.Status == GRB.INFEASIBLE:
+            cut = generate_benders_cut(self, subproblem_relaxed_res, subproblem_relaxed)
+            model.cbLazy(cut <= 0)
+          timer.timestamp('cortes de benders')
       timer.timestamp('MIPSOL')
 
   def optimize(self):
@@ -121,7 +122,7 @@ class Benders:
     def callback(x, y):
       self._lazy_cb(x, y)
 
-    if not args.no_preprocess:
+    if args.preprocess:
       preprocess(self)
 
     self.master_model.write('logs/model/master.mps')
@@ -153,9 +154,13 @@ class Benders:
     """Retorna las variables del modelo maestro"""
     return self.master_model.getVars()
 
-  def write(self, *args):
+  def objVal(self):
+    """Retorna el valor objetivo"""
+    return self.master_model.objVal
+
+  def write(self, *m_args):
     """Escribe el modelo maestro"""
-    return self.master_model.write(*args)
+    return self.master_model.write(*m_args)
 
 
 def create_model():

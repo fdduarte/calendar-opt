@@ -1,5 +1,5 @@
 from gurobipy import quicksum
-from .common import value_to_binary
+from .helpers import value_to_binary
 # pylint: disable=invalid-name
 
 

@@ -100,5 +100,15 @@ parser.add_argument(
   help="Si se usa IIS para el subproblema."
 )
 
+parser.add_argument(
+  "--no_benders_cuts",
+  action="store_true",
+  default=False,
+  help="Si se usan cortes de benders."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS
+args.local_patterns = not args.no_local_patterns
+args.preprocess = not args.no_preprocess
+args.benders_cuts = not args.no_benders_cuts
