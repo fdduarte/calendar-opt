@@ -1,5 +1,13 @@
 from invoke import task
 
+# Task params
+
+PATTERNS = False  # Si se usan patrones de localia/visita
+PREPROCESS = False  # Si se usa preprocesamiento
+BENDERS = True  # Si se usan cortes de benders
+IIS = False  # Si se usa IIS para cortes de Hamming
+VERBOSE = True  # Si se imprime a consola
+
 
 @task
 def delete_cache(context, full=False):
@@ -14,29 +22,54 @@ def delete_cache(context, full=False):
 
 
 @task
-def run_small(con, start=6, patterns=False, no_preprocess=False, no_benders=False, no_iis=False):
-  """Campeonato pequeño con descomposición"""
-  com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_6_1.xlsx"'
-  if not patterns:
+def run_tiny(con, start=4):
+  """Campeonato enano con descomposición"""
+  com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
+  if not PATTERNS:
     com += ' --no_local_patterns'
-  if no_preprocess:
+  if not PREPROCESS:
     com += ' --no_preprocess'
-  if no_benders:
+  if not BENDERS:
     com += ' --no_benders_cuts'
-  if no_iis:
+  if not IIS:
     com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
   con.run(com)
 
 
 @task
-def run_med(context, start=7, patterns=False, no_preprocess=False):
+def run_small(con, start=6):
+  """Campeonato pequeño con descomposición"""
+  com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_6_1.xlsx"'
+  if not PATTERNS:
+    com += ' --no_local_patterns'
+  if not PREPROCESS:
+    com += ' --no_preprocess'
+  if not BENDERS:
+    com += ' --no_benders_cuts'
+  if not IIS:
+    com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
+  con.run(com)
+
+
+@task
+def run_med(con, start=7):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_8_1.xlsx"'
-  if not patterns:
+  if not PATTERNS:
     com += ' --no_local_patterns'
-  if no_preprocess:
+  if not PREPROCESS:
     com += ' --no_preprocess'
-  context.run(com)
+  if not BENDERS:
+    com += ' --no_benders_cuts'
+  if not IIS:
+    com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
+  con.run(com)
 
 
 @task
@@ -51,11 +84,17 @@ def run_big(context, start=8, patterns=False, no_preprocess=False):
 
 
 @task
-def run_huge(context, start=9, patterns=False, no_preprocess=False):
+def run_huge(con, start=9):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model 5 --start_date {start} --filepath "data/campeonato_12_1.xlsx"'
-  if not patterns:
+  if not PATTERNS:
     com += ' --no_local_patterns'
-  if no_preprocess:
+  if not PREPROCESS:
     com += ' --no_preprocess'
-  context.run(com)
+  if not BENDERS:
+    com += ' --no_benders_cuts'
+  if not IIS:
+    com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
+  con.run(com)

@@ -1,12 +1,12 @@
-def preprocess(self, upgraded=True):
+def preprocess(self, model, variables, upgraded=True):
   """Función principal que agrega cortes al modelo"""
   if upgraded:
-    _upgraded_cuts(self)
+    _upgraded_cuts(self, model, variables)
   else:
     _normal_cuts(self)
 
 
-def _upgraded_cuts(self):
+def _upgraded_cuts(self, model, variables):
   """Función principal que agrega cortes al modelo"""
   dates_left = len(self.params['F'])
   F = self.params['F']
@@ -48,16 +48,13 @@ def _upgraded_cuts(self):
             teams_above_worst_case += 1
       p_max = 1 + teams_above_best_case
       p_min = 1 + teams_above_worst_case
-      beta_m = self.master_vars['beta_m']
-      beta_p = self.master_vars['beta_p']
-      if i == 'A':
-        print(f"best beta[{i}, {f}] >= {p_max}")
-        print(f"worst beta[{i}, {f}] <= {p_min}")
-      self.master_model.addConstr(beta_m[i, f] >= p_max, name=f'PR-1-{i}-{f}-m')
-      self.master_model.addConstr(beta_p[i, f] >= p_max, name=f'PR-1-{i}-{f}-p')
-      self.master_model.addConstr(beta_m[i, f] <= p_min, name=f'PR-2-{i}-{f}-m')
-      self.master_model.addConstr(beta_p[i, f] <= p_min, name=f'PR-2-{i}-{f}-p')
-  self.master_model.update()
+      beta_m = variables['beta_m']
+      beta_p = variables['beta_p']
+      model.addConstr(beta_m[i, f] >= p_max, name=f'PR1[{i},{f},m]')
+      model.addConstr(beta_p[i, f] >= p_max, name=f'PR1[{i},{f},p]')
+      model.addConstr(beta_m[i, f] <= p_min, name=f'PR2[{i},{f},m]')
+      model.addConstr(beta_p[i, f] <= p_min, name=f'PR2[{i},{f},p]')
+  model.update()
 
 
 def _get_sum_results(results_sorted, start_date, current_date):
