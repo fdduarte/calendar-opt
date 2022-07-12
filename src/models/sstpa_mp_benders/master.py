@@ -10,7 +10,7 @@ def master(params):
   local_patterns = args.local_patterns
 
   m = Model("SSTPA Benders Master")
-  if args.gurobi_no_log_console:
+  if not args.verbose:
     m.Params.LogToConsole = 0
   m.Params.TimeLimit = time_limit
   m.Params.LazyConstraints = 1

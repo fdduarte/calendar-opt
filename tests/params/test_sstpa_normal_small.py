@@ -26,7 +26,6 @@ class TestSSTPASmall(unittest.TestCase):
   """Unit test para param generator"""
   def setUp(self):
     args.start_date = 4
-    args.end_date = 6
     # args.verbose = False
     args.filepath = "data/campeonato_prueba.xlsx"
     generate_params()

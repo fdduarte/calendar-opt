@@ -5,13 +5,11 @@ from src.libs.timer import timer
 
 
 if __name__ == "__main__":
-  print('Optimización calendario deportivo')
-
   assert args.model in range(1, 6)
 
   if args.model == 3:
     sstpa_mp_generate_params()
-    m = sstpa_mp_create_model()
+    m, _ = sstpa_mp_create_model()
 
   if args.model == 5:
     sstpa_mp_benders_generate_params()
@@ -19,7 +17,9 @@ if __name__ == "__main__":
 
   m.optimize()
 
-  print(timer.times_string())
+  if args.verbose:
+    print('\n[time] logs:')
+    print(timer.times_string())
 
   # if args.model == 5:
   #   m.print_stats()

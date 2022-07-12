@@ -1,5 +1,6 @@
+from itertools import product
 from gurobipy import LinExpr
-from .helpers import get_subproblem_indexes
+from .helpers import get_subproblem_indexes, value_to_binary
 
 
 def generate_hamming_cut(self, indexes, master, IIS=False):
@@ -19,9 +20,9 @@ def generate_hamming_cut(self, indexes, master, IIS=False):
       if master.cbGetSolution(x) > 0.5:
         x = LinExpr(1 - x)
       if IIS:
-        const = self.subproblem_res[i, l, s]['R13'][n, f]
-        if const.getAttr('IISConstr'):
-          cut += x
+        # const = self.subproblem_res[i, l, s]['R13'][n, f]
+        # if const.getAttr('IISConstr'):
+        cut += x
       else:
         cut += x
   # alpha
@@ -30,52 +31,15 @@ def generate_hamming_cut(self, indexes, master, IIS=False):
     if master.cbGetSolution(alpha) > 0.5:
       alpha = LinExpr(1 - alpha)
     if IIS:
-      const = self.subproblem_res[i, l, s]['R14'][j, i, l]
-      if const.getAttr('IISConstr'):
-        cut += alpha
+      # const = self.subproblem_res[i, l, s]['R14'][j, i, l]
+      # if const.getAttr('IISConstr'):
+      cut += alpha
     else:
       cut += alpha
   return cut
 
 
-def generate_hamming_cut_depr(self, indexes, master, IIS=False):
-  """
-  Dado un subproblema resuelto, crea cortes de hamming con o sin
-  el calculo de IIS.
-  """
-  i, l, s = indexes
-  subproblem = self.subproblem_model[i, l, s]
-  cut = LinExpr()
-  for var in subproblem.getVars():
-    name = var.VarName
-    if 'x' in name:
-      n, f = _get_index(name)
-      master_var = master.getVarByName(name)
-      print(master_var, master.cbGetSolution(master_var))
-      if master.cbGetSolution(master_var) > 0.5:
-        master_var = LinExpr(1 - master_var)
-      if IIS:
-        const = subproblem.getConstrByName(f'R13[{n},{f}]')
-        if const.getAttr('IISConstr'):
-          cut += master_var
-      else:
-        cut += master_var
-    if 'alpha' in name:
-      j = _get_index(name)[0]
-      master_var = master.getVarByName(f'alpha_{s}[{j},{i},{l}]')
-      if master.cbGetSolution(master_var) > 0.5:
-        master_var = LinExpr(1 - master_var)
-      if IIS:
-        const = subproblem.getConstrByName(f'R14[{j},{i},{l}]')
-        if const.getAttr('IISConstr'):
-          cut += master_var
-      else:
-        cut += master_var
-  # print(cut)
-  return cut
-
-
-def generate_benders_cut(self, subproblem_res, subproblem):
+def generate_benders_cut(self, model, subproblem_res, subproblem):
   """
   Dado un subproblema relajado, crea cortes de benders.
   """
@@ -84,46 +48,53 @@ def generate_benders_cut(self, subproblem_res, subproblem):
   F = self.params['F']
   I = self.params['I']
   PI = self.params['PI']
+  R = self.params['R']
+  M = self.params['M']
+  PI = self.params['PI']
+  EV = self.params['EV']
+  EL = self.params['EL']
 
   # R13
   cut = LinExpr()
-  for n in N:
-    for f in F:
-      if f > l:
-        r13 = subproblem_res['R13'][n, f]
-        x = self.master_vars['x'][n, f]
-        cut += r13.farkasDual * x
+  for n, f in product(N, F):
+    if f > l:
+      r13 = subproblem_res['R13'][n, i, f, l]
+      x = self.master_vars['x'][n, f]
+      x = model.cbGetSolution(x)
+      value = value_to_binary(x)
+      cut += r13.farkasDual * value
 
   # R14
-  for j in I:
-    if j != i:
-      r14 = subproblem_res['R14'][j, i, l]
-      alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-      cut += r14.farkasDual * alpha
+  for j, f in product(I, F):
+    r14 = subproblem_res['R14'][j, i, f, l]
+    value = 0
+    for n in N:
+      if EL[j][n] + EV[j][n] == 1:
+        for theta in F:
+          if theta <= l:
+            x = self.master_vars['x'][n, theta]
+            x = model.cbGetSolution(x)
+            x = value_to_binary(x)
+            value += R[j][n] * x
+    cut += r14.farkasDual * (PI[j] + value)
 
-  # R16
-  for j in I:
-    for f in F:
-      if f > l:
-        r16 = subproblem_res['R16'][j, i, f, l]
-        cut += r16.farkasDual * PI[j]
-
-  # R17
+  # R15
   if s == 'm':
     for j in I:
       if j != i:
-        r17 = subproblem_res['R17'][l, i, j]
-        cut += r17.farkasDual * alpha
+        r15 = subproblem_res[i, l, s]['R15'][l, i, j]
+        alpha = self.master_vars[f'alpha_{s}'][j, i, l]
+        alpha = model.cbGetSolution(alpha)
+        alpha = value_to_binary(alpha)
+        cut += r15.farkasDual * (M[i] * (1 - alpha) - 1)
+
+  # R16
   if s == 'p':
     for j in I:
       if j != i:
-        r17 = subproblem_res['R18'][l, i, j]
-        cut += r17.farkasDual * alpha
+        r16 = subproblem_res[i, l, s]['R16'][l, i, j]
+        alpha = self.master_vars[f'alpha_{s}'][j, i, l]
+        alpha = model.cbGetSolution(alpha)
+        alpha = value_to_binary(alpha)
+        cut += r16.farkasDual * (M[i] * alpha - 1)
   return cut
-
-
-def _get_index(name):
-  name = name.strip(']')
-  _, name = name.split('[')
-  index = [int(i) if i.isdigit() else i for i in name.split(',')]
-  return tuple(index)

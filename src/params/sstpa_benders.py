@@ -53,7 +53,7 @@ def generate_params():
   # Patrones de localias asociados al equipo i. 'Si' es un conjunto de
   # indices que corresponden a cada patron. Para acceder al detalle
   # de un patron, revisar archivo correspondiente con detalle.
-  log("params", "generación de patrones terminada")
+  log("params", "generación de patrones terminada\n")
 
   # Si: S[equipo]
   # Patrones de localias asociados al equipo i. 'Si' es un conjunto de
