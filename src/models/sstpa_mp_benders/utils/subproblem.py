@@ -1,122 +1,60 @@
-from gurobipy import LinExpr, quicksum
+from itertools import product
+from .helpers import value_to_binary
+
+
 # pylint: disable=invalid-name
-
-
-def set_subproblem_values(master, subproblem):
-  """Dado el problema maestro, setea el lado derecho de las
-  restricciones del subproblema (R15 y R16) que fijan a x y alpha"""
-  i, l, s = _get_subproblem_indexes(subproblem)
-  for cons in subproblem.getConstrs():
-    name = cons.getAttr('ConstrName')
-    # Set same x vars (R13)
-    if 'R14' in name:
-      n, f = _get_index(name)
-      var = master.getVarByName(f'x[{n},{f}]')
-      value = _to_int(master.cbGetSolution(var))
-      cons.rhs = value
-    # Set same alpha vars (R14)
-    if 'R15' in name:
-      j = _get_index(name)[0]
-      var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
-      value = _to_int(master.cbGetSolution(var))
-      cons.rhs = value
-
-
-def generate_cut(subproblem, master, IIS=False):
+def set_subproblem_values(self, model, indexes):
   """
-  Dado un subproblema resuelto, crea cortes de hamming con o sin
-  el calculo de IIS.
+  Dado el problema maestro, setea el lado derecho de las
+  restricciones del subproblema (R15, R16 y  R17/R18)
   """
-  i, l, s = _get_subproblem_indexes(subproblem)
-  cut = LinExpr()
-  for var in subproblem.getVars():
-    name = var.VarName
-    if 'x' in name:
-      n, f = _get_index(name)
-      master_var = master.getVarByName(name)
-      if master.cbGetSolution(master_var) > 0.5:
-        master_var = LinExpr(1 - master_var)
-      if IIS:
-        const = subproblem.getConstrByName(f'R14[{n},{f}]')
-        if const.getAttr('IISConstr'):
-          cut += master_var
-      else:
-        cut += master_var
-    if 'alfa' in name:
-      j = _get_index(name)[0]
-      master_var = master.getVarByName(f'alfa_{s}[{j},{i},{l}]')
-      if master.cbGetSolution(master_var) > 0.5:
-        master_var = LinExpr(1 - master_var)
-      if IIS:
-        const = subproblem.getConstrByName(f'R15[{j}]')
-        if const.getAttr('IISConstr'):
-          cut += master_var
-      else:
-        cut += master_var
-  return cut
-
-
-def generate_benders_cut(self, subproblem_res, subproblem):
-  """
-  Dado un subproblema relajado, crea cortes de benders.
-  """
-  i, l, s = _get_subproblem_indexes(subproblem)
+  i, l, s = indexes
   N = self.params['N']
   F = self.params['F']
   I = self.params['I']
-  EL = self.params['EL']
+  R = self.params['R']
+  M = self.params['M']
+  PI = self.params['PI']
   EV = self.params['EV']
-  M = 61
-  cut = LinExpr()
-  for n in N:
-    for f in F:
-      if f > l:
-        r16 = subproblem_res['R16'][n, i, f, l]
-        x = self.master_vars['x'][n, f]
-        cut += r16.farkasDual * x
-  for j in I:
-    for f in F:
-      if f > l:
-        x_sum = LinExpr()
+  EL = self.params['EL']
+
+  # R13
+  for n, f in product(N, F):
+    if f > l:
+      x = self.master_vars['x'][n, f]
+      x = model.cbGetSolution(x)
+      value = value_to_binary(x)
+      self.subproblem_res[i, l, s]['R13'][n, i, f, l].rhs = value
+
+  # R14
+  for j, f in product(I, F):
+    value = 0
+    for n in N:
+      if EL[j][n] + EV[j][n] == 1:
         for theta in F:
-          if l >= theta:
-            for n in N:
-              if EL[j][n] + EV[j][n] == 1:
-                x = self.master_vars['x'][n, theta]
-                x_sum += x
-        r17 = subproblem_res['R17'][j, i, f, l]
-        cut += r17.farkasDual * self.params['PI'][j] * (x_sum)
+          if theta <= l:
+            x = self.master_vars['x'][n, theta]
+            x = model.cbGetSolution(x)
+            x = value_to_binary(x)
+            value += R[j][n] * x
+      self.subproblem_res[i, l, s]['R14'][j, i, f, l].rhs = PI[j] + value
+
+  # R15
   if s == 'm':
     for j in I:
       if j != i:
-        r18 = subproblem_res['R18'][l, i, j]
-        alpha = self.master_vars['alpha_m'][j, i, l]
-        cut += r18.farkasDual * (M - 1 - M * alpha)
+        alpha = self.master_vars[f'alpha_{s}'][j, i, l]
+        alpha = model.cbGetSolution(alpha)
+        alpha = value_to_binary(alpha)
+        self.subproblem_res[i, l, s]['R15'][l, i, j].rhs = M[i] * (1 - alpha) - 1
+
+  # R16
   if s == 'p':
     for j in I:
       if j != i:
-        r18 = subproblem_res['R18'][l, i, j]
-        alpha = self.master_vars['alpha_p'][j, i, l]
-        cut += r18.farkasDual * (M * alpha - 1)
+        alpha = self.master_vars[f'alpha_{s}'][j, i, l]
+        alpha = model.cbGetSolution(alpha)
+        alpha = value_to_binary(alpha)
+        self.subproblem_res[i, l, s]['R16'][l, i, j].rhs = M[i] * alpha - 1
 
-  return cut
-
-
-def _get_subproblem_indexes(subproblem):
-  name = subproblem.getAttr('ModelName')
-  _, name = name.split(': ')
-  i, l, s = name.split('-')
-  return i, int(l), s
-
-
-def _get_index(name):
-  name = name.strip(']')
-  _, name = name.split('[')
-  index = [int(i) if i.isdigit() else i for i in name.split(',')]
-  return tuple(index)
-
-
-def _to_int(value):
-  if value > 0.5:
-    return 1
-  return 0
+  self.subproblem_model[i, l, s].update()

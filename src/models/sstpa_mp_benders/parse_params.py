@@ -16,6 +16,8 @@ def parse_params():
   with open(infile_path, 'r', encoding='UTF-8') as infile:
     params: SSTPAParams = json.load(infile)
 
+  # al trabajar con json, los int se pasan a str.
+
   # R
   for key in params['R'].keys():
     params['R'][key] = {int(k): v for k, v in params['R'][key].items()}
@@ -31,5 +33,9 @@ def parse_params():
   # EV
   for key in params['EV'].keys():
     params['EV'][key] = {int(k): v for k, v in params['EV'][key].items()}
+
+  # M
+  for key in params['M'].keys():
+    params['M'][key] = int(params['M'][key])
 
   return params

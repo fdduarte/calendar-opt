@@ -1,3 +1,7 @@
+from typing import Tuple
+from gurobipy import Model
+
+
 def parse_vars(model, var_name, callback=False, is_binary=True):
   """
   Parsea la variable "var_name" de un modelo, retornando un diccionario.
@@ -23,3 +27,11 @@ def value_to_binary(value: float):
   if value > 0.5:
     return 1
   return 0
+
+
+def get_subproblem_indexes(subproblem: Model) -> Tuple[int, int, int]:
+  """Dado un modelo de un subproblema de gurobi, retorna los indices del modelo"""
+  name = subproblem.getAttr('ModelName')
+  _, name = name.split(': ')
+  i, l, s = name.split('-')
+  return i, int(l), s
