@@ -13,7 +13,7 @@ from .utils import (
   preprocess
 )
 from ...libs.argsparser import args
-from ...libs.logger import log
+from ...libs.logger import log, logger
 from ...libs.timer import timer
 from .parse_params import parse_params
 
@@ -95,6 +95,7 @@ class Benders:
           set_subproblem_values(self, model, (i, l, s))
           timer.timestamp('opt hamming sub')
           subproblem.optimize()
+          logger.increment_stats('subsolved')
           timer.timestamp('opt hamming sub')
 
           # Si el modelo es infactible, se agregan cortes de factibilidad
@@ -102,24 +103,28 @@ class Benders:
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
+            logger.increment_stats('hamming cut')
             model.cbLazy(cut >= 1)
           timer.timestamp('cortes de hamming')
 
           if args.benders_cuts:
+
             # Se resuelve la relajación y agregan cortes de Benders
             timer.timestamp('cortes de benders')
             subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
             subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
 
-            set_subproblem_values(self, model, (i, l, s))
+            set_subproblem_values(self, model, (i, l, s), relaxed=True)
 
             timer.timestamp('opt benders sub')
             subproblem_relaxed.optimize()
+            logger.increment_stats('sub(r) solved')
             timer.timestamp('opt benders sub')
 
             if subproblem_relaxed.Status == GRB.INFEASIBLE:
               cut = generate_benders_cut(self, model, subproblem_relaxed_res, subproblem_relaxed)
               model.cbLazy(cut <= 0)
+              logger.increment_stats('benders cut')
             timer.timestamp('cortes de benders')
         timer.timestamp('MIPSOL')
     except Exception as err:

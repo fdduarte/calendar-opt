@@ -2,6 +2,7 @@ from src.libs.argsparser import args
 from src.models import sstpa_mp_create_model, sstpa_mp_benders_create_model
 from src.params import sstpa_mp_generate_params, sstpa_mp_benders_generate_params
 from src.libs.timer import timer
+from src.libs.logger import logger
 
 
 if __name__ == "__main__":
@@ -20,6 +21,9 @@ if __name__ == "__main__":
   if args.verbose:
     print('\n[time] logs:')
     print(timer.times_string())
+
+    print('\n[stats] logs:')
+    print(logger.stats_string())
 
   # if args.model == 5:
   #   m.print_stats()
