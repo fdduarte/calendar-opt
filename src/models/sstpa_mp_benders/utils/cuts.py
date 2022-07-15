@@ -54,17 +54,15 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
   EV = self.params['EV']
   EL = self.params['EL']
 
-  # R13
+  # R3
   cut = LinExpr()
   for n, f in product(N, F):
     if f > l:
       r3 = subproblem_res['R3'][n, i, f, l]
       x = self.master_vars['x'][n, f]
-      x = model.cbGetSolution(x)
-      value = value_to_binary(x)
-      cut += r3.farkasDual * value
+      cut += r3.farkasDual * x
 
-  # R14
+  # R4
   for j, f in product(I, F):
     r4 = subproblem_res['R4'][j, i, f, l]
     value = 0
@@ -73,8 +71,6 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
         for theta in F:
           if theta <= l:
             x = self.master_vars['x'][n, theta]
-            x = model.cbGetSolution(x)
-            x = value_to_binary(x)
             value += R[j][n] * x
     cut += r4.farkasDual * (PI[j] + value)
 
@@ -84,9 +80,7 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
       if j != i:
         r5m = subproblem_res['R5M'][l, i, j]
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-        alpha = model.cbGetSolution(alpha)
-        alpha = value_to_binary(alpha)
-        cut += r5m.farkasDual * (M[i] * (1 - alpha) - 1)
+        cut += r5m.farkasDual * (1 - M[i] + M[i] * alpha)
 
   # R16
   if s == 'p':
@@ -94,7 +88,6 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
       if j != i:
         r5p = subproblem_res['R5P'][l, i, j]
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-        alpha = model.cbGetSolution(alpha)
-        alpha = value_to_binary(alpha)
-        cut += r5p.farkasDual * (M[i] * alpha - 1)
+        cut += r5p.farkasDual * (1 - M[i] * alpha)
+
   return cut

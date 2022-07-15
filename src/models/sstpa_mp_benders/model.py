@@ -9,9 +9,9 @@ from .utils import (
   set_sstpa_restrictions,
   set_cb_sol,
   create_sstpa_restrictions,
-  generate_benders_cut,
-  preprocess
+  generate_benders_cut
 )
+from .preprocessing import preprocess
 from ...libs.argsparser import args
 from ...libs.logger import log, logger
 from ...libs.timer import timer
@@ -92,7 +92,8 @@ class Benders:
           # y se resuelve.
           timer.timestamp('cortes de hamming')
           subproblem = self.subproblem_model[i, l, s]
-          set_subproblem_values(self, model, (i, l, s))
+          sub = (self.subproblem_model, self.subproblem_res)
+          set_subproblem_values(self, model, sub, (i, l, s))
           timer.timestamp('opt hamming sub')
           subproblem.optimize()
           logger.increment_stats('subsolved')
@@ -114,7 +115,8 @@ class Benders:
             subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
             subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
 
-            set_subproblem_values(self, model, (i, l, s), relaxed=True)
+            sub = (self.subproblem_relaxed_model, self.subproblem_relaxed_res)
+            set_subproblem_values(self, model, sub, (i, l, s), relaxed=True)
 
             timer.timestamp('opt benders sub')
             subproblem_relaxed.optimize()
@@ -131,7 +133,7 @@ class Benders:
       log('error', 'callback')
       log('error', err)
       model.terminate()
-      raise Exception(err)
+      raise Exception from err
 
   def optimize(self):
     """

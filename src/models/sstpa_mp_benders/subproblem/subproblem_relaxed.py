@@ -33,19 +33,19 @@ def subproblem(i, l, s, params):
   # binaria,  1 si el equipo local gana el partido n de la
   # fecha f teniendo informacion finalizada la fecha l en el
   # MEJOR/PEOR conjunto de resultados futuros para el equipo i
-  v = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="v", lb=0, ub=1)
+  v = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="v")
 
   # a_nilf: a[partido,equipo,fecha,fecha]
   # 1 si el equipo visitante gana el partido n de la fecha f
   # teniendo información finalizada la fecha l
   # en el MEJOR/PEOR conjunto de resultados para el equipo i
-  a = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="a", lb=0, ub=1)
+  a = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="a")
 
   # e_nilf: e[partido,equipo,fecha,fecha]
   # binaria, toma el valor 1 si se empata el partido n de la fecha f,
   # con la info de los resultados hasta la fecha l inclusive en el
   # MEJOR/PEOR conjunto de resultados futuros para el euqipo i
-  e = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="e", lb=0, ub=1)
+  e = m.addVars(N, [i], [l], F, vtype=GRB.CONTINUOUS, name="e")
 
   #####################
   # * RESTRICCIONES * #
@@ -92,8 +92,6 @@ def subproblem(i, l, s, params):
         r = m.addConstr(p[j, i, l, F[-1]] - p[i, i, l, F[-1]] <= 0, name=f"R5P[{l},{i},{j}]")
         res['R5P'][l, i, j] = r
 
-  for j, f in product(I, F):
-    m.addConstr(p[j, i, l, f] >= 0)
   for n, f in product(N, F):
     m.addConstr(v[n, i, l, f] >= 0)
     m.addConstr(e[n, i, l, f] >= 0)
