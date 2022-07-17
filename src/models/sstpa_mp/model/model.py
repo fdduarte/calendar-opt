@@ -1,7 +1,7 @@
 from itertools import product
 from gurobipy import Model, GRB, quicksum, LinExpr
-from .parse_params import parse_params
-from ...libs.argsparser import args
+from ..parse_params import parse_params
+from ....libs.argsparser import args
 
 
 # pylint: disable=invalid-name
@@ -33,7 +33,7 @@ def create_model(log=True):
   I = params['I']
   R = params['R']
   L = params['L']
-  M = 140
+  M = params['M']
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
@@ -55,20 +55,23 @@ def create_model(log=True):
   # 1 si al equipo i se le asigna el patron
   # de localias s
   # 0 en otro caso
-  y = {i: m.addVars(S[i], vtype=GRB.BINARY, name="y") for i in I}
+  y = {}
+  for i in I:
+    for s in S[i]:
+      y[i, s] = m.addVar(vtype=GRB.BINARY, name=f"y[{i},{s}]")
   variables['y'] = y
 
   # p_jilf: P[equipo, equipo, fecha, fecha]
   # discreta, cant de puntos del equipo j al finalizar la fecha f
   # con la info de los resultados hasta la fecha l inclusive
   # en el MEJOR conjunto de resultados futuros para el equipo i
-  p_m = m.addVars(I, I, F, F, vtype=GRB.INTEGER, name="p_m")
+  p_m = m.addVars(I, I, F, F, vtype=GRB.CONTINUOUS, name="p_m")
 
   # p_jilf: P[equipo, equipo, fecha, fecha]
   # discreta, cant de puntos del equipo j al finalizar la fecha f
   # con la info de los resultados hasta la fecha l inclusive
   # en el PEOR conjunto de resultados futuros para el equipo i
-  p_p = m.addVars(I, I, F, F, vtype=GRB.INTEGER, name="p_p")
+  p_p = m.addVars(I, I, F, F, vtype=GRB.CONTINUOUS, name="p_p")
 
   # v_nilf : v[partido, equipo, fecha, fecha]
   # binaria,  1 si el equipo local gana el partido n
@@ -128,7 +131,7 @@ def create_model(log=True):
   # que puede alcanzar el equipo i al final del 
   # torneo, mirando desde la fecha l en el MEJOR
   # conjunto de resultados futuros para el equipo i
-  beta_m = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_m")
+  beta_m = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_m")
   variables['beta_m'] = beta_m
 
   # beta_il: beta[equipo, fecha]
@@ -136,7 +139,7 @@ def create_model(log=True):
   # que puede alcanzar el equipo i al final del 
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
-  beta_p = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_p")
+  beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
   variables['beta_p'] = beta_p
 
   #####################
@@ -154,101 +157,81 @@ def create_model(log=True):
 
   # R4
   if local_patterns:
-    m.addConstrs((quicksum(y[i][s] for s in S[i]) == 1 for i in I), name="R4")
+    m.addConstrs((quicksum(y[i, s] for s in S[i]) == 1 for i in I), name="R4")
 
   # R5
   if local_patterns:
     for f, i in product(F, I):
       _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 1))
+      _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 1))
       m.addConstr(_exp1 == _exp2, name=f"R5[{f},{i}]")
 
   # R6
   if local_patterns:
     for f, i in product(F, I):
       _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
-      _exp2 = LinExpr(quicksum(y[i][s] for s in S[i] if L[s][f] == 0))
+      _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 0))
       m.addConstr(_exp1 == _exp2, name=f"R6[{f},{i}]")
 
   # R7
   for n, i, f, l in product(N, I, F, F):
     if f > l:
       _exp = LinExpr(v_m[n, i, l, f] + e_m[n, i, l, f] + a_m[n, i, l, f])
-      m.addConstr(x[n, f] == _exp, name=f"R7[{n},{i},{f},{l}]")
+      m.addConstr(_exp == x[n, f], name=f"R7[{n},{i},{f},{l}]")
 
   # R8
   for n, i, f, l in product(N, I, F, F):
     if f > l:
       _exp = LinExpr(v_p[n, i, l, f] + e_p[n, i, l, f] + a_p[n, i, l, f])
-      m.addConstr(x[n, f] == _exp, name=f"R8[{n},{i},{f},{l}]")
+      m.addConstr(_exp == x[n, f], name=f"R8[{n},{i},{f},{l}]")
+
+  # R9
+  for j, i, f, l in product(I, I, F, F):
+    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+    _exp2 = LinExpr(quicksum(quicksum(3 * v_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
+    _exp3 = LinExpr(quicksum(quicksum(3 * a_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
+    _exp4 = LinExpr(quicksum(quicksum(e_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+    m.addConstr(p_m[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                name=f"R9[{j},{i},{f},{l}]")
 
   # R10
-  for j in I:
-    for i in I:
-      for f in F:
-        for l in F:
-          _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
-                                   for n in N if EL[j][n] + EV[j][n] == 1)
-                          for theta in F if theta <= l))
-          _exp2 = LinExpr(quicksum(quicksum(3 * v_m[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EL[j][n] == 1))
-          _exp3 = LinExpr(quicksum(quicksum(3 * a_m[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EV[j][n] == 1))
-          _exp4 = LinExpr(quicksum(quicksum(e_m[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EL[j][n] + EV[j][n] == 1))
-          m.addConstr(p_m[j, i, l, f] == PI[j] + _exp1 + _exp2 + _exp3 + _exp4,
-                      name=f"R10[{j},{i},{f},{l}]")
+  for j, i, f, l in product(I, I, F, F):
+    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+    _exp2 = LinExpr(quicksum(quicksum(3 * v_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
+    _exp3 = LinExpr(quicksum(quicksum(3 * a_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
+    _exp4 = LinExpr(quicksum(quicksum(e_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+    m.addConstr(p_p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                name=f"R10[{j},{i},{f},{l}]")
 
-  # R10
-  for j in I:
-    for i in I:
-      for f in F:
-        for l in F:
-          _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
-                                   for n in N if EL[j][n] + EV[j][n] == 1)
-                          for theta in F if theta <= l))
-          _exp2 = LinExpr(quicksum(quicksum(3 * v_p[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EL[j][n] == 1))
-          _exp3 = LinExpr(quicksum(quicksum(3 * a_p[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EV[j][n] == 1))
-          _exp4 = LinExpr(quicksum(quicksum(e_p[n, i, l, theta]
-                                   for theta in F if theta > l and theta <= f)
-                          for n in N if EL[j][n] + EV[j][n] == 1))
-          m.addConstr(p_p[j, i, l, f] == PI[j] + _exp1 + _exp2 + _exp3 + _exp4,
-                      name=f"R11[{j},{i},{f},{l}]")
+  # R11
+  for l, i, j in product(F, I, I):
+    if j != i:
+      m.addConstr(p_m[i, i, l, f] - p_m[j, i, l, f] <= M[i] * (1 - alpha_m[j, i, l]) - 1,
+                  name=f"R11[{l},{i},{j}]")
 
   # R12
-  for l in F:
-    for i in I:
-      for j in I:
-        if j != i:
-          m.addConstr(M - M * alpha_m[j, i, l] >= 1 + p_m[j, i, l, F[-1]] - p_m[i, i, l, F[-1]],
-                      name=f"R12-{l}-{i}-{j}")
+  for l, i, j in product(F, I, I):
+    if j != i:
+      m.addConstr(p_p[i, i, l, f] - p_p[j, i, l, f] <= M[i] * alpha_p[j, i, l] - 1,
+                  name=f"R12[{l},{i},{j}]")
 
   # R13
-  for l in F:
-    for i in I:
-      for j in I:
-        if j != i:
-          m.addConstr(M * alpha_p[j, i, l] >= 1 + p_p[j, i, l, F[-1]] - p_p[i, i, l, F[-1]],
-                      name=f"R13-{l}-{i}-{j}")
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R13[{i},{l}]")
 
   # R14
-  for i in I:
-    for l in F:
-      _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
-      m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R14-{i}-{l}")
-
-  # R15
-  for i in I:
-    for l in F:
-      _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
-      m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R15-{i}-{l}")
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R14[{i},{l}]")
 
   ########################
   # * FUNCION OBJETIVO * #

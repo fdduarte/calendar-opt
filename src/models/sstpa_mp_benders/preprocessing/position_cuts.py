@@ -1,12 +1,4 @@
-def preprocess(self, model, variables, upgraded=True):
-  """Función principal que agrega cortes al modelo"""
-  if upgraded:
-    _upgraded_cuts(self, model, variables)
-  else:
-    _normal_cuts(self)
-
-
-def _upgraded_cuts(self, model, variables):
+def upgraded_position_cuts(self, model, variables):
   """Función principal que agrega cortes al modelo"""
   dates_left = len(self.params['F'])
   F = self.params['F']
@@ -64,7 +56,7 @@ def _get_sum_results(results_sorted, start_date, current_date):
   return val
 
 
-def _normal_cuts(self):
+def normal_position_cuts(self):
   """Agrega cortes normales (sin considerar información de los resultados)"""
   dates_left = len(self.params['F'])
   F = self.params['F']

@@ -1,0 +1,266 @@
+from itertools import product
+from gurobipy import Model, GRB, quicksum, LinExpr
+from ..parse_params import parse_params
+from ....libs.argsparser import args
+
+
+# pylint: disable=invalid-name
+def create_model(log=True):
+  """
+  Funcion que crea modelo de optimizacion de multiples posiciones sin descomposicion
+  """
+  start_date = args.start_date
+  filepath = args.filepath
+  time_limit = args.time_limit
+  mip_focus = args.mip_focus
+  mip_gap = args.mip_gap
+  local_patterns = args.local_patterns
+
+  m = Model("SSTPA V3")
+
+  if not args.verbose or not log:
+    m.Params.LogToConsole = 0
+  m.Params.TimeLimit = time_limit
+  m.Params.MIPFocus = mip_focus
+  m.Params.MIPGap = mip_gap
+
+  # Parse params dict to variables
+  params = parse_params(filepath, start_date)
+
+  N = params['N']
+  F = params['F']
+  S = params['S']
+  I = params['I']
+  R = params['R']
+  L = params['L']
+  M = params['M']
+  EL = params['EL']
+  EV = params['EV']
+  PI = params['PI']
+
+  #################
+  # * VARIABLES * #
+  #################
+
+  variables = {}
+
+  # x_nf: x[partido, fecha]
+  # 1 si el partido n se programa finalmente
+  # en la fecha f
+  # 0 en otro caso.
+  x = m.addVars(N, F, vtype=GRB.CONTINUOUS, name="x")
+  variables['x'] = x
+
+  # y_is: y[equipo][patron_localias]
+  # 1 si al equipo i se le asigna el patron
+  # de localias s
+  # 0 en otro caso
+  y = {}
+  for i in I:
+    for s in S[i]:
+      y[i, s] = m.addVar(vtype=GRB.CONTINUOUS, name=f"y[{i},{s}]")
+  variables['y'] = y
+
+  # p_jilf: P[equipo, equipo, fecha, fecha]
+  # discreta, cant de puntos del equipo j al finalizar la fecha f
+  # con la info de los resultados hasta la fecha l inclusive
+  # en el MEJOR conjunto de resultados futuros para el equipo i
+  p_m = m.addVars(I, I, F, F, vtype=GRB.CONTINUOUS, name="p_m")
+
+  # p_jilf: P[equipo, equipo, fecha, fecha]
+  # discreta, cant de puntos del equipo j al finalizar la fecha f
+  # con la info de los resultados hasta la fecha l inclusive
+  # en el PEOR conjunto de resultados futuros para el equipo i
+  p_p = m.addVars(I, I, F, F, vtype=GRB.CONTINUOUS, name="p_p")
+
+  # v_nilf : v[partido, equipo, fecha, fecha]
+  # binaria,  1 si el equipo local gana el partido n
+  # de la fecha f teniendo informacion finalizada la fecha l
+  # en el MEJOR conjunto de resultados futuros para el equipo i
+  v_m = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="v_m")
+
+  # v_nilf : v[partido, equipo, fecha, fecha]
+  # binaria,  1 si el equipo local gana el partido n
+  # de la fecha f teniendo informacion finalizada la fecha l
+  # en el MEJOR conjunto de resultados futuros para el equipo i
+  v_p = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="v_p")
+
+  # a_nilf: a[partido,equipo,fecha,fecha]
+  # 1 si el equipo visitante gana el partido n de la fecha f
+  # teniendo información finalizada la fecha l
+  # en el MEJOR conjunto de resultados para el equipo i
+  a_m = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="a_m")
+
+  # a_nilf: a[partido,equipo,fecha,fecha]
+  # 1 si el equipo visitante gana el partido n de la fecha f
+  # teniendo información finalizada la fecha l
+  # en el PEOR conjunto de resultados para el equipo i
+  a_p = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="a_p")
+
+  # e_nilf: e[partido,equipo,fecha,fecha]
+  # binaria, toma el valor 1 si se empata el
+  # partido n de la fecha f, con la info
+  # de los resultados hasta la fecha l inclusive
+  # en el MEJOR conjunto de resultados futuros para el euqipo i
+  e_m = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="e_m")
+
+  # e_nilf: e[partido,equipo,fecha,fecha]
+  # binaria, toma el valor 1 si se empata el
+  # partido n de la fecha f, con la info
+  # de los resultados hasta la fecha l inclusive
+  # en el PEOR- conjunto de resultados futuros para el euqipo i
+  e_p = m.addVars(N, I, F, F, vtype=GRB.CONTINUOUS, name="e_p")
+
+  # alpha_jil : alfa[equipo,equipo,fecha]
+  # binaria, toma el valor 1 si el equipo j termina con menos puntos
+  # que el equipo i en el
+  # MEJOR conjunto de
+  # resultados futuros para el equipo i considerando que
+  # se está en la fecha l
+  alpha_m = m.addVars(I, I, F, vtype=GRB.CONTINUOUS, name="alpha_m")
+
+  # alpha_jil : alfa[equipo,equipo,fecha]
+  # binaria, toma el valor 1 si el equipo j tiene termina
+  # con menos puntos que el equipo i, en el PEOR conjunto de
+  # resultados futuros para el equipo i considerando que
+  # se está en la fecha l
+  alpha_p = m.addVars(I, I, F, vtype=GRB.CONTINUOUS, name="alpha_p")
+
+  # beta_il: beta[equipo,fecha]
+  # discreta, indica la mejor posicion
+  # que puede alcanzar el equipo i al final del 
+  # torneo, mirando desde la fecha l en el MEJOR
+  # conjunto de resultados futuros para el equipo i
+  beta_m = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_m")
+  variables['beta_m'] = beta_m
+
+  # beta_il: beta[equipo, fecha]
+  # discreta, indica la mejor posicion
+  # que puede alcanzar el equipo i al final del 
+  # torneo, mirando desde la fecha l en el PEOR
+  # conjunto de resultados futuros para el equipo i
+  beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
+  variables['beta_p'] = beta_p
+
+  #####################
+  # * RESTRICCIONES * #
+  #####################
+
+  # R2
+  for n in N:
+    m.addConstr((quicksum(x[n, f] for f in F) == 1), name=f"R2[{n}]")
+
+  # R3
+  for i, f in product(I, F):
+    _exp = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1))
+    m.addConstr(_exp == 1, name=f"R3[{i},{f}]")
+
+  # R4
+  if local_patterns:
+    m.addConstrs((quicksum(y[i, s] for s in S[i]) == 1 for i in I), name="R4")
+
+  # R5
+  if local_patterns:
+    for f, i in product(F, I):
+      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
+      _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 1))
+      m.addConstr(_exp1 == _exp2, name=f"R5[{f},{i}]")
+
+  # R6
+  if local_patterns:
+    for f, i in product(F, I):
+      _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
+      _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 0))
+      m.addConstr(_exp1 == _exp2, name=f"R6[{f},{i}]")
+
+  # R7
+  for n, i, f, l in product(N, I, F, F):
+    if f > l:
+      _exp = LinExpr(v_m[n, i, l, f] + e_m[n, i, l, f] + a_m[n, i, l, f])
+      m.addConstr(_exp == x[n, f], name=f"R7[{n},{i},{f},{l}]")
+
+  # R8
+  for n, i, f, l in product(N, I, F, F):
+    if f > l:
+      _exp = LinExpr(v_p[n, i, l, f] + e_p[n, i, l, f] + a_p[n, i, l, f])
+      m.addConstr(_exp == x[n, f], name=f"R8[{n},{i},{f},{l}]")
+
+  # R9
+  for j, i, f, l in product(I, I, F, F):
+    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+    _exp2 = LinExpr(quicksum(quicksum(3 * v_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
+    _exp3 = LinExpr(quicksum(quicksum(3 * a_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
+    _exp4 = LinExpr(quicksum(quicksum(e_m[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+    m.addConstr(p_m[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                name=f"R9[{j},{i},{f},{l}]")
+
+  # R10
+  for j, i, f, l in product(I, I, F, F):
+    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+    _exp2 = LinExpr(quicksum(quicksum(3 * v_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
+    _exp3 = LinExpr(quicksum(quicksum(3 * a_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
+    _exp4 = LinExpr(quicksum(quicksum(e_p[n, i, l, theta]
+                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+    m.addConstr(p_p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                name=f"R10[{j},{i},{f},{l}]")
+
+  # R11
+  for l, i, j in product(F, I, I):
+    if j != i:
+      m.addConstr(p_m[i, i, l, f] - p_m[j, i, l, f] <= M[i] * (1 - alpha_m[j, i, l]) - 1,
+                  name=f"R11[{l},{i},{j}]")
+
+  # R12
+  for l, i, j in product(F, I, I):
+    if j != i:
+      m.addConstr(p_p[i, i, l, f] - p_p[j, i, l, f] <= M[i] * alpha_p[j, i, l] - 1,
+                  name=f"R12[{l},{i},{j}]")
+
+  # R13
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R13[{i},{l}]")
+
+  # R14
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R14[{i},{l}]")
+
+  # Var constr
+  m.addConstrs((x[n, f] >= 0 for n in N for f in F), name='N1')
+  m.addConstrs((x[n, f] <= 1 for n in N for f in F), name='N2')
+
+  for i in I:
+    for s in S[i]:
+      m.addConstr(y[i, s] >= 0, name=f'N3[{i},{s}]')
+      m.addConstr(y[i, s] <= 1, name=f'N4[{i},{s}]')
+
+  m.addConstrs((alpha_m[i, j, f] >= 0 for i in I for j in I for f in F), name='N5')
+  m.addConstrs((alpha_m[i, j, f] <= 1 for i in I for j in I for f in F), name='N6')
+
+  m.addConstrs((v_m[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N7')
+  m.addConstrs((v_p[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N8')
+
+  m.addConstrs((e_m[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N9')
+  m.addConstrs((e_p[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N10')
+
+  m.addConstrs((a_m[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N11')
+  m.addConstrs((a_p[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N12')
+
+  ########################
+  # * FUNCION OBJETIVO * #
+  ########################
+
+  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
+  m.setObjective(_obj, GRB.MAXIMIZE)
+
+  m.update()
+
+  return m, variables

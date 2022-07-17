@@ -3,9 +3,9 @@ from invoke import task
 # Task params
 
 PATTERNS = False  # Si se usan patrones de localia/visita
-PREPROCESS = False  # Si se usa preprocesamiento
+PREPROCESS = True  # Si se usa preprocesamiento
 BENDERS = True  # Si se usan cortes de benders
-IIS = False  # Si se usa IIS para cortes de Hamming
+IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 
 

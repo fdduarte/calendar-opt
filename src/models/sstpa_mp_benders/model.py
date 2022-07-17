@@ -9,11 +9,11 @@ from .utils import (
   set_sstpa_restrictions,
   set_cb_sol,
   create_sstpa_restrictions,
-  generate_benders_cut,
-  preprocess
+  generate_benders_cut
 )
+from .preprocessing import preprocess
 from ...libs.argsparser import args
-from ...libs.logger import log
+from ...libs.logger import log, logger
 from ...libs.timer import timer
 from .parse_params import parse_params
 
@@ -64,37 +64,40 @@ class Benders:
   @timer.timeit('callback')
   def _lazy_cb(self, model, where):
     """Gurobi callback"""
+    mipnode = True
+    mipsol = True
     try:
-      if where == GRB.Callback.MIPNODE:
+      if where == GRB.Callback.MIPNODE and mipnode:
         timer.timestamp('MIPNODE')
         if self.last_sol and not str(self.last_sol) in self.visited_sols:
           # Set SSTPA x values and optimize
-          set_sstpa_restrictions(self.sstpa_model, 'x', self.last_sol)
           self.sstpa_model.optimize()
 
           if self.sstpa_model.Status == GRB.OPTIMAL:
             # Pass solution to current model and get incumbent
             set_cb_sol(model, self.sstpa_model)
-            model.cbUseSolution()
 
           # Add solution to visited
           self.visited_sols.add(str(self.last_sol))
         timer.timestamp('MIPNODE')
 
-      if where == GRB.Callback.MIPSOL:
+      if where == GRB.Callback.MIPSOL and mipsol:
         timer.timestamp('MIPSOL')
         # Si estamos en un nodo de solución entera, seteamos last_sol a la
         # solucón del nodo.
-        self.last_sol = parse_vars(self.master_model, 'x', callback=True)
+        self.last_sol = parse_vars(self.master_vars, self.master_model, callback=True)
+        set_sstpa_restrictions(self.sstpa_model, self.last_sol)
 
         for i, l, s in self.subproblem_indexes:
           # Se setean las restricciones que fijan a x y alpha en el subproblema
           # y se resuelve.
           timer.timestamp('cortes de hamming')
           subproblem = self.subproblem_model[i, l, s]
-          set_subproblem_values(self, model, (i, l, s))
+          sub = (self.subproblem_model, self.subproblem_res)
+          set_subproblem_values(self, model, sub, (i, l, s))
           timer.timestamp('opt hamming sub')
           subproblem.optimize()
+          logger.increment_stats('subsolved')
           timer.timestamp('opt hamming sub')
 
           # Si el modelo es infactible, se agregan cortes de factibilidad
@@ -102,31 +105,36 @@ class Benders:
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
+            logger.increment_stats('hamming cut')
             model.cbLazy(cut >= 1)
           timer.timestamp('cortes de hamming')
 
           if args.benders_cuts:
+
             # Se resuelve la relajación y agregan cortes de Benders
             timer.timestamp('cortes de benders')
             subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
             subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
 
-            set_subproblem_values(self, model, (i, l, s))
+            sub = (self.subproblem_relaxed_model, self.subproblem_relaxed_res)
+            set_subproblem_values(self, model, sub, (i, l, s), relaxed=True)
 
             timer.timestamp('opt benders sub')
             subproblem_relaxed.optimize()
+            logger.increment_stats('sub(r) solved')
             timer.timestamp('opt benders sub')
 
             if subproblem_relaxed.Status == GRB.INFEASIBLE:
               cut = generate_benders_cut(self, model, subproblem_relaxed_res, subproblem_relaxed)
               model.cbLazy(cut <= 0)
+              logger.increment_stats('benders cut')
             timer.timestamp('cortes de benders')
         timer.timestamp('MIPSOL')
     except Exception as err:
       log('error', 'callback')
       log('error', err)
       model.terminate()
-      raise Exception(err)
+      raise Exception from err
 
   def optimize(self):
     """
@@ -144,14 +152,14 @@ class Benders:
     if self.master_model.Status == GRB.INFEASIBLE:
       log('result', 'Modelo Infactible')
       return
-    x = parse_vars(self.master_model, 'x')
+    x = parse_vars(self.master_vars, self.master_model)
     # le pasamos el x a sstpa
 
     # creamos una instancia del sstpa con x fijo
     sstpa, _ = _sstpa()
     sstpa.Params.LogToConsole = 0
     create_sstpa_restrictions(self, sstpa, 'x')
-    set_sstpa_restrictions(sstpa, 'x', x)
+    set_sstpa_restrictions(sstpa, x)
     sstpa.optimize()
 
     # creamos una instancia de sstpa con x irrestricto

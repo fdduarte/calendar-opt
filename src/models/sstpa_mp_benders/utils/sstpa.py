@@ -17,17 +17,17 @@ def create_sstpa_restrictions(self, model, var):
   model.update()
 
 
-def set_sstpa_restrictions(model, var_name, var):
+def set_sstpa_restrictions(model, last_sol):
   """
   Setea el lado derecho (rhs) de la restriccion de la variable {var} para
   el modelo SSTPA.
   """
-  assert var_name in ['x'], 'Variable no soportada'
-  for index, value in var.items():
+  for name, value in last_sol.items():
     value = value_to_binary(value)
-    if var_name == 'x':
-      n, f = index
-      model.getConstrByName(f'R-x[{n},{f}]').rhs = value
+    _, index = name.strip(']').split('[')
+    index = index.split(',')
+    n, f = index
+    model.getConstrByName(f'R-x[{n},{f}]').rhs = value
 
   model.update()
 
