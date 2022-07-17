@@ -4,14 +4,14 @@ from ....libs.argsparser import args
 
 
 # pylint: disable=invalid-name
-def master(params):
+def master(params, log=True):
   """Genera el modelo maestro de SSTPA"""
   mip_gap = args.mip_gap
   time_limit = args.time_limit
   local_patterns = args.local_patterns
 
   m = Model("SSTPA Benders Master")
-  if not args.verbose:
+  if not args.verbose or not log:
     m.Params.LogToConsole = 0
   m.Params.TimeLimit = time_limit
   m.Params.LazyConstraints = 1

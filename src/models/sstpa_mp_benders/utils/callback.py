@@ -4,3 +4,4 @@ def set_cb_sol(model, sstpa):
   for var in model.getVars():
     value = sstpa.getVarByName(var.VarName).X
     model.cbSetSolution(var, value)
+  model.cbUseSolution()

@@ -1,6 +1,6 @@
 from itertools import product
 from gurobipy import LinExpr
-from .helpers import get_subproblem_indexes, value_to_binary
+from .helpers import get_subproblem_indexes
 
 
 def generate_hamming_cut(self, indexes, master, IIS=False):
@@ -60,7 +60,7 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
     if f > l:
       r3 = subproblem_res['R3'][n, i, f, l]
       x = self.master_vars['x'][n, f]
-      cut += r3.farkasDual * x
+      cut += -r3.farkasDual * x
 
   # R4
   for j, f in product(I, F):
@@ -72,7 +72,7 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
           if theta <= l:
             x = self.master_vars['x'][n, theta]
             value += R[j][n] * x
-    cut += r4.farkasDual * (PI[j] + value)
+    cut += -r4.farkasDual * (PI[j] + value)
 
   # R15
   if s == 'm':
@@ -80,7 +80,7 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
       if j != i:
         r5m = subproblem_res['R5M'][l, i, j]
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-        cut += r5m.farkasDual * (1 - M[i] + M[i] * alpha)
+        cut += -r5m.farkasDual * (1 - M[i] + M[i] * alpha)
 
   # R16
   if s == 'p':
@@ -88,6 +88,6 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
       if j != i:
         r5p = subproblem_res['R5P'][l, i, j]
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-        cut += r5p.farkasDual * (1 - M[i] * alpha)
+        cut += -r5p.farkasDual * (1 - M[i] * alpha)
 
   return cut

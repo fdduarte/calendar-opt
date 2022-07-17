@@ -64,28 +64,29 @@ class Benders:
   @timer.timeit('callback')
   def _lazy_cb(self, model, where):
     """Gurobi callback"""
+    mipnode = True
+    mipsol = True
     try:
-      if where == GRB.Callback.MIPNODE:
+      if where == GRB.Callback.MIPNODE and mipnode:
         timer.timestamp('MIPNODE')
         if self.last_sol and not str(self.last_sol) in self.visited_sols:
           # Set SSTPA x values and optimize
-          set_sstpa_restrictions(self.sstpa_model, 'x', self.last_sol)
           self.sstpa_model.optimize()
 
           if self.sstpa_model.Status == GRB.OPTIMAL:
             # Pass solution to current model and get incumbent
             set_cb_sol(model, self.sstpa_model)
-            model.cbUseSolution()
 
           # Add solution to visited
           self.visited_sols.add(str(self.last_sol))
         timer.timestamp('MIPNODE')
 
-      if where == GRB.Callback.MIPSOL:
+      if where == GRB.Callback.MIPSOL and mipsol:
         timer.timestamp('MIPSOL')
         # Si estamos en un nodo de solución entera, seteamos last_sol a la
         # solucón del nodo.
-        self.last_sol = parse_vars(self.master_model, 'x', callback=True)
+        self.last_sol = parse_vars(self.master_vars, self.master_model, callback=True)
+        set_sstpa_restrictions(self.sstpa_model, self.last_sol)
 
         for i, l, s in self.subproblem_indexes:
           # Se setean las restricciones que fijan a x y alpha en el subproblema
@@ -151,14 +152,14 @@ class Benders:
     if self.master_model.Status == GRB.INFEASIBLE:
       log('result', 'Modelo Infactible')
       return
-    x = parse_vars(self.master_model, 'x')
+    x = parse_vars(self.master_vars, self.master_model)
     # le pasamos el x a sstpa
 
     # creamos una instancia del sstpa con x fijo
     sstpa, _ = _sstpa()
     sstpa.Params.LogToConsole = 0
     create_sstpa_restrictions(self, sstpa, 'x')
-    set_sstpa_restrictions(sstpa, 'x', x)
+    set_sstpa_restrictions(sstpa, x)
     sstpa.optimize()
 
     # creamos una instancia de sstpa con x irrestricto

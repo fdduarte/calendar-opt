@@ -2,23 +2,21 @@ from typing import Tuple
 from gurobipy import Model
 
 
-def parse_vars(model, var_name, callback=False, is_binary=True):
+def parse_vars(model_var, model, callback=False, is_binary=True):
   """
   Parsea la variable "var_name" de un modelo, retornando un diccionario.
   """
+
   _vars = {}
-  for var in model.getVars():
+  for var in model_var['x'].values():
     name = var.VarName
-    if var_name in name:
-      name = name.strip(f"{var_name}[").strip("]").split(",")
-      name = (int(i) if i.isdigit() else i for i in name)
-      if callback:
-        value = model.cbGetSolution(var)
-      else:
-        value = var.X
-      if is_binary:
-        value = value_to_binary(value)
-      _vars[name] = value
+    if callback:
+      value = model.cbGetSolution(var)
+    else:
+      value = var.X
+    if is_binary:
+      value = value_to_binary(value)
+    _vars[name] = value
   return _vars
 
 
