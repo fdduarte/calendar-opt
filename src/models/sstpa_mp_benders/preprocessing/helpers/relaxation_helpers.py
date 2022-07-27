@@ -21,23 +21,24 @@ def set_subproblem_values(self, indexes, subproblem_res, master_vars):
 
   # R4
   for j, f in product(I, F):
-    value = 0
-    for n in N:
-      if EL[j][n] + EV[j][n] == 1:
-        for theta in F:
-          if theta <= l:
-            x = master_vars['x'][n, theta].X
-            value += R[j][n] * x
-    subproblem_res['R4'][j, i, f, l].rhs = PI[j] + value
+    if f > l:
+      value = 0
+      for n in N:
+        if EL[j][n] + EV[j][n] == 1:
+          for theta in F:
+            if theta <= l:
+              x = master_vars['x'][n, theta].X
+              value += R[j][n] * x
+      subproblem_res['R4'][j, i, f, l].rhs = PI[j] + value
 
-  # R15
+  # R5M
   if s == 'm':
     for j in I:
       if j != i:
         alpha = master_vars[f'alpha_{s}'][j, i, l].X
         subproblem_res['R5M'][l, i, j].rhs = (1 - M[i] + M[i] * alpha)
 
-  # R16
+  # R5P
   if s == 'p':
     for j in I:
       if j != i:
@@ -70,17 +71,18 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
 
   # R4
   for j, f in product(I, F):
-    r4 = subproblem_res['R4'][j, i, f, l]
-    value = 0
-    for n in N:
-      if EL[j][n] + EV[j][n] == 1:
-        for theta in F:
-          if theta <= l:
-            x = master_vars['x'][n, theta]
-            value += R[j][n] * x
-    cut += -r4.farkasDual * (PI[j] + value)
+    if f > l:
+      r4 = subproblem_res['R4'][j, i, f, l]
+      value = 0
+      for n in N:
+        if EL[j][n] + EV[j][n] == 1:
+          for theta in F:
+            if theta <= l:
+              x = master_vars['x'][n, theta]
+              value += R[j][n] * x
+      cut += -r4.farkasDual * (PI[j] + value)
 
-  # R15
+  # R5M
   if s == 'm':
     for j in I:
       if j != i:
@@ -88,7 +90,7 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
         alpha = master_vars[f'alpha_{s}'][j, i, l]
         cut += -r5m.farkasDual * (1 - M[i] + M[i] * alpha)
 
-  # R16
+  # R5P
   if s == 'p':
     for j in I:
       if j != i:

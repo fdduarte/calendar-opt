@@ -1,4 +1,5 @@
 from gurobipy import GRB
+from ....libs.argsparser import args
 from ..subproblem import subproblem
 from ..master import master
 from .helpers import set_subproblem_values, generate_benders_cut
@@ -19,14 +20,20 @@ def relaxation_cuts(self):
 
   niter = 0
   ncuts = 0
-  print('\nSolving problem relaxation')
-  print(f'{"iteration": <10} | {"objVal": <8}')
+
+  if args.verbose:
+    print('\nSolving problem relaxation')
+    print(f'{"iteration": <10} | {"objVal": <8}')
+
+  last_obj_val = 10000000
   while True:
     niter += 1
 
     m_model.optimize()
     obj_val = round(m_model.objVal, 5)
-    print(f"{niter: <10} | {obj_val: <8}")
+    if obj_val < last_obj_val and args.verbose:
+      last_obj_val = obj_val
+      print(f"{niter: <10} | {obj_val: <8}")
 
     all_factible = True
     for i, l, s in self.subproblem_indexes:
@@ -46,6 +53,7 @@ def relaxation_cuts(self):
     if all_factible:
       break
 
-  print('\nRelaxation objectibe', m_model.objVal)
-  print('Relaxation added', ncuts, 'cuts\n')
+  if args.verbose:
+    print('\nRelaxation objectibe', m_model.objVal)
+    print('Relaxation added', ncuts, 'cuts\n')
   return

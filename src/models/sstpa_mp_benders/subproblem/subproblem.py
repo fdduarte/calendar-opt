@@ -92,24 +92,25 @@ def subproblem(i, l, s, params):
   # R4
   res['R4'] = {}
   for j, f in product(I, F):
-    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
-                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
-    _exp2 = LinExpr(quicksum(quicksum(3 * v[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
-    _exp3 = LinExpr(quicksum(quicksum(3 * a[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
-    _exp4 = LinExpr(quicksum(quicksum(e[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
-    m.addConstr(p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
-                name=f"R9[{j},{i},{f},{l}]")
-    res['R4'][j, i, f, l] = r
+    if f > l:
+      _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                      for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+      _exp2 = LinExpr(quicksum(quicksum(3 * v[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n]))
+      _exp3 = LinExpr(quicksum(quicksum(3 * a[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EV[j][n]))
+      _exp4 = LinExpr(quicksum(quicksum(e[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+      m.addConstr(p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                  name=f"R9[{j},{i},{f},{l}]")
+      res['R4'][j, i, f, l] = r
 
   # R17
   res['R5M'] = {}
   if s == 'm':
     for j in I:
       if j != i:
-        r = m.addConstr(p[i, i, l, f] - p[j, i, l, f] <= M[i] * (1 - alpha[j, i, l]) - 1,
+        r = m.addConstr(p[i, i, l, F[-1]] - p[j, i, l, F[-1]] <= M[i] * (1 - alpha[j, i, l]) - 1,
                         name=f"R5M[{l},{i},{j}]")
         res['R5M'][l, i, j] = r
 
@@ -117,7 +118,7 @@ def subproblem(i, l, s, params):
   if s == 'p':
     for j in I:
       if j != i:
-        r = m.addConstr(p[i, i, l, f] - p[j, i, l, f] <= M[i] * alpha[j, i, l] - 1,
+        r = m.addConstr(p[i, i, l, F[-1]] - p[j, i, l, F[-1]] <= M[i] * alpha[j, i, l] - 1,
                         name=f"R5P[{l},{i},{j}]")
         res['R5P'][l, i, j] = r
 
