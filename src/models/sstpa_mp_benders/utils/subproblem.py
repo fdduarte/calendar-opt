@@ -38,23 +38,24 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
       value = value_to_binary(x)
       subproblem_res[i, l, s]['R3'][n, i, f, l].rhs = value
 
-  # R14
+  # R4
   for j, f in product(I, F):
-    value = 0
-    for n in N:
-      if EL[j][n] + EV[j][n] == 1:
-        for theta in F:
-          if theta <= l:
-            x = self.master_vars['x'][n, theta]
-            if cb:
-              x = model.cbGetSolution(x)
-            else:
-              x = x.X
-            x = value_to_binary(x)
-            value += R[j][n] * x
-    subproblem_res[i, l, s]['R4'][j, i, f, l].rhs = PI[j] + value
+    if f > l:
+      value = 0
+      for n in N:
+        if EL[j][n] + EV[j][n] == 1:
+          for theta in F:
+            if theta <= l:
+              x = self.master_vars['x'][n, theta]
+              if cb:
+                x = model.cbGetSolution(x)
+              else:
+                x = x.X
+              x = value_to_binary(x)
+              value += R[j][n] * x
+      subproblem_res[i, l, s]['R4'][j, i, f, l].rhs = PI[j] + value
 
-  # R15
+  # R5M
   if s == 'm':
     for j in I:
       if j != i:
@@ -66,7 +67,7 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
         alpha = value_to_binary(alpha)
         subproblem_res[i, l, s]['R5M'][l, i, j].rhs = (1 - M[i] + M[i] * alpha)
 
-  # R16
+  # R5P
   if s == 'p':
     for j in I:
       if j != i:

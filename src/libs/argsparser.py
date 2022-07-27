@@ -31,13 +31,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-  "--mip_gap",
-  default=0,
-  type=int,
-  help="Gap de optimalidad"
-)
-
-parser.add_argument(
   "--mip_focus",
   default=1,
   type=int,
@@ -100,12 +93,21 @@ parser.add_argument(
   help="Si se usan cortes de benders."
 )
 
+parser.add_argument(
+  "--no_position_cuts",
+  action="store_true",
+  default=False,
+  help="Si se usan cortes de posiciones."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
 args.preprocess = not args.no_preprocess
+args.position_cuts = not args.no_position_cuts
 args.benders_cuts = not args.no_benders_cuts
 args.verbose = not args.not_verbose
+args.mip_gap = args.gap
 
 model_to_name = {
   3: 'Integrado',
@@ -118,7 +120,7 @@ if args.verbose:
   print('[args] Fecha de inicio:', args.start_date)
   print('[args] Breaks:', args.breaks)
   print('[args] Path del archivo:', args.filepath)
-  print('[args] MIP gap:', args.mip_gap)
+  print('[args] MIP gap:', args.gap)
   print('[args] MIP focus:', args.mip_focus)
   print('[args] Tiempo máximo:', args.time_limit)
   print('[args] Patrones:', args.local_patterns)
@@ -126,4 +128,5 @@ if args.verbose:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)
     print('[args] Cortes de Benders', args.benders_cuts)
+    print('[args] Cortes de posición', args.position_cuts)
   print("")

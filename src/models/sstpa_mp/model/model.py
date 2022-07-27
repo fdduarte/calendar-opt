@@ -187,40 +187,42 @@ def create_model(log=True):
 
   # R9
   for j, i, f, l in product(I, I, F, F):
-    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
-                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
-    _exp2 = LinExpr(quicksum(quicksum(3 * v_m[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
-    _exp3 = LinExpr(quicksum(quicksum(3 * a_m[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
-    _exp4 = LinExpr(quicksum(quicksum(e_m[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
-    m.addConstr(p_m[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
-                name=f"R9[{j},{i},{f},{l}]")
+    if f > l:
+      _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                      for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+      _exp2 = LinExpr(quicksum(quicksum(3 * v_m[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n]))
+      _exp3 = LinExpr(quicksum(quicksum(3 * a_m[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EV[j][n]))
+      _exp4 = LinExpr(quicksum(quicksum(e_m[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+      m.addConstr(p_m[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                  name=f"R9[{j},{i},{f},{l}]")
 
   # R10
   for j, i, f, l in product(I, I, F, F):
-    _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
-                    for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
-    _exp2 = LinExpr(quicksum(quicksum(3 * v_p[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n]))
-    _exp3 = LinExpr(quicksum(quicksum(3 * a_p[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EV[j][n]))
-    _exp4 = LinExpr(quicksum(quicksum(e_p[n, i, l, theta]
-                    for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
-    m.addConstr(p_p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
-                name=f"R10[{j},{i},{f},{l}]")
+    if f > l:
+      _exp1 = LinExpr(quicksum(quicksum(R[j][n] * x[n, theta]
+                      for n in N if EL[j][n] + EV[j][n] == 1) for theta in F if theta <= l))
+      _exp2 = LinExpr(quicksum(quicksum(3 * v_p[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n]))
+      _exp3 = LinExpr(quicksum(quicksum(3 * a_p[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EV[j][n]))
+      _exp4 = LinExpr(quicksum(quicksum(e_p[n, i, l, theta]
+                      for theta in F if l < theta <= f) for n in N if EL[j][n] + EV[j][n]))
+      m.addConstr(p_p[j, i, l, f] - _exp2 - _exp3 - _exp4 == PI[j] + _exp1,
+                  name=f"R10[{j},{i},{f},{l}]")
 
   # R11
   for l, i, j in product(F, I, I):
     if j != i:
-      m.addConstr(p_m[i, i, l, f] - p_m[j, i, l, f] <= M[i] * (1 - alpha_m[j, i, l]) - 1,
+      m.addConstr(p_m[i, i, l, F[-1]] - p_m[j, i, l, F[-1]] <= M[i] * (1 - alpha_m[j, i, l]) - 1,
                   name=f"R11[{l},{i},{j}]")
 
   # R12
   for l, i, j in product(F, I, I):
     if j != i:
-      m.addConstr(p_p[i, i, l, f] - p_p[j, i, l, f] <= M[i] * alpha_p[j, i, l] - 1,
+      m.addConstr(p_p[i, i, l, F[-1]] - p_p[j, i, l, F[-1]] <= M[i] * alpha_p[j, i, l] - 1,
                   name=f"R12[{l},{i},{j}]")
 
   # R13
@@ -237,7 +239,7 @@ def create_model(log=True):
   # * FUNCION OBJETIVO * #
   ########################
 
-  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
+  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()

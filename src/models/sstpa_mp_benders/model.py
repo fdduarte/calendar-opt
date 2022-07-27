@@ -4,12 +4,17 @@ from .master import master as _master
 from ..sstpa_mp import create_model as _sstpa
 from .utils import (
   set_subproblem_values,
-  generate_hamming_cut,
   parse_vars,
   set_sstpa_restrictions,
   set_cb_sol,
-  create_sstpa_restrictions,
-  generate_benders_cut
+  create_sstpa_restrictions
+)
+from .cuts import (
+  generate_benders_cut,
+  generate_hamming_cut,
+  generate_position_cut,
+  calculate_sum_alpha,
+  hamming_x
 )
 from .preprocessing import preprocess
 from ...libs.argsparser import args
@@ -107,10 +112,19 @@ class Benders:
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
             logger.increment_stats('hamming cut')
             model.cbLazy(cut >= 1)
+            # nuevo corte
+
+            if args.position_cuts:
+              sum_alpha = calculate_sum_alpha(self, (i, l, s), model)
+              ham_x = hamming_x(self, (i, l, s), model)
+              for f in self.params['F']:
+                if f >= l:
+                  cut = generate_position_cut(self, (i, f, s), sum_alpha, ham_x)
+                  model.cbLazy(cut >= 1)
+
           timer.timestamp('cortes de hamming')
 
           if args.benders_cuts:
-
             # Se resuelve la relajación y agregan cortes de Benders
             timer.timestamp('cortes de benders')
             subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
@@ -152,6 +166,7 @@ class Benders:
     if self.master_model.Status == GRB.INFEASIBLE:
       log('result', 'Modelo Infactible')
       return
+    return
     x = parse_vars(self.master_vars, self.master_model)
     # le pasamos el x a sstpa
 

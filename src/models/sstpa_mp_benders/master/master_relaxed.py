@@ -155,7 +155,7 @@ def master(params, log=True):
   # *  FUNCION OBJETIVO  *#
   #########################
 
-  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F)
+  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()

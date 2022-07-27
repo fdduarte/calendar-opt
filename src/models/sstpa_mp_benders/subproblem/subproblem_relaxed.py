@@ -64,18 +64,19 @@ def subproblem(i, l, s, params):
   # R14
   res['R4'] = {}
   for j, f in product(I, F):
-    _exp2 = LinExpr(quicksum(quicksum(3 * v[n, i, l, theta]
-                    for theta in F if theta > l and theta <= f)
-                    for n in N if EL[j][n] == 1))
-    _exp3 = LinExpr(quicksum(quicksum(3 * a[n, i, l, theta]
-                    for theta in F if theta > l and theta <= f)
-                    for n in N if EV[j][n] == 1))
-    _exp4 = LinExpr(quicksum(quicksum(e[n, i, l, theta]
-                    for theta in F if theta > l and theta <= f)
-                    for n in N if EL[j][n] + EV[j][n] == 1))
-    r = m.addConstr(p[j, i, l, f] - _exp2 - _exp3 - _exp4 == 0,
-                    name=f"R4[{j},{i},{f},{l}]")
-    res['R4'][j, i, f, l] = r
+    if f > l:
+      _exp2 = LinExpr(quicksum(quicksum(3 * v[n, i, l, theta]
+                      for theta in F if theta > l and theta <= f)
+                      for n in N if EL[j][n] == 1))
+      _exp3 = LinExpr(quicksum(quicksum(3 * a[n, i, l, theta]
+                      for theta in F if theta > l and theta <= f)
+                      for n in N if EV[j][n] == 1))
+      _exp4 = LinExpr(quicksum(quicksum(e[n, i, l, theta]
+                      for theta in F if theta > l and theta <= f)
+                      for n in N if EL[j][n] + EV[j][n] == 1))
+      r = m.addConstr(p[j, i, l, f] - _exp2 - _exp3 - _exp4 == 0,
+                      name=f"R4[{j},{i},{f},{l}]")
+      res['R4'][j, i, f, l] = r
 
   # R17
   res['R5M'] = {}
