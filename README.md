@@ -40,16 +40,10 @@ Detalles de los parámetros se encuentran en `scripts/run.sh`.
   - `4`: SSTPA MP CPLEX
   - `5`: SSTPA Benders
 
-#### Comandos útiles
+### CLI
 
-- Correr campeonato de prueba sin restricción de patrones:
+Por facilidad se usa [invoke](https://www.pyinvoke.org/) para ejecutar el programa mediante comandos más cortos. El el archivo `tasks.py` se pueden modificar los parámetros al comienzo del archivo, y luego ejecutar algún campeonato mediante el comando `invoke run-{size}`.
 
-`python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx" --no_local_patterns`
+Los tamaños (size) disponibles son tiny, small, med, big y huge.
 
-- Correr campeonato de prueba mediano
-
-`python main.py --start_date 10 --filepath data/campeonato_prueba_10eq.xlsx --model 3`
-
-- Correr campeonato real:
-
-`python main.py --start_date 28 --filepath data/Datos.xlsx --model 5`
+Además, mediante el comando `invoke clear-cache` se elimina el cache generado de los parámetros de las instancias.

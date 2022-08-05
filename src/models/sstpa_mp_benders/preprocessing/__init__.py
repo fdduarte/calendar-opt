@@ -4,7 +4,7 @@ from .relaxation_cuts import relaxation_cuts
 
 def preprocess(self, model, variables, upgraded=False):
   """Función principal que agrega cortes al modelo"""
-  position_cuts = True
+  position_cuts = False
   rel_cuts = True
   if rel_cuts:
     relaxation_cuts(self)
