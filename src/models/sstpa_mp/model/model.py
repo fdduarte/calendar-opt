@@ -128,7 +128,7 @@ def create_model(log=True):
 
   # beta_il: beta[equipo,fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final del 
+  # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el MEJOR
   # conjunto de resultados futuros para el equipo i
   beta_m = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_m")
@@ -136,7 +136,7 @@ def create_model(log=True):
 
   # beta_il: beta[equipo, fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final del 
+  # que puede alcanzar el equipo i al final de
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")

@@ -4,10 +4,10 @@ from invoke import task
 # Task params
 
 PATTERNS = True  # Si se usan patrones de localia/visita
-PREPROCESS = True  # Si se usa preprocesamiento
-BENDERS = True  # Si se usan cortes de benders
+PREPROCESS = False  # Si se usa preprocesamiento
+BENDERS = False  # Si se usan cortes de benders
 POSITION_CUTS = True  # Si se usan cortes de posiciones
-IIS = True  # Si se usa IIS para cortes de Hamming
+IIS = False  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
 
@@ -64,6 +64,7 @@ def run_small(con, start=6):
 def run_med(con, start=8):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_8_1.xlsx"'
+  com += '--breaks 2'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
@@ -80,7 +81,8 @@ def run_med(con, start=8):
 @task
 def run_big(con, start=9):
   """Campeonato pequeño con descomposición"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_10_1.xlsx"'
+  filepath = '"data/campeonato_10_1.xlsx"'
+  com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
@@ -97,7 +99,8 @@ def run_big(con, start=9):
 @task
 def run_huge(con, start=12):
   """Campeonato pequeño con descomposición"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_12_1.xlsx"'
+  filepath = '"data/campeonato_12_1.xlsx"'
+  com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
