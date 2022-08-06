@@ -105,7 +105,7 @@ def subproblem(i, l, s, params):
                   name=f"R9[{j},{i},{f},{l}]")
       res['R4'][j, i, f, l] = r
 
-  # R17
+  # R5M
   res['R5M'] = {}
   if s == 'm':
     for j in I:

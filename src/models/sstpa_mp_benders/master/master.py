@@ -72,7 +72,7 @@ def master(params, log=True):
   # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el MEJOR
   # conjunto de resultados futuros para el equipo i
-  beta_m = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_m")
+  beta_m = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_m")
   variables['beta_m'] = beta_m
 
   # beta_il: beta[equipo, fecha]
@@ -80,7 +80,7 @@ def master(params, log=True):
   # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
-  beta_p = m.addVars(I, F, vtype=GRB.INTEGER, name="beta_p")
+  beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
   variables['beta_p'] = beta_m
 
   #####################

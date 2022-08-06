@@ -42,7 +42,7 @@ class Benders:
     m, variables = _sstpa(log=False)
     self.sstpa_model = m
     self.sstpa_variables = variables
-    create_sstpa_restrictions(self, self.sstpa_model, 'x')
+    create_sstpa_restrictions(self, self.sstpa_model)
 
   def _init_master_model(self):
     """Instancia modelo maestro"""
@@ -112,15 +112,6 @@ class Benders:
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
             logger.increment_stats('hamming cut')
             model.cbLazy(cut >= 1)
-            # nuevo corte
-
-            if args.position_cuts:
-              sum_alpha = calculate_sum_alpha(self, (i, l, s), model)
-              ham_x = hamming_x(self, (i, l, s), model)
-              for f in self.params['F']:
-                if f >= l:
-                  cut = generate_position_cut(self, (i, f, s), sum_alpha, ham_x)
-                  model.cbLazy(cut >= 1)
 
           timer.timestamp('cortes de hamming')
 
@@ -173,7 +164,7 @@ class Benders:
     # creamos una instancia del sstpa con x fijo
     sstpa, _ = _sstpa()
     sstpa.Params.LogToConsole = 0
-    create_sstpa_restrictions(self, sstpa, 'x')
+    create_sstpa_restrictions(self, sstpa)
     set_sstpa_restrictions(sstpa, x)
     sstpa.optimize()
 
