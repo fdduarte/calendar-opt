@@ -3,7 +3,7 @@ from .helpers import value_to_binary
 # pylint: disable=invalid-name
 
 
-def create_sstpa_restrictions(self, model, var):
+def create_sstpa_restrictions(self, model):
   """
   Dada una familia de variables del modelo sstpa, crea restricciones del tipo
   for var in fam_var: var = 0. Esta restricción permite posteriormente fijar
@@ -17,13 +17,14 @@ def create_sstpa_restrictions(self, model, var):
   model.update()
 
 
-def set_sstpa_restrictions(model, last_sol):
+def set_sstpa_restrictions(model, last_sol, is_binary=True):
   """
   Setea el lado derecho (rhs) de la restriccion de la variable {var} para
   el modelo SSTPA.
   """
   for name, value in last_sol.items():
-    value = value_to_binary(value)
+    if is_binary:
+      value = value_to_binary(value)
     _, index = name.strip(']').split('[')
     index = index.split(',')
     n, f = index

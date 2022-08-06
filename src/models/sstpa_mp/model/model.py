@@ -5,7 +5,7 @@ from ....libs.argsparser import args
 
 
 # pylint: disable=invalid-name
-def create_model(log=True):
+def create_model(log=True, gap=True):
   """
   Funcion que crea modelo de optimizacion de multiples posiciones sin descomposicion
   """
@@ -22,7 +22,10 @@ def create_model(log=True):
     m.Params.LogToConsole = 0
   m.Params.TimeLimit = time_limit
   m.Params.MIPFocus = mip_focus
-  m.Params.MIPGap = mip_gap
+  if gap:
+    m.Params.MIPGap = mip_gap
+  else:
+    m.Params.MIPGap = 0
 
   # Parse params dict to variables
   params = parse_params(filepath, start_date)
@@ -136,7 +139,7 @@ def create_model(log=True):
 
   # beta_il: beta[equipo, fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final de
+  # que puede alcanzar el equipo i al final del 
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")

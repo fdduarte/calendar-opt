@@ -4,10 +4,10 @@ from invoke import task
 # Task params
 
 PATTERNS = True  # Si se usan patrones de localia/visita
-PREPROCESS = False  # Si se usa preprocesamiento
-BENDERS = False  # Si se usan cortes de benders
+PREPROCESS = True  # Si se usa preprocesamiento
+BENDERS = True  # Si se usan cortes de benders
 POSITION_CUTS = True  # Si se usan cortes de posiciones
-IIS = False  # Si se usa IIS para cortes de Hamming
+IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
 
@@ -25,7 +25,7 @@ def clear_cache(context, full=False):
 
 
 @task
-def run_tiny(con, start=4):
+def run_tiny(con, start=4, gap='0', preprocess_gap='0'):
   """Campeonato enano con descomposición"""
   com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
   if not PATTERNS:
@@ -40,11 +40,15 @@ def run_tiny(con, start=4):
     com += ' --not_verbose'
   if not POSITION_CUTS:
     com += ' --no_position_cuts'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
 @task
-def run_small(con, start=6):
+def run_small(con, start=6, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_6_1.xlsx"'
   if not PATTERNS:
@@ -57,14 +61,17 @@ def run_small(con, start=6):
     com += ' --no_IIS'
   if not VERBOSE:
     com += ' --not_verbose'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
 @task
-def run_med(con, start=8):
+def run_med(con, start=8, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_8_1.xlsx"'
-  com += '--breaks 2'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
@@ -75,11 +82,15 @@ def run_med(con, start=8):
     com += ' --no_IIS'
   if not VERBOSE:
     com += ' --not_verbose'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
 @task
-def run_big(con, start=9):
+def run_big(con, start=9, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   filepath = '"data/campeonato_10_1.xlsx"'
   com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
@@ -93,11 +104,15 @@ def run_big(con, start=9):
     com += ' --no_IIS'
   if not VERBOSE:
     com += ' --not_verbose'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
 @task
-def run_huge(con, start=12):
+def run_huge(con, start=12, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   filepath = '"data/campeonato_12_1.xlsx"'
   com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
@@ -111,11 +126,15 @@ def run_huge(con, start=12):
     com += ' --no_IIS'
   if not VERBOSE:
     com += ' --not_verbose'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
 @task
-def run_full(con, start=16):
+def run_full(con, start=16, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/Datos.xlsx"'
   if not PATTERNS:
@@ -128,6 +147,10 @@ def run_full(con, start=16):
     com += ' --no_IIS'
   if not VERBOSE:
     com += ' --not_verbose'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 

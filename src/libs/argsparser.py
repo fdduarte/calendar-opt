@@ -66,6 +66,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+  "--lp_gap",
+  default=0.0,
+  type=float,
+  help="Gap del preprocesamiento (relajación)."
+)
+
+parser.add_argument(
   "--no_IIS",
   action="store_true",
   default=False,
@@ -108,6 +115,7 @@ args.position_cuts = not args.no_position_cuts
 args.benders_cuts = not args.no_benders_cuts
 args.verbose = not args.not_verbose
 args.mip_gap = args.gap
+args.lp_gap = args.lp_gap
 
 model_to_name = {
   3: 'Integrado',
@@ -127,6 +135,7 @@ if args.verbose:
   if args.model == 5:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)
+    print('[args] LP gap preprocesamiento', args.lp_gap)
     print('[args] Cortes de Benders', args.benders_cuts)
     print('[args] Cortes de posición', args.position_cuts)
   print("")
