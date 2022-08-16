@@ -90,7 +90,7 @@ def run_med(con, start=8, gap='0', preprocess_gap='0'):
 
 
 @task
-def run_big(con, start=9, gap='0', preprocess_gap='0'):
+def run_big(con, start=10, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   filepath = '"data/campeonato_10_1.xlsx"'
   com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
