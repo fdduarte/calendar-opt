@@ -78,9 +78,9 @@ class Benders:
           # Set SSTPA x values and optimize
           self.sstpa_model.optimize()
 
-          if self.sstpa_model.Status == GRB.OPTIMAL:
-            # Pass solution to current model and get incumbent
-            set_cb_sol(model, self.sstpa_model)
+          assert self.sstpa_model.Status == GRB.OPTIMAL, 'Modelo no es factible'
+          # Pass solution to current model and get incumbent
+          set_cb_sol(model, self.sstpa_model)
 
           # Add solution to visited
           self.visited_sols.add(str(self.last_sol))
@@ -110,7 +110,7 @@ class Benders:
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
-            logger.increment_stats('hamming cut')
+            logger.increment_stats('hamming cut', verbose=True)
             model.cbLazy(cut >= 1)
 
           timer.timestamp('cortes de hamming')
@@ -150,7 +150,9 @@ class Benders:
       self._lazy_cb(x, y)
 
     if args.preprocess:
+      timer.timestamp('preprocess')
       preprocess(self, self.master_model, self.master_vars)
+      timer.timestamp('preprocess')
 
     self.master_model.write('logs/model/master.mps')
     self.master_model.optimize(callback)

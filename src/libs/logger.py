@@ -12,10 +12,13 @@ class Logger():
     if args.verbose:
       print(f"[{category}] {message}")
 
-  def increment_stats(self, name: str):
+  def increment_stats(self, name: str, verbose=False):
     """Incrementa en uno la estadistica {name}"""
     if name in self.data:
       self.data[name] += 1
+      if args.print_every_n_cuts != 0:
+        if args.verbose and verbose and self.data[name] % args.print_every_n_cuts == 0:
+          print('[stats]', name, self.data[name])
     else:
       self.data[name] = 1
 
