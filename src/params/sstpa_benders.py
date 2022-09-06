@@ -1,5 +1,6 @@
 import json
 import os
+from itertools import product
 from ..libs import sheet_parser
 from ..libs.argsparser import args
 from ..libs import pattern_generator
@@ -77,6 +78,13 @@ def generate_params():
 
   # Lista de los puntos disponibles en el torneo
   dates_number = F[-1] - start_date + 1
+
+  # XInf: XI[partido, fecha]
+  # Si el partido n se juega en la fecha f inicialmente
+  XI = {n: {f: 0 for f in F} for n in N}
+  for match in results_data:
+    if match.number in N and match.date in F:
+      XI[match.number][match.date] = 1
 
   # T: Puntos
   _max_points = max(PI.values()) + dates_number * 3
@@ -158,7 +166,8 @@ def generate_params():
     'EV': EV,
     'L': L,
     'V': V,
-    'M': M
+    'M': M,
+    'XI': XI
   }
 
   filename = os.path.split(filepath)[1]

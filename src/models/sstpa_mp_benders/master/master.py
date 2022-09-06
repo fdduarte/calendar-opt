@@ -26,6 +26,7 @@ def master(params, log=True):
   L = params['L']
   EL = params['EL']
   EV = params['EV']
+  XI = params['XI']
 
   #################
   # *  VARIABLES  *#
@@ -39,6 +40,10 @@ def master(params, log=True):
   # 0 en otro caso.
   x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
   variables['x'] = x
+
+  if args.initial_sol:
+    for n, f in product(N, F):
+      x[n, f].start = XI[n][f]
 
   # y_is: y[equipo][patron_localias]
   # 1 si al equipo i se le asigna el patron
@@ -123,6 +128,13 @@ def master(params, log=True):
   for i, l in product(I, F):
     _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
     m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R8[{i},{l}]")
+
+  # R9
+  res9 = False
+  if res9:
+    for f in F:
+      _exp = LinExpr(quicksum(quicksum(y[i, s] * L[s][f]for s in S[i]) for i in I))
+      m.addConstr(_exp == len(I) // 2, name=f"R9[{f}]")
 
   # R10
   # for i in I:
