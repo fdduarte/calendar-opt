@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description="")
 
@@ -144,7 +145,10 @@ model_to_name = {
 }
 
 if args.verbose:
-  print('Optimización calendario deportivo\n')
+  print('Optimización calendario deportivo')
+  dt_s = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+  print(dt_s, '\n')
+
   print('[args] Modelo:', model_to_name[args.model])
   print('[args] Fecha de inicio:', args.start_date)
   print('[args] Breaks:', args.breaks)
