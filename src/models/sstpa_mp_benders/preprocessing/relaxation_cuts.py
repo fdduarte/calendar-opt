@@ -80,7 +80,7 @@ def relaxation_cuts(self):
       break
 
   if args.verbose:
-    print('\nRelaxation objectibe', m_model.objVal)
+    print('\nRelaxation objective', m_model.objVal)
     print('Relaxation added', ncuts, 'cuts')
     print('Total time', round(time() - start_time, 2), 'seconds\n')
 
