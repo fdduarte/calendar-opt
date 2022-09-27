@@ -1,6 +1,5 @@
 import json
 import os
-from itertools import product
 from ..libs import sheet_parser
 from ..libs.argsparser import args
 from ..libs import pattern_generator
