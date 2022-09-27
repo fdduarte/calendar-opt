@@ -86,6 +86,27 @@ class Benders:
           self.visited_sols.add(str(self.last_sol))
         timer.timestamp('MIPNODE')
 
+        node_count = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+        if int(node_count) == 0:  # nodo raíz
+          for i, l, s in self.subproblem_indexes:
+            timer.timestamp('cortes de benders')
+            subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
+            subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
+
+            sub = (self.subproblem_relaxed_model, self.subproblem_relaxed_res)
+            set_subproblem_values(self, model, sub, (i, l, s), relaxed=True, cb=False, mn=True)
+
+            timer.timestamp('opt benders sub')
+            subproblem_relaxed.optimize()
+            logger.increment_stats('sub(r) solved')
+            timer.timestamp('opt benders sub')
+
+            if subproblem_relaxed.Status == GRB.INFEASIBLE:
+              cut = generate_benders_cut(self, model, subproblem_relaxed_res, subproblem_relaxed)
+              model.cbLazy(cut <= 0)
+              logger.increment_stats('benders cut')
+            timer.timestamp('cortes de benders')
+
       if where == GRB.Callback.MIPSOL and mipsol:
         timer.timestamp('MIPSOL')
         # Si estamos en un nodo de solución entera, seteamos last_sol a la

@@ -3,18 +3,18 @@ from .helpers import value_to_binary
 
 
 # pylint: disable=invalid-name
-def set_subproblem_values(self, model, subproblem, indexes, relaxed=False, cb=True):
+def set_subproblem_values(self, model, subproblem, indexes, relaxed=False, cb=True, mn=False):
   """
   Dado el problema maestro, setea el lado derecho de las
   restricciones del subproblema (R15, R16 y  R17/R18)
   """
   if relaxed:
-    _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb)
+    _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb, mn)
   else:
     _set_subproblem_values_normal(self, model, subproblem, indexes)
 
 
-def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
+def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb, mn):
   i, l, s = indexes
   N = self.params['N']
   F = self.params['F']
@@ -33,6 +33,8 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
       x = self.master_vars['x'][n, f]
       if cb:
         x = model.cbGetSolution(x)
+      elif mn:
+        x = model.cbGetNodeRel(x)
       else:
         x = x.X
       value = value_to_binary(x)
@@ -49,6 +51,8 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
               x = self.master_vars['x'][n, theta]
               if cb:
                 x = model.cbGetSolution(x)
+              elif mn:
+                x = model.cbGetNodeRel(x)
               else:
                 x = x.X
               x = value_to_binary(x)
@@ -62,6 +66,8 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
         if cb:
           alpha = model.cbGetSolution(alpha)
+        elif mn:
+          alpha = model.cbGetNodeRel(alpha)
         else:
           alpha = alpha.X
         alpha = value_to_binary(alpha)
@@ -74,6 +80,8 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb):
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
         if cb:
           alpha = model.cbGetSolution(alpha)
+        elif mn:
+          alpha = model.cbGetNodeRel(alpha)
         else:
           alpha = model.X
         alpha = value_to_binary(alpha)
