@@ -87,7 +87,7 @@ class Benders:
         timer.timestamp('MIPNODE')
 
         node_count = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
-        if int(node_count) == 0:  # nodo raíz
+        if int(node_count) == 0 and args.mipnode_cuts:  # nodo raíz
           for i, l, s in self.subproblem_indexes:
             timer.timestamp('cortes de benders')
             subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
