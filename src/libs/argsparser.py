@@ -121,6 +121,13 @@ parser.add_argument(
   help="Si se usa el torneo como solución inicial."
 )
 
+parser.add_argument(
+  "--shuffle_params",
+  action="store_true",
+  default=False,
+  help="Si se ordenan de forma aleatoria los patrones de resultado."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
@@ -147,6 +154,7 @@ if args.verbose:
   print('[args] Tiempo máximo:', args.time_limit)
   print('[args] Patrones:', args.local_patterns)
   print('[args] Solución Inicial:', args.initial_sol)
+  print('[args] Orden de parámetros aleatorio:', args.shuffle_params)
   if args.model == 5:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)

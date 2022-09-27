@@ -1,6 +1,7 @@
 import itertools
 import os
 import json
+import random
 from .logger import log
 from .argsparser import args
 from .array_tools import remove_duplicates
@@ -49,8 +50,6 @@ def filter_local_patterns(
   # Se hace copia de los patrones
   patterns = patterns.copy()
 
-  test_save = os.path.join('data', 'patterns', "test.json")
-
   # Se revisa que tenga cantidad localias y visitas congruentes con la data
   home_left = team_pattern[2:].count('1')
   away_left = team_pattern[2:].count('0')
@@ -70,7 +69,8 @@ def filter_local_patterns(
   patterns = [p[(start_date - second_round_date):] for p in patterns]
   patterns = remove_duplicates(patterns)
 
-  save_patterns(test_save, {'A': patterns})
+  if args.shuffle_params:
+    random.shuffle(patterns)
 
   return patterns
 

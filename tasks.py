@@ -9,6 +9,7 @@ BENDERS = True  # Si se usan cortes de benders
 POSITION_CUTS = True  # Si se usan cortes de posiciones
 IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
+SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
 MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
 
 
@@ -65,6 +66,8 @@ def run_small(con, start=6, gap='0', preprocess_gap='0'):
     com += f' --gap {gap}'
   if preprocess_gap != '0':
     com += f' --lp_gap {preprocess_gap}'
+  if SHUFFLE:
+    com += ' --shuffle_params'
   con.run(com)
 
 
