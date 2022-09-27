@@ -61,7 +61,7 @@ parser.add_argument(
 
 parser.add_argument(
   "--gap",
-  default=0.0,
+  default=0.01,
   type=float,
   help="Gap del modelo."
 )
