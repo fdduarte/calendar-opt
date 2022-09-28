@@ -61,7 +61,7 @@ parser.add_argument(
 
 parser.add_argument(
   "--gap",
-  default=0.0,
+  default=0.01,
   type=float,
   help="Gap del modelo."
 )
@@ -110,7 +110,7 @@ parser.add_argument(
 
 parser.add_argument(
   "--print_every_n_cuts",
-  default=10,
+  default=100,
   type=int,
   help="Valor que dice cada cuantos cortes agregados se hace una impresión a consola."
 )
