@@ -38,4 +38,8 @@ def parse_params():
   for key in params['M'].keys():
     params['M'][key] = int(params['M'][key])
 
+  # XI
+  for key in list(params['XI'].keys()):
+    params['XI'][int(key)] = {int(k): v for k, v in params['XI'][key].items()}
+
   return params

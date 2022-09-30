@@ -1,8 +1,10 @@
 import itertools
 import os
 import json
+import random
 from .logger import log
 from .argsparser import args
+from .array_tools import remove_duplicates
 
 
 def _generate_home_away_pattern_string(second_round_date: int, end_date: int) -> list[str]:
@@ -36,7 +38,7 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
 def filter_local_patterns(
   patterns: list[str],
   team_pattern: str,
-  second_round_date: int
+  second_round_date: int,
 ) -> list[str]:
   """
   Dado un patrón de localias de un equipo, filtra los patrones que
@@ -65,7 +67,10 @@ def filter_local_patterns(
   # Por ultimo, se achican los patrones para respresentar solo las fechas a
   # programar
   patterns = [p[(start_date - second_round_date):] for p in patterns]
-  patterns = list(set(patterns))  # eliminar duplicados
+  patterns = remove_duplicates(patterns)
+
+  if args.shuffle_params:
+    random.shuffle(patterns)
 
   return patterns
 
@@ -97,7 +102,7 @@ def create_local_patterns(team_patterns: dict[str, str], end_date: int) -> dict[
   patterns: dict[str, list] = {}
 
   # Se revisa si patrones estan en el cache
-  if os.path.exists(pattern_file_path):
+  if os.path.exists(pattern_file_path) and False:
     patterns = load_patterns(pattern_file_path)
     log('params', 'patrones de localia cargados de cache.')
   # Si no estan se crean
@@ -105,7 +110,6 @@ def create_local_patterns(team_patterns: dict[str, str], end_date: int) -> dict[
     pats = _generate_home_away_pattern_string(second_round_date, end_date)
     log('params', 'filtrando patrones de localia por equipos.')
     for team in team_patterns.keys():
-      patterns['hola'] = ['hola']
       patterns[team] = filter_local_patterns(pats, team_patterns[team], second_round_date)
     log('params', 'patrones de localia por equipos filtrados.')
     save_patterns(pattern_file_path, patterns)

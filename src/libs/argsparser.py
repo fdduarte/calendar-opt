@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 
 parser = argparse.ArgumentParser(description="")
 
@@ -60,7 +61,7 @@ parser.add_argument(
 
 parser.add_argument(
   "--gap",
-  default=0.0,
+  default=0.01,
   type=float,
   help="Gap del modelo."
 )
@@ -107,6 +108,34 @@ parser.add_argument(
   help="Si se usan cortes de posiciones."
 )
 
+parser.add_argument(
+  "--print_every_n_cuts",
+  default=100,
+  type=int,
+  help="Valor que dice cada cuantos cortes agregados se hace una impresión a consola."
+)
+
+parser.add_argument(
+  "--initial_sol",
+  action="store_true",
+  default=False,
+  help="Si se usa el torneo como solución inicial."
+)
+
+parser.add_argument(
+  "--shuffle_params",
+  action="store_true",
+  default=False,
+  help="Si se ordenan de forma aleatoria los patrones de resultado."
+)
+
+parser.add_argument(
+  "--mipnode_cuts",
+  action="store_true",
+  default=False,
+  help="Si se agregan cortes en mipnode."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
@@ -123,7 +152,10 @@ model_to_name = {
 }
 
 if args.verbose:
-  print('Optimización calendario deportivo\n')
+  print('Optimización calendario deportivo')
+  dt_s = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+  print(dt_s, '\n')
+
   print('[args] Modelo:', model_to_name[args.model])
   print('[args] Fecha de inicio:', args.start_date)
   print('[args] Breaks:', args.breaks)
@@ -132,10 +164,14 @@ if args.verbose:
   print('[args] MIP focus:', args.mip_focus)
   print('[args] Tiempo máximo:', args.time_limit)
   print('[args] Patrones:', args.local_patterns)
+  print('[args] Solución Inicial:', args.initial_sol)
+  print('[args] Orden de parámetros aleatorio:', args.shuffle_params)
+  print('[args] MIPNODE benders cuts', args.mipnode_cuts)
   if args.model == 5:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)
     print('[args] LP gap preprocesamiento', args.lp_gap)
     print('[args] Cortes de Benders', args.benders_cuts)
     print('[args] Cortes de posición', args.position_cuts)
+    print('[args] Print cada n cortes', args.print_every_n_cuts)
   print("")

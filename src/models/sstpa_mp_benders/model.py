@@ -78,13 +78,34 @@ class Benders:
           # Set SSTPA x values and optimize
           self.sstpa_model.optimize()
 
-          if self.sstpa_model.Status == GRB.OPTIMAL:
-            # Pass solution to current model and get incumbent
-            set_cb_sol(model, self.sstpa_model)
+          assert self.sstpa_model.Status == GRB.OPTIMAL, 'Modelo no es factible'
+          # Pass solution to current model and get incumbent
+          set_cb_sol(model, self.sstpa_model)
 
           # Add solution to visited
           self.visited_sols.add(str(self.last_sol))
         timer.timestamp('MIPNODE')
+
+        node_count = model.cbGet(GRB.Callback.MIPNODE_NODCNT)
+        if int(node_count) == 0 and args.mipnode_cuts:  # nodo raíz
+          for i, l, s in self.subproblem_indexes:
+            timer.timestamp('cortes de benders')
+            subproblem_relaxed = self.subproblem_relaxed_model[i, l, s]
+            subproblem_relaxed_res = self.subproblem_relaxed_res[i, l, s]
+
+            sub = (self.subproblem_relaxed_model, self.subproblem_relaxed_res)
+            set_subproblem_values(self, model, sub, (i, l, s), relaxed=True, cb=False, mn=True)
+
+            timer.timestamp('opt benders sub')
+            subproblem_relaxed.optimize()
+            logger.increment_stats('sub(r) solved')
+            timer.timestamp('opt benders sub')
+
+            if subproblem_relaxed.Status == GRB.INFEASIBLE:
+              cut = generate_benders_cut(self, model, subproblem_relaxed_res, subproblem_relaxed)
+              model.cbLazy(cut <= 0)
+              logger.increment_stats('benders cut')
+            timer.timestamp('cortes de benders')
 
       if where == GRB.Callback.MIPSOL and mipsol:
         timer.timestamp('MIPSOL')
@@ -110,7 +131,7 @@ class Benders:
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
-            logger.increment_stats('hamming cut')
+            logger.increment_stats('hamming cut', verbose=True)
             model.cbLazy(cut >= 1)
 
           timer.timestamp('cortes de hamming')
@@ -150,7 +171,9 @@ class Benders:
       self._lazy_cb(x, y)
 
     if args.preprocess:
+      timer.timestamp('preprocess')
       preprocess(self, self.master_model, self.master_vars)
+      timer.timestamp('preprocess')
 
     self.master_model.write('logs/model/master.mps')
     self.master_model.optimize(callback)

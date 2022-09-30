@@ -9,6 +9,7 @@ BENDERS = True  # Si se usan cortes de benders
 POSITION_CUTS = True  # Si se usan cortes de posiciones
 IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
+SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
 MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
 
 
@@ -65,6 +66,8 @@ def run_small(con, start=6, gap='0', preprocess_gap='0'):
     com += f' --gap {gap}'
   if preprocess_gap != '0':
     com += f' --lp_gap {preprocess_gap}'
+  if SHUFFLE:
+    com += ' --shuffle_params'
   con.run(com)
 
 
@@ -90,7 +93,7 @@ def run_med(con, start=8, gap='0', preprocess_gap='0'):
 
 
 @task
-def run_big(con, start=9, gap='0', preprocess_gap='0'):
+def run_big(con, start=10, gap='0', preprocess_gap='0'):
   """Campeonato pequeño con descomposición"""
   filepath = '"data/campeonato_10_1.xlsx"'
   com = f'python main.py --model {MODEL} --start_date {start} --filepath {filepath}'
