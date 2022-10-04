@@ -17,6 +17,8 @@ if __name__ == "__main__":
     m = sstpa_mp_benders_create_model()
 
   m.optimize()
+  m.write('logs/model/model.lp')
+  m.write('logs/output/model.sol')
 
   if args.verbose:
     print('\n[time] logs:')
@@ -24,14 +26,3 @@ if __name__ == "__main__":
 
     print('\n[stats] logs:')
     print(logger.stats_string())
-
-  # if args.model == 5:
-  #   m.print_stats()
-
-  # if args.model == 5:
-  #  ModelStats.parse_gurobi_output(m, champ_stats.matches, f'model-{args.model}-{time.time()}',
-  # benders=True)
-  # else:
-  #  ModelStats.parse_gurobi_output(m.getVars(), champ_stats.matches, f'model-{args.model}-
-  # {time.time()}')
-  # ModelStats.check_valid_output()
