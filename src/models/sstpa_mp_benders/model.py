@@ -11,10 +11,7 @@ from .utils import (
 )
 from .cuts import (
   generate_benders_cut,
-  generate_hamming_cut,
-  generate_position_cut,
-  calculate_sum_alpha,
-  hamming_x
+  generate_hamming_cut
 )
 from .preprocessing import preprocess
 from ...libs.argsparser import args
@@ -175,31 +172,9 @@ class Benders:
       preprocess(self, self.master_model, self.master_vars)
       timer.timestamp('preprocess')
 
-    self.master_model.write('logs/model/master.mps')
     self.master_model.optimize(callback)
     if self.master_model.Status == GRB.INFEASIBLE:
       log('result', 'Modelo Infactible')
-      return
-    return
-    x = parse_vars(self.master_vars, self.master_model)
-    # le pasamos el x a sstpa
-
-    # creamos una instancia del sstpa con x fijo
-    sstpa, _ = _sstpa()
-    sstpa.Params.LogToConsole = 0
-    create_sstpa_restrictions(self, sstpa)
-    set_sstpa_restrictions(sstpa, x)
-    sstpa.optimize()
-
-    # creamos una instancia de sstpa con x irrestricto
-    irr = True
-    if irr:
-      sstpa_irr, _ = _sstpa()
-      sstpa_irr.Params.LogToConsole = 0
-      sstpa_irr.optimize()
-      log('result', f'SSTPA Irr ObjVal: {sstpa_irr.objVal}')
-    log('result', f'Benders objVal:   {self.master_model.objVal}')
-    log('result', f'SSTPA objVal:     {sstpa.objVal}')
 
   def getVars(self):
     """Retorna las variables del modelo maestro"""
