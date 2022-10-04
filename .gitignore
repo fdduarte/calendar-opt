@@ -129,13 +129,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# CUSTOM
+
 # Mac
 .DS_Store
-
-# Other
-*_results_pattern.csv
-V4-Plots (2)
-logs/*
 
 # latex
 *.aux
@@ -146,20 +143,22 @@ logs/*
 *.spl
 *.gz
 
-# output
-ouput/
+# data dir
+data/json/*.json
+data/json/patterns/*.json
+data/patterns/*.json
 
-# Data
-data/json/
+# gurobi
+*.sol
+*.lp
 
 # VSCode
 .vscode
 
-# data cache
-data/patterns/*
-
-commands.txt
-
 # MS Excel
-
 ~*.xslx
+
+# Other
+*_results_pattern.csv
+V4-Plots (2)
+commands.txt
