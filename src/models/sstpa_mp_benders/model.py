@@ -1,4 +1,5 @@
 from gurobipy import GRB
+from itertools import product
 from .subproblem import subproblem as _subproblem
 from .master import master as _master
 from ..sstpa_mp import create_model as _sstpa
@@ -25,8 +26,7 @@ class Benders:
   """Clase del modelo de optimización SSTPA con descomposición de benders"""
   def __init__(self):
     self.params = parse_params()
-    self.subproblem_indexes = [(i, l, s) for i in self.params['I']
-                               for l in self.params['F'] for s in ["m", "p"]]
+    self.subproblem_indexes = list(product(self.params['I'], self.params['F'], ["m", "p"]))
     # Models
     self._init_sstpa_model()
     self._init_master_model()
