@@ -35,20 +35,28 @@ def master(params, log=True):
   variables = {}
 
   # x_nf: x[partido, fecha]
-  # 1 si el partido n se programa finalmente
-  # en la fecha f
-  # 0 en otro caso.
+  # 1 si el partido n se programa finalmente en la fecha f. 0 en otro caso.
   x = m.addVars(N, F, vtype=GRB.BINARY, name="x")
   variables['x'] = x
+
+  # tau_inf: tau[equipo, partido, fecha]
+  # 1 si el equipo i juega el partido n en la fecha f. 0 en otro caso
+  tau = m.addVars(I, N, F, vtype=GRB.BINARY, name='tau')
+
+  # gamma_ijf: gamma[equipo, equipo, fecha]
+  # 1 si el equipo i juega contra el equipo j en la fecha f. 0 en otro caso
+  gamma = m.addVars(I, I, F, vtype=GRB.BINARY, name='gamma')
+
+  # epsilon_ijnf: epsilon[equipo, equipo, partido, fecha]
+  # 1 si el equipo i juega contra el equipo j en el partido n programado en la fecha f.
+  epsilon = m.addVars(I, I, N, F, vtype=GRB.BINARY, name='epsilon')
 
   if args.initial_sol:
     for n, f in product(N, F):
       x[n, f].start = XI[n][f]
 
   # y_is: y[equipo][patron_localias]
-  # 1 si al equipo i se le asigna el patron
-  # de localias s
-  # 0 en otro caso
+  # 1 si al equipo i se le asigna el patron de localias s. 0 en otro caso
   y = {}
   for i in I:
     for s in S[i]:
@@ -129,20 +137,33 @@ def master(params, log=True):
     _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
     m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R8[{i},{l}]")
 
-  # R9
-  res9 = False
-  if res9:
-    for f in F:
-      _exp = LinExpr(quicksum(quicksum(y[i, s] * L[s][f]for s in S[i]) for i in I))
-      m.addConstr(_exp == len(I) // 2, name=f"R9[{f}]")
+  # RVI9
+  for f in F:
+    _exp = LinExpr(quicksum(quicksum(y[i, s] * L[s][f]for s in S[i]) for i in I))
+    m.addConstr(_exp == len(I) // 2, name=f"R9[{f}]")
 
-  # R10
-  # for i in I:
-  #   for l in F[:-1]:
-  #     m.addConstr(beta_m[i, l] <= beta_m[i, l + 1], name=f"R10[{i},{l}]")
+  # RVI12
+  for i, n, f in product(I, N, F):
+    _exp = (EL[i][n] + EV[i][n]) * x[n, f]
+    m.addConstr(_exp == tau[i, n, f], name=f"RVI12[{i},{n},{f}]")
 
-  # R11
-  # for
+  # RVI13 and RVI14
+  for i, j, n, f in product(I, I, N, F):
+    m.addConstr(tau[i, n, f] + tau[j, n, f] <= 1 + epsilon[i, j, n, f],
+                name=f"RVI13[{i},{j},{n},{f}]")
+    m.addConstr(tau[i, n, f] + tau[j, n, f] >= 2 * epsilon[i, j, n, f],
+                name=f"RVI14[{i},{j},{n},{f}]")
+
+  # RV15
+  for i, j, f in product(I, I, F):
+    m.addConstr(quicksum(epsilon[i, j, n, f] for n in N) == gamma[i, j, f],
+                name=f"RVI15[{i},{j},{f}]")
+
+  # RVI16
+  for i, j, k, f in product(I, I, I, F):
+    if i != j and j != k and k != i:
+      m.addConstr(gamma[i, j, f] + gamma[j, k, f] + gamma[k, i, f] <= 1,
+                  name=f"RVI16[{i},{j},{k},{f}]")
 
   #########################
   # *  FUNCION OBJETIVO  *#
