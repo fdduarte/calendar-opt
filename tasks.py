@@ -10,7 +10,7 @@ POSITION_CUTS = True  # Si se usan cortes de posiciones
 IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
-MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
+MODEL = 3  # Modelo a utilizar. Opciones válidas 3 y 5.
 
 
 @task
