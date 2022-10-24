@@ -264,7 +264,7 @@ def create_model(log=True, gap=True):
   # * FUNCION OBJETIVO * #
   ########################
 
-  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  _obj = quicksum(l ** 2 * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()
