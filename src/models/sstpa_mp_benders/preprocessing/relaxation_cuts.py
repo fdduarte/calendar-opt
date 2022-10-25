@@ -14,6 +14,7 @@ def relaxation_cuts(self):
   y subproblemas relajados, generando una colección de cortes que se aplicarán
   al problema maestro.
   """
+  print('HEREE')
   start_time = time()
   sstpa_model, sstpa_variables = sstpa(log=False, relaxed=True)
   create_sstpa_restrictions(self, sstpa_model)
@@ -41,6 +42,8 @@ def relaxation_cuts(self):
     sol = parse_vars(m_variables, m_model, is_binary=False)
     set_sstpa_restrictions(sstpa_model, sol, is_binary=False)
     sstpa_model.optimize()
+
+    assert sstpa_model.Status != GRB.INFEASIBLE, 'SSTPA Infactible.'
 
     obj_val = round(m_model.objVal, 4)
     best_bound = round(m_model.ObjBound, 4)
