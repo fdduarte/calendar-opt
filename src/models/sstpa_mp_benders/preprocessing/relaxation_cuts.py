@@ -14,7 +14,6 @@ def relaxation_cuts(self):
   y subproblemas relajados, generando una colección de cortes que se aplicarán
   al problema maestro.
   """
-  print('HEREE')
   start_time = time()
   sstpa_model, sstpa_variables = sstpa(log=False, relaxed=True)
   create_sstpa_restrictions(self, sstpa_model)
@@ -30,7 +29,7 @@ def relaxation_cuts(self):
 
   if args.verbose:
     print('\nSolving problem relaxation')
-    print(f'{"iteration": <10} | {"objVal": <8} | {"BestBd": <8} | {"Gap": <4} | {"Time": <4}')
+    print(f'{"iteration": <10} | {"objVal": <10} | {"Gap": <4} | {"Time": <4}')
 
   last_obj_val = 10000000
   while True:
@@ -59,7 +58,7 @@ def relaxation_cuts(self):
       fgap = f'{gap}%'
       spent_time = int(time() - start_time)
       spent_time = f"{spent_time}s"
-      print(f"{niter: <10} | {obj_val: <8} | {best_bound: <8} | {fgap: <4} | {spent_time: <4}")
+      print(f"{niter: <10} | {obj_val: <10} | {fgap: <4} | {spent_time: <4}")
 
     if gap != '-' and gap / 100 < args.lp_gap:
       break
