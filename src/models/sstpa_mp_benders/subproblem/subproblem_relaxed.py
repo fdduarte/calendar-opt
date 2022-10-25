@@ -83,7 +83,7 @@ def subproblem(i, l, s, params):
   if s == 'm':
     for j in I:
       if j != i:
-        r = m.addConstr(p[j, i, l, F[-1]] - p[i, i, l, F[-1]] >= 0, name=f"R5M[{l},{i},{j}]")
+        r = m.addConstr(p[i, i, l, F[-1]] - p[j, i, l, F[-1]] >= 0, name=f"R5M[{l},{i},{j}]")
         res['R5M'][l, i, j] = r
 
   res['R5P'] = {}
