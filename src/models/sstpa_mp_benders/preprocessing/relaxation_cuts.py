@@ -29,7 +29,7 @@ def relaxation_cuts(self):
 
   if args.verbose:
     print('\nSolving problem relaxation')
-    print(f'{"iteration": <10} | {"objVal": <8} | {"BestBd": <8} | {"Gap": <4} | {"Time": <4}')
+    print(f'{"iteration": <10} | {"objVal": <9} | {"Gap": <4} | {"Time": <4}')
 
   last_obj_val = 10000000
   while True:
@@ -41,6 +41,8 @@ def relaxation_cuts(self):
     sol = parse_vars(m_variables, m_model, is_binary=False)
     set_sstpa_restrictions(sstpa_model, sol, is_binary=False)
     sstpa_model.optimize()
+
+    assert sstpa_model.Status not in [GRB.INFEASIBLE, GRB.INF_OR_UNBD], 'Modelo infactible.'
 
     obj_val = round(m_model.objVal, 4)
     best_bound = round(m_model.ObjBound, 4)
@@ -56,7 +58,7 @@ def relaxation_cuts(self):
       fgap = f'{gap}%'
       spent_time = int(time() - start_time)
       spent_time = f"{spent_time}s"
-      print(f"{niter: <10} | {obj_val: <8} | {best_bound: <8} | {fgap: <4} | {spent_time: <4}")
+      print(f"{niter: <10} | {obj_val: <8} | {fgap: <4} | {spent_time: <4}")
 
     if gap != '-' and gap / 100 < args.lp_gap:
       break
