@@ -143,6 +143,10 @@ def master(params, log=True):
     m.addConstr(alpha_p[i, j, f] >= 0)
     m.addConstr(alpha_p[i, j, f] <= 1)
 
+  #########################
+  # *  FUNCION OBJETIVO  *#
+  #########################
+
   _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
   m.setObjective(_obj, GRB.MAXIMIZE)
 
