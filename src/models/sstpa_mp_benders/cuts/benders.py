@@ -45,7 +45,7 @@ def generate_benders_cut(self, model, subproblem_res, subproblem):
       if j != i:
         r5m = subproblem_res['R5M'][l, i, j]
         alpha = self.master_vars[f'alpha_{s}'][j, i, l]
-        cut += -r5m.farkasDual * (M[i] * alpha - M[i])
+        cut += -r5m.farkasDual * (M[j] * alpha - M[j])
 
   # R5P
   if s == 'p':
