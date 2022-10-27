@@ -143,14 +143,6 @@ def master(params, log=True):
     m.addConstr(alpha_p[i, j, f] >= 0)
     m.addConstr(alpha_p[i, j, f] <= 1)
 
-  # R10
-  # for i in I:
-  #   for l in F[:-1]:
-  #     m.addConstr(beta_m[i, l] <= beta_m[i, l + 1], name=f"R10[{i},{l}]")
-
-  # R11
-  # for
-
   #########################
   # *  FUNCION OBJETIVO  *#
   #########################

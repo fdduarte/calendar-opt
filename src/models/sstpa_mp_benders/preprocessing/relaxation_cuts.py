@@ -42,7 +42,7 @@ def relaxation_cuts(self):
     set_sstpa_restrictions(sstpa_model, sol, is_binary=False)
     sstpa_model.optimize()
 
-    assert sstpa_model.Status != GRB.INFEASIBLE, 'SSTPA Infactible.'
+    assert sstpa_model.Status not in [GRB.INFEASIBLE, GRB.INF_OR_UNBD], 'Modelo infactible.'
 
     obj_val = round(m_model.objVal, 4)
     best_bound = round(m_model.ObjBound, 4)

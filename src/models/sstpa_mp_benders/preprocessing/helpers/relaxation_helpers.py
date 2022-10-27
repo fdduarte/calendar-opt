@@ -36,14 +36,14 @@ def set_subproblem_values(self, indexes, subproblem_res, master_vars):
     for j in I:
       if j != i:
         alpha = master_vars[f'alpha_{s}'][j, i, l].X
-        subproblem_res['R5M'][l, i, j].rhs = (M[i] * alpha - M[i])
+        subproblem_res['R5M'][l, i, j].rhs = (M[j] * alpha - M[j])
 
   # R5P
   if s == 'p':
     for j in I:
       if j != i:
         alpha = master_vars[f'alpha_{s}'][j, i, l].X
-        subproblem_res['R5P'][l, i, j].rhs = (- 1 * M[i] * alpha)
+        subproblem_res['R5P'][l, i, j].rhs = (-M[i] * alpha)
 
 
 def generate_benders_cut(self, indexes, master_vars, subproblem_res):
@@ -88,7 +88,7 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
       if j != i:
         r5m = subproblem_res['R5M'][l, i, j]
         alpha = master_vars[f'alpha_{s}'][j, i, l]
-        cut += -r5m.farkasDual * (M[i] * alpha - M[i])
+        cut += -r5m.farkasDual * (M[j] * alpha - M[j])
 
   # R5P
   if s == 'p':
@@ -96,6 +96,6 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
       if j != i:
         r5p = subproblem_res['R5P'][l, i, j]
         alpha = master_vars[f'alpha_{s}'][j, i, l]
-        cut += -r5p.farkasDual * (- 1 * M[i] * alpha)
+        cut += -r5p.farkasDual * (-M[i] * alpha)
 
   return cut
