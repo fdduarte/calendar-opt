@@ -71,7 +71,7 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb, mn):
         else:
           alpha = alpha.X
         alpha = value_to_binary(alpha)
-        subproblem_res[i, l, s]['R5M'][l, i, j].rhs = (1 - M[i] + M[i] * alpha)
+        subproblem_res[i, l, s]['R5M'][l, i, j].rhs = (M[j] * alpha - M[j])
 
   # R5P
   if s == 'p':
@@ -85,7 +85,7 @@ def _set_subproblem_values_relaxed(self, model, subproblem, indexes, cb, mn):
         else:
           alpha = model.X
         alpha = value_to_binary(alpha)
-        subproblem_res[i, l, s]['R5P'][l, i, j].rhs = (1 - M[i] * alpha)
+        subproblem_res[i, l, s]['R5P'][l, i, j].rhs = (-M[i] * alpha)
 
   subproblem_model[i, l, s].update()
 

@@ -219,13 +219,13 @@ def create_model(log=True, gap=True):
   # R11
   for l, i, j in product(F, I, I):
     if j != i:
-      m.addConstr(p_m[i, i, l, F[-1]] - p_m[j, i, l, F[-1]] <= M[i] * (1 - alpha_m[j, i, l]) - 1,
+      m.addConstr(p_m[j, i, l, F[-1]] - p_m[i, i, l, F[-1]] <= M[j] * (1 - alpha_m[j, i, l]),
                   name=f"R11[{l},{i},{j}]")
 
   # R12
   for l, i, j in product(F, I, I):
     if j != i:
-      m.addConstr(p_p[i, i, l, F[-1]] - p_p[j, i, l, F[-1]] <= M[i] * alpha_p[j, i, l] - 1,
+      m.addConstr(p_p[i, i, l, F[-1]] - p_p[j, i, l, F[-1]] <= M[i] * alpha_p[j, i, l],
                   name=f"R12[{l},{i},{j}]")
 
   # R13
@@ -242,7 +242,7 @@ def create_model(log=True, gap=True):
   # * FUNCION OBJETIVO * #
   ########################
 
-  _obj = quicksum(quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()
