@@ -30,6 +30,8 @@ def create_model(log=True, gap=True):
   # Parse params dict to variables
   params = parse_params(filepath, start_date)
 
+  fixed_x = False
+
   N = params['N']
   F = params['F']
   S = params['S']
@@ -40,7 +42,8 @@ def create_model(log=True, gap=True):
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
-  x_bar = params['x_bar']
+  if fixed_x:
+    x_bar = params['x_bar']
 
   #################
   # * VARIABLES * #
@@ -149,8 +152,6 @@ def create_model(log=True, gap=True):
   #####################
   # * RESTRICCIONES * #
   #####################
-
-  fixed_x = True
 
   if fixed_x:
     for n in N:

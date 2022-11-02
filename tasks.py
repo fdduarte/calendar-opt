@@ -4,13 +4,13 @@ from invoke import task
 # Task params
 
 PATTERNS = True  # Si se usan patrones de localia/visita
-PREPROCESS = True  # Si se usa preprocesamiento
+PREPROCESS = False # Si se usa preprocesamiento
 BENDERS = True  # Si se usan cortes de benders
 POSITION_CUTS = True  # Si se usan cortes de posiciones
 IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
-MODEL = 3  # Modelo a utilizar. Opciones válidas 3 y 5.
+MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
 
 
 @task
@@ -28,7 +28,7 @@ def clear_cache(context, full=False):
 @task
 def run_azerbaijan(con):
   """Campeonato azerbeijan"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
+  com = f'python main.py --model {MODEL} --start_date 8 --filepath "data/azerbaijan_8.xlsx" --no_local_patterns'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
@@ -41,10 +41,6 @@ def run_azerbaijan(con):
     com += ' --not_verbose'
   if not POSITION_CUTS:
     com += ' --no_position_cuts'
-  if gap != '0':
-    com += f' --gap {gap}'
-  if preprocess_gap != '0':
-    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 @task
