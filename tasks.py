@@ -10,7 +10,7 @@ POSITION_CUTS = True  # Si se usan cortes de posiciones
 IIS = True  # Si se usa IIS para cortes de Hamming
 VERBOSE = True  # Si se imprime a consola
 SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
-MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
+MODEL = 3  # Modelo a utilizar. Opciones válidas 3 y 5.
 
 
 @task
@@ -24,6 +24,50 @@ def clear_cache(context, full=False):
     context.run('rm logs/*.txt')
     context.run('rm logs/model/*')
 
+
+@task
+def run_azerbaijan(con):
+  """Campeonato azerbeijan"""
+  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
+  if not PATTERNS:
+    com += ' --no_local_patterns'
+  if not PREPROCESS:
+    com += ' --no_preprocess'
+  if not BENDERS:
+    com += ' --no_benders_cuts'
+  if not IIS:
+    com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
+  if not POSITION_CUTS:
+    com += ' --no_position_cuts'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
+  con.run(com)
+
+@task
+def run_suiza(con):
+  """Campeonato suiza"""
+  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
+  if not PATTERNS:
+    com += ' --no_local_patterns'
+  if not PREPROCESS:
+    com += ' --no_preprocess'
+  if not BENDERS:
+    com += ' --no_benders_cuts'
+  if not IIS:
+    com += ' --no_IIS'
+  if not VERBOSE:
+    com += ' --not_verbose'
+  if not POSITION_CUTS:
+    com += ' --no_position_cuts'
+  if gap != '0':
+    com += f' --gap {gap}'
+  if preprocess_gap != '0':
+    com += f' --lp_gap {preprocess_gap}'
+  con.run(com)
 
 @task
 def run_tiny(con, start=4, gap='0', preprocess_gap='0'):

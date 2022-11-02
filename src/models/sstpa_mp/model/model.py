@@ -40,6 +40,7 @@ def create_model(log=True, gap=True):
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
+  x_bar = params['x_bar']
 
   #################
   # * VARIABLES * #
@@ -148,6 +149,13 @@ def create_model(log=True, gap=True):
   #####################
   # * RESTRICCIONES * #
   #####################
+
+  fixed_x = True
+
+  if fixed_x:
+    for n in N:
+      for f in F:
+        m.addConstr(x[n, f] == x_bar[str(n)][str(f)])
 
   # R2
   for n in N:

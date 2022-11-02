@@ -17,3 +17,4 @@ class SSTPAParams(TypedDict):
   L: dict[str, dict[int, int]]
   M: dict[str, int]
   XI: dict[int, dict[int, int]]
+  x_bar: dict[int, dict[int, int]]
