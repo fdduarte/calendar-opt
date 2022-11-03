@@ -26,9 +26,9 @@ def clear_cache(context, full=False):
 
 
 @task
-def run_islandia(con):
+def run_paraguay(con):
   """Campeonato islandia"""
-  com = f'python main.py --model {MODEL} --start_date 12 --filepath "data/islandia_12.xlsx" --no_local_patterns'
+  com = f'python main.py --model {MODEL} --start_date 12 --filepath "data/paraguay_12.xlsx"'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
