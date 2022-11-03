@@ -26,9 +26,9 @@ def clear_cache(context, full=False):
 
 
 @task
-def run_tiny(con, start=4, gap='0', preprocess_gap='0'):
-  """Campeonato enano con descomposición"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
+def run_islandia(con):
+  """Campeonato islandia"""
+  com = f'python main.py --model {MODEL} --start_date 12 --filepath "data/islandia_12.xlsx" --no_local_patterns'
   if not PATTERNS:
     com += ' --no_local_patterns'
   if not PREPROCESS:
@@ -41,10 +41,6 @@ def run_tiny(con, start=4, gap='0', preprocess_gap='0'):
     com += ' --not_verbose'
   if not POSITION_CUTS:
     com += ' --no_position_cuts'
-  if gap != '0':
-    com += f' --gap {gap}'
-  if preprocess_gap != '0':
-    com += f' --lp_gap {preprocess_gap}'
   con.run(com)
 
 
