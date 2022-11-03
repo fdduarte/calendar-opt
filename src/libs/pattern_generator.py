@@ -19,16 +19,16 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
   length = end_date - second_round_date + 1
   patterns = ["".join(seq) for seq in itertools.product("01", repeat=length)]
 
-  # Se eliminan patrones que rompan maximo cuatro (0 o 1) seguidos
-  patterns_filtered = list(filter(lambda x: x.count('0000') == 0 and x.count('1111') == 0, patterns))
+  # Se eliminan patrones que rompan maximo dos (0 o 1) seguidos
+  patterns_filtered = list(filter(lambda x: x.count('000') == 0 and x.count('111') == 0, patterns))
 
   # Patrones con 2, 3 o 4 localías
-  same_matches_fil = lambda x: x.count('1') in [2, 3, 4]
+  same_matches_fil = lambda x: x.count('1') in [4, 5, 6]
   patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
 
   # Patrones deben tener maximo n breaks
-  patterns_filtered = list(filter(lambda x: x.count('111') <= breaks, patterns_filtered))
-  patterns_filtered = list(filter(lambda x: x.count('000') <= breaks, patterns_filtered))
+  patterns_filtered = list(filter(lambda x: x.count('11') <= breaks, patterns_filtered))
+  patterns_filtered = list(filter(lambda x: x.count('00') <= breaks, patterns_filtered))
 
   log('params', 'patrones de localia generados')
 

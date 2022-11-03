@@ -19,7 +19,7 @@ parser.add_argument(
 
 parser.add_argument(
   "--breaks",
-  default=2,
+  default=1,
   type=int,
   help="Cantidad de breaks localia-visita permitidos",
 )
