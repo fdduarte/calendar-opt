@@ -23,7 +23,7 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
   patterns_filtered = list(filter(lambda x: x.count('0000') == 0 and x.count('1111') == 0, patterns))
 
   # Patrones con 2, 3 o 4 localías
-  same_matches_fil = lambda x: x.count('1') in [2, 3, 4]
+  same_matches_fil = lambda x: x.count('1') in [2, 3, 4, 5]
   patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
 
   # Patrones deben tener maximo n breaks
@@ -53,15 +53,16 @@ def filter_local_patterns(
   # Se revisa que tenga cantidad localias y visitas congruentes con la data
   home_left = team_pattern[2:].count('1')
   away_left = team_pattern[2:].count('0')
+
   patterns = list(filter(lambda x: x.count('1') == home_left, patterns))
   patterns = list(filter(lambda x: x.count('0') == away_left, patterns))
 
   # Se revisa si arrastra un break o tiene 3 localias/visitas seguidas
   patterns = [f"{team_pattern[0:2]}{p}" for p in patterns]
-  patterns = list(filter(lambda x: x.count('000') == 0 and x.count('111') == 0, patterns))
+  patterns = list(filter(lambda x: x.count('0000') == 0 and x.count('1111') == 0, patterns))
   patterns = [p[1:] for p in patterns]
-  patterns = list(filter(lambda x: x.count('11') <= breaks, patterns))
-  patterns = list(filter(lambda x: x.count('00') <= breaks, patterns))
+  patterns = list(filter(lambda x: x.count('111') <= breaks, patterns))
+  patterns = list(filter(lambda x: x.count('000') <= breaks, patterns))
   patterns = [p[1:] for p in patterns]
 
   # Por ultimo, se achican los patrones para respresentar solo las fechas a
