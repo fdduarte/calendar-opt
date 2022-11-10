@@ -26,7 +26,7 @@ def clear_cache(context, full=False):
 @task
 def run(con, model=5, no_pats=False):
   """Campeonato azerbeijan"""
-  com = f'python main.py --model {model} --start_date 12 --filepath "data/islandia_12.xlsx"'
+  com = f'python main.py --model {model} --start_date 8 --filepath "data/azerbaijan_8.xlsx"'
   if no_pats:
     com += ' --no_local_patterns'
   con.run(com)
