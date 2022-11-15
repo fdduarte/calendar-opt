@@ -42,6 +42,12 @@ def generate_params():
 
   N = list(range(1, dates_to_program * matches_per_date + 1))
 
+  # \bar{x}_nf
+  x_bar = {n: {f: 0 for f in F} for n in N}
+  for match in results_data:
+    if match.number in N and match.date in F:
+      x_bar[match.number][match.date] = 1
+
   # se generan los patrones originales de los equipos
   team_original_patterns = get_team_local_patterns(teams_data, results_data, F)
 
@@ -152,7 +158,8 @@ def generate_params():
     'EV': EV,
     'L': L,
     'V': V,
-    'M': M
+    'M': M,
+    'x_bar': x_bar
   }
 
   filename = os.path.split(filepath)[1]
