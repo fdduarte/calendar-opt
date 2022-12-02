@@ -154,9 +154,19 @@ def generate_params():
   # peso en la función objetivo
   RF = {}
   for u, v, f, i in product(P, P, F, I):
-    ud = abs(u - len(I) / 2)
-    ld = abs(v - len(I) / 2)
-    RF[str((u, v, f, i))] = (f / len(F)) * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1)
+    ud = abs(u - ((len(I) - 1) / 2 + 1.5))
+    ld = abs(v - ((len(I) - 1) / 2 + 1.5))
+    date_pond = (f - min(F) + 1) ** 2
+    m_pond = 1
+    if u == 1:
+      m_pond += 0.3
+    if v == len(I):
+      m_pond += 0.2
+    pen_pond = 1
+    if u == v:
+      pen_pond -= 0.2
+    final_pond = date_pond * pen_pond * m_pond
+    RF[str((u, v, f, i))] = final_pond * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1)
 
   params: SSTPAParams = {
       'I': I,

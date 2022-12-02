@@ -1,5 +1,5 @@
-from gurobipy import Model, GRB, quicksum, LinExpr
 from itertools import product
+from gurobipy import Model, GRB, quicksum, LinExpr
 from ....libs.argsparser import args
 
 
@@ -27,6 +27,8 @@ def master(params, log=True):
   EL = params['EL']
   EV = params['EV']
   XI = params['XI']
+  P = params['P']
+  RF = params['RF']
 
   #################
   # *  VARIABLES  *#
@@ -50,6 +52,11 @@ def master(params, log=True):
   # epsilon_ijnf: epsilon[equipo, equipo, partido, fecha]
   # 1 si el equipo i juega contra el equipo j en el partido n programado en la fecha f.
   epsilon = m.addVars(I, I, N, F, vtype=GRB.BINARY, name='epsilon')
+
+  # z_iluv: z[equipo, fecha, pos, pos]
+  # variable binaria que indica si el equipo i en la fecha l
+  # puede alcanzar u como mejor posición y v como peor posición
+  z = m.addVars(I, F, P, P, vtype=GRB.BINARY, name='z')
 
   if args.initial_sol:
     for n, f in product(N, F):
@@ -100,76 +107,98 @@ def master(params, log=True):
   # *  RESTRICCIONES  *#
   #####################
 
-  # R2
+  # R1
   for n in N:
-    m.addConstr((quicksum(x[n, f] for f in F) == 1), name=f"R2[{n}]")
+    m.addConstr((quicksum(x[n, f] for f in F) == 1), name=f"R1[{n}]")
 
-  # R3
+  # R2
   for i, f in product(I, F):
     _exp = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] + EV[i][n] == 1))
-    m.addConstr(_exp == 1, name=f"R3[{i},{f}]")
+    m.addConstr(_exp == 1, name=f"R2[{i},{f}]")
+
+  # R3
+  if local_patterns:
+    m.addConstrs((quicksum(y[i, s] for s in S[i]) == 1 for i in I), name="R3")
 
   # R4
-  if local_patterns:
-    m.addConstrs((quicksum(y[i, s] for s in S[i]) == 1 for i in I), name="R4")
-
-  # R5
   if local_patterns:
     for f, i in product(F, I):
       _exp1 = LinExpr(quicksum(x[n, f] for n in N if EL[i][n] == 1))
       _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 1))
-      m.addConstr(_exp1 == _exp2, name=f"R5[{f},{i}]")
+      m.addConstr(_exp1 == _exp2, name=f"R4[{f},{i}]")
 
-  # R6
+  # R5
   if local_patterns:
     for f, i in product(F, I):
       _exp1 = LinExpr(quicksum(x[n, f] for n in N if EV[i][n] == 1))
       _exp2 = LinExpr(quicksum(y[i, s] for s in S[i] if L[s][f] == 0))
-      m.addConstr(_exp1 == _exp2, name=f"R6[{f},{i}]")
+      m.addConstr(_exp1 == _exp2, name=f"R5[{f},{i}]")
+
+  # R6
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R6[{i},{l}]")
 
   # R7
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
-    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R7[{i},{l}]")
+    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R7[{i},{l}]")
 
   # R8
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
-    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R8[{i},{l}]")
+    m.addConstr(beta_m[i, l] <= beta_p[i, l], name=f"R8[{i},{l}]")
 
-  # RVI9
+  # R9
   for f in F:
     _exp = LinExpr(quicksum(quicksum(y[i, s] * L[s][f]for s in S[i]) for i in I))
     m.addConstr(_exp == len(I) // 2, name=f"R9[{f}]")
 
-  # RVI12
+  # R10
   for i, n, f in product(I, N, F):
     _exp = (EL[i][n] + EV[i][n]) * x[n, f]
-    m.addConstr(_exp == tau[i, n, f], name=f"RVI12[{i},{n},{f}]")
+    m.addConstr(_exp == tau[i, n, f], name=f"R10[{i},{n},{f}]")
 
-  # RVI13 and RVI14
+  # R11
   for i, j, n, f in product(I, I, N, F):
     m.addConstr(tau[i, n, f] + tau[j, n, f] <= 1 + epsilon[i, j, n, f],
-                name=f"RVI13[{i},{j},{n},{f}]")
-    m.addConstr(tau[i, n, f] + tau[j, n, f] >= 2 * epsilon[i, j, n, f],
-                name=f"RVI14[{i},{j},{n},{f}]")
+                name=f"R11[{i},{j},{n},{f}]")
 
-  # RV15
+  # R12
+  for i, j, n, f in product(I, I, N, F):
+    m.addConstr(tau[i, n, f] + tau[j, n, f] >= 2 * epsilon[i, j, n, f],
+                name=f"R12[{i},{j},{n},{f}]")
+
+  # R13
   for i, j, f in product(I, I, F):
     m.addConstr(quicksum(epsilon[i, j, n, f] for n in N) == gamma[i, j, f],
-                name=f"RVI15[{i},{j},{f}]")
+                name=f"R13[{i},{j},{f}]")
 
-  # RVI16
+  # R14
   for i, j, k, f in product(I, I, I, F):
     if i != j and j != k and k != i:
       m.addConstr(gamma[i, j, f] + gamma[j, k, f] + gamma[k, i, f] <= 1,
-                  name=f"RVI16[{i},{j},{k},{f}]")
+                  name=f"R14[{i},{j},{k},{f}]")
 
-  #########################
-  # *  FUNCION OBJETIVO  *#
-  #########################
+  # R15
+  for i, l in product(I, F):
+    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in P) for v in P) == 1, name=f'R15[{i},{l}]')
 
-  _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  # R16
+  for i, l in product(I, F):
+    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in P)
+                for v in P) == beta_p[i, l], name=f'R16[{i},{l}]')
+
+  # R17
+  for i, l in product(I, F):
+    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in P)
+                for v in P) == beta_m[i, l], name=f'R17[{i},{l}]')
+
+  ########################
+  # * FUNCION OBJETIVO * #
+  ########################
+  _obj = LinExpr()
+  for u, v, l, i in product(P, P, F, I):
+    _obj += RF[u, v, l, i] * z[i, l, u, v]
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()

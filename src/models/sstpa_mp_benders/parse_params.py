@@ -42,4 +42,10 @@ def parse_params():
   for key in list(params['XI'].keys()):
     params['XI'][int(key)] = {int(k): v for k, v in params['XI'][key].items()}
 
+  # RF
+  for key in list(params['RF'].keys()):
+    u, v, l, i = key.strip('(').strip(')').split(',')
+    i = i.strip().strip('\'').strip('\'')
+    params['RF'][(int(u), int(v), int(l), i)] = params['RF'][key]
+
   return params

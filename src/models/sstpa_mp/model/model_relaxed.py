@@ -148,6 +148,11 @@ def create_model(log=True, gap=True):
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
   variables['beta_p'] = beta_p
 
+  # z_iluv: z[equipo, fecha, pos, pos]
+  # variable binaria que indica si el equipo i en la fecha l
+  # puede alcanzar u como mejor posición y v como peor posición
+  z = m.addVars(I, F, P, P, vtype=GRB.CONTINUOUS, name='z')
+
   #####################
   # * RESTRICCIONES * #
   #####################
@@ -233,13 +238,31 @@ def create_model(log=True, gap=True):
 
   # R13
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
-    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R13[{i},{l}]")
+    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in P) for v in P) == 1, name=f'R13[{i},{l}]')
 
   # R14
   for i, l in product(I, F):
+    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in P)
+                for v in P) == beta_p[i, l], name=f'R14[{i},{l}]')
+
+  # R15
+  for i, l in product(I, F):
+    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in P)
+                for v in P) == beta_m[i, l], name=f'R15[{i},{l}]')
+
+  # R16
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R16[{i},{l}]")
+
+  # R17
+  for i, l in product(I, F):
     _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
-    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R14[{i},{l}]")
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R17[{i},{l}]")
+
+  # R18
+  for i, l in product(I, F):
+    m.addConstr(beta_m[i, l] <= beta_p[i, l], name=f"R18[{i},{l}]")
 
   # Var constr
   m.addConstrs((x[n, f] >= 0 for n in N for f in F), name='N1')
@@ -262,10 +285,12 @@ def create_model(log=True, gap=True):
   m.addConstrs((a_m[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N11')
   m.addConstrs((a_p[n, i, f, l] >= 0 for n in N for i in I for f in F for l in F), name='N12')
 
+  for i, l, u, v in product(I, F, P, P):
+    m.addConstr(z[i, l, u, v] >= 0, name=f'N13[{i},{l},{u},{v}]')
+
   ########################
   # * FUNCION OBJETIVO * #
   ########################
-
   _obj = LinExpr()
   for u, v, l, i in product(P, P, F, I):
     _obj += RF[u, v, l, i] * z[i, l, u, v]
