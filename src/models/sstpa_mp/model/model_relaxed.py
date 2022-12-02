@@ -41,6 +41,8 @@ def create_model(log=True, gap=True):
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
+  P = params['P']
+  RF = params['RF']
 
   #################
   # * VARIABLES * #
@@ -132,7 +134,7 @@ def create_model(log=True, gap=True):
 
   # beta_il: beta[equipo,fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final del 
+  # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el MEJOR
   # conjunto de resultados futuros para el equipo i
   beta_m = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_m")
@@ -140,7 +142,7 @@ def create_model(log=True, gap=True):
 
   # beta_il: beta[equipo, fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final del 
+  # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
@@ -264,7 +266,9 @@ def create_model(log=True, gap=True):
   # * FUNCION OBJETIVO * #
   ########################
 
-  _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  _obj = LinExpr()
+  for u, v, l, i in product(P, P, F, I):
+    _obj += RF[u, v, l, i] * z[i, l, u, v]
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()

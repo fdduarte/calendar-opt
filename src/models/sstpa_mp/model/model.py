@@ -30,7 +30,7 @@ def create_model(log=True, gap=True):
   # Parse params dict to variables
   params = parse_params(filepath, start_date)
 
-  fixed_x = True
+  fixed_x = False
 
   N = params['N']
   F = params['F']
@@ -42,9 +42,10 @@ def create_model(log=True, gap=True):
   EL = params['EL']
   EV = params['EV']
   PI = params['PI']
+  P = params['P']
+  RF = params['RF']
   if fixed_x:
     x_bar = params['x_bar']
-  POS = range(1, 1 + len(I))
 
   #################
   # * VARIABLES * #
@@ -144,7 +145,7 @@ def create_model(log=True, gap=True):
 
   # beta_il: beta[equipo, fecha]
   # discreta, indica la mejor posicion
-  # que puede alcanzar el equipo i al final del 
+  # que puede alcanzar el equipo i al final del
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
@@ -153,7 +154,7 @@ def create_model(log=True, gap=True):
   # z_iluv: z[equipo, fecha, pos, pos]
   # variable binaria que indica si el equipo i en la fecha l
   # puede alcanzar u como mejor posición y v como peor posición
-  z = m.addVars(I, F, POS, POS, vtype=GRB.BINARY, name='z')
+  z = m.addVars(I, F, P, P, vtype=GRB.BINARY, name='z')
 
   #####################
   # * RESTRICCIONES * #
@@ -245,25 +246,38 @@ def create_model(log=True, gap=True):
 
   # R13
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
-    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R13[{i},{l}]")
+    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in P) for v in P) == 1, name=f'R13[{i},{l}]')
 
   # R14
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
-    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R14[{i},{l}]")
+    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in P)
+                for v in P) == beta_p[i, l], name=f'R14[{i},{l}]')
 
-  # z res
+  # R15
   for i, l in product(I, F):
-    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in POS) for v in POS) == 1, name='z1')
-    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in POS) for v in POS) == beta_p[i, l], name='z2')
-    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in POS) for v in POS) == beta_m[i, l], name='z3')
+    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in P)
+                for v in P) == beta_m[i, l], name=f'R15[{i},{l}]')
+
+  # R16
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R16[{i},{l}]")
+
+  # R17
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R17[{i},{l}]")
+
+  # R18
+  for i, l in product(I, F):
+    m.addConstr(beta_m[i, l] <= beta_p[i, l], name=f"R18[{i},{l}]")
+
   ########################
   # * FUNCION OBJETIVO * #
   ########################
-
-  _obj = sum(sum(sum(sum(l * (v - u)**2 * z[i, l, u, v] for i in I) for l in F[:-1]) for u in POS) for v in POS)
-  # _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  _obj = LinExpr()
+  for u, v, l, i in product(P, P, F, I):
+    _obj += RF[u, v, l, i] * z[i, l, u, v]
   m.setObjective(_obj, GRB.MAXIMIZE)
 
   m.update()

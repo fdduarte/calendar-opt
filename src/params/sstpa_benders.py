@@ -1,5 +1,6 @@
 import json
 import os
+from itertools import product
 from ..libs import sheet_parser
 from ..libs.argsparser import args
 from ..libs import pattern_generator
@@ -7,10 +8,10 @@ from ..libs.timer import timer
 from ..types import SSTPAParams
 from ..libs.logger import log
 from .helpers import (
-  get_team_local_patterns,
-  get_team_matches_points,
-  get_team_points,
-  get_team_localties
+    get_team_local_patterns,
+    get_team_matches_points,
+    get_team_points,
+    get_team_localties
 )
 
 
@@ -24,12 +25,16 @@ def generate_params():
   log('params', 'comenzando generación de parámetros')
   filepath = args.filepath
   start_date = args.start_date
+  w1, w2 = args.w1, args.w2
 
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
 
   # I: equipos del campeonato
   I = list(teams_data.keys())
+
+  # P: posiciones que pueden alcanzar los equipos
+  P = list(range(1, len(I) + 1))
 
   # F: fechas del campeonato
   F = list({match.date for match in results_data})
@@ -152,21 +157,31 @@ def generate_params():
   M = {i: PI[i] + dates_number * 3 + 1 for i in I}
   # M = {i: 10**10 for i in I}
 
+  # Ruvfi: R[posición, posición, fecha, equipo]
+  # peso en la función objetivo
+  RF = {}
+  for u, v, f, i in product(P, P, F, I):
+    ud = abs(u - len(I) / 2)
+    ld = abs(v - len(I) / 2)
+    RF[u, v, f, i] = (f / len(F)) * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1)
+
   params: SSTPAParams = {
-    'I': I,
-    'F': F,
-    'N': N,
-    'S': S,
-    'T': T,
-    'PI': PI,
-    'EB': EB,
-    'R': R,
-    'EL': EL,
-    'EV': EV,
-    'L': L,
-    'V': V,
-    'M': M,
-    'XI': XI
+      'I': I,
+      'F': F,
+      'N': N,
+      'S': S,
+      'T': T,
+      'PI': PI,
+      'EB': EB,
+      'R': R,
+      'EL': EL,
+      'EV': EV,
+      'L': L,
+      'V': V,
+      'M': M,
+      'XI': XI,
+      'P': P,
+      'RF': RF,
   }
 
   filename = os.path.split(filepath)[1]

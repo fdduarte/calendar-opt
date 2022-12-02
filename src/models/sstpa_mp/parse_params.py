@@ -28,4 +28,10 @@ def parse_params(filepath: str, start_date: int):
   for key in params['EV'].keys():
     params['EV'][key] = {int(k): v for k, v in params['EV'][key].items()}
 
+  # RF
+  for key in list(params['RF'].keys()):
+    u, v, l, i = key.strip('(').strip(')').split(',')
+    i = i.strip().strip('\'').strip('\'')
+    params['RF'][(int(u), int(v), int(l), i)] = params['RF'][key]
+
   return params
