@@ -171,8 +171,9 @@ def generate_params():
       m_pond += 0.2
     pen_pond = 1
     if u == v:
-      pen_pond -= 0.2
+      pen_pond = 0.7
     final_pond = date_pond * pen_pond * m_pond
+    print(final_pond * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1))
     RF[str((u, v, f, i))] = final_pond * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1)
 
   params: SSTPAParams = {
