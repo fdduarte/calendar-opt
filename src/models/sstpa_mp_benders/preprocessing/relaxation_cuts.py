@@ -4,7 +4,7 @@ from ....libs.argsparser import args
 from ..subproblem import subproblem
 from ..master import master
 from ...sstpa_mp import create_model as sstpa
-from .helpers import set_subproblem_values, generate_benders_cut
+from .helpers import set_subproblem_values, generate_benders_cut, change_objective_function
 from ..utils import parse_vars, set_sstpa_restrictions, create_sstpa_restrictions
 
 
@@ -23,6 +23,9 @@ def relaxation_cuts(self):
     sub, r = subproblem(i, l, s, self.params, relaxed=True)
     s_model[i, l, s] = sub
     s_res[i, l, s] = r
+
+  change_objective_function(self.params, sstpa_model, sstpa_variables)
+  change_objective_function(self.params, m_model, m_variables)
 
   niter = 0
   ncuts = 0
@@ -46,6 +49,11 @@ def relaxation_cuts(self):
 
     obj_val = round(m_model.objVal, 4)
     best_bound = round(m_model.ObjBound, 4)
+
+    if niter == 1 and obj_val == sstpa_model.objVal:
+      msg = "Objective value of master and composed model are the same in first iteration"
+      raise Exception(msg)
+
     gap = None
     if sstpa_model.Status == GRB.OPTIMAL:
       heuristic_sol = round(sstpa_model.objVal, 5)

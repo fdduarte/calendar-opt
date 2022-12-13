@@ -1,2 +1,8 @@
 python main.py --model 3 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
 python main.py --model 5 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
+
+python main.py --model 3 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+
+python main.py --model 3 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
+python main.py --model 5 --start_date 4 --filepath "data/campeonato_4_1.xlsx"

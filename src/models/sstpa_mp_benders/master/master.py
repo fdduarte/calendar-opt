@@ -101,7 +101,7 @@ def master(params, log=True):
   # torneo, mirando desde la fecha l en el PEOR
   # conjunto de resultados futuros para el equipo i
   beta_p = m.addVars(I, F, vtype=GRB.CONTINUOUS, name="beta_p")
-  variables['beta_p'] = beta_m
+  variables['beta_p'] = beta_p
 
   #####################
   # *  RESTRICCIONES  *#

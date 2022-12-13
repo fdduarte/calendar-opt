@@ -22,8 +22,8 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
   # Se eliminan patrones que rompan maximo dos (0 o 1) seguidos
   patterns_filtered = list(filter(lambda x: x.count('000') == 0 and x.count('111') == 0, patterns))
 
-  # Patrones con 2, 3 o 4 localías
-  same_matches_fil = lambda x: x.count('1') in [4, 5, 6]
+  # Patrones con máximo un partido de diferencia
+  same_matches_fil = lambda x: x.count('1') == x.count('0') + 1 or x.count('1') == x.count('0') - 1
   patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
 
   # Patrones deben tener maximo n breaks
