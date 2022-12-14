@@ -4,7 +4,7 @@ from ....libs.argsparser import args
 from ..subproblem import subproblem
 from ..master import master
 from ...sstpa_mp import create_model as sstpa
-from .helpers import set_subproblem_values, generate_benders_cut
+from .helpers import set_subproblem_values, generate_benders_cut, change_objective_function
 from ..utils import parse_vars, set_sstpa_restrictions, create_sstpa_restrictions
 
 
@@ -24,12 +24,16 @@ def relaxation_cuts(self):
     s_model[i, l, s] = sub
     s_res[i, l, s] = r
 
+  # Cambio de la función objetivo.
+  change_objective_function(self.params, sstpa_model, sstpa_variables)
+  change_objective_function(self.params, m_model, m_variables)
+
   niter = 0
   ncuts = 0
 
   if args.verbose:
     print('\nSolving problem relaxation')
-    print(f'{"iteration": <10} | {"objVal": <10} | {"Gap": <4} | {"Time": <4}')
+    print(f'{"iteration": <10} | {"objVal": <10} | {"Gap": <7} | {"Time": <4}')
 
   last_obj_val = 10000000
   while True:
@@ -46,6 +50,11 @@ def relaxation_cuts(self):
 
     obj_val = round(m_model.objVal, 4)
     best_bound = round(m_model.ObjBound, 4)
+
+    if niter == 1 and obj_val == sstpa_model.objVal:
+      msg = "Objective value of master and composed model are the same in first iteration"
+      raise Exception(msg)
+
     gap = None
     if sstpa_model.Status == GRB.OPTIMAL:
       heuristic_sol = round(sstpa_model.objVal, 5)
@@ -58,7 +67,7 @@ def relaxation_cuts(self):
       fgap = f'{gap}%'
       spent_time = int(time() - start_time)
       spent_time = f"{spent_time}s"
-      print(f"{niter: <10} | {obj_val: <10} | {fgap: <4} | {spent_time: <4}")
+      print(f"{niter: <10} | {obj_val: <10} | {fgap: <7} | {spent_time: <4}")
 
     if gap != '-' and gap / 100 < args.lp_gap:
       break

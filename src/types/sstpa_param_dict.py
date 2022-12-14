@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, Optional, Union
 
 
 class SSTPAParams(TypedDict):
@@ -16,4 +16,7 @@ class SSTPAParams(TypedDict):
   V: dict[int, int]
   L: dict[str, dict[int, int]]
   M: dict[str, int]
-  XI: dict[int, dict[int, int]]
+  XI: Optional[dict[int, dict[int, int]]]
+  x_bar: dict[int, dict[int, int]]
+  RF: Union[dict[str, float], dict[tuple[int, int, int, str], float]]
+  P: list[int]

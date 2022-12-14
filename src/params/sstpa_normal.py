@@ -1,5 +1,6 @@
 import json
 import os
+from itertools import product
 from ..libs import sheet_parser
 from ..libs import pattern_generator
 from ..libs.timer import timer
@@ -7,10 +8,10 @@ from ..libs.argsparser import args
 from ..libs.logger import log
 from ..types import SSTPAParams
 from .helpers import (
-  get_team_local_patterns,
-  get_team_matches_points,
-  get_team_points,
-  get_team_localties
+    get_team_local_patterns,
+    get_team_matches_points,
+    get_team_points,
+    get_team_localties
 )
 
 
@@ -24,12 +25,16 @@ def generate_params():
   log('params', 'comenzando la generación de parámetros')
   filepath: str = args.filepath
   start_date: int = args.start_date
+  w1, w2 = args.w1, args.w2
 
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
 
   # I: equipos del campeonato
   I = list(teams_data.keys())
+
+  # P: posiciones que pueden alcanzar los equipos
+  P = list(range(1, len(I) + 1))
 
   # F: fechas del campeonato
   F = list({match.date for match in results_data})
@@ -41,6 +46,12 @@ def generate_params():
   dates_to_program = F[-1] - start_date + 1
 
   N = list(range(1, dates_to_program * matches_per_date + 1))
+
+  # \bar{x}_nf
+  x_bar = {n: {f: 0 for f in F} for n in N}
+  for match in results_data:
+    if match.number in N and match.date in F:
+      x_bar[match.number][match.date] = 1
 
   # se generan los patrones originales de los equipos
   team_original_patterns = get_team_local_patterns(teams_data, results_data, F)
@@ -139,20 +150,42 @@ def generate_params():
   # Cantidád máxima de puntos que puede alcanzar el equipo i + 1.
   M = {i: PI[i] + dates_number * 3 + 1 for i in I}
 
+  # Ruvfi: R[posición, posición, fecha, equipo]
+  # peso en la función objetivo
+  RF = {}
+  for u, v, f, i in product(P, P, F, I):
+    ud = abs(u - ((len(I) - 1) / 2 + 1.5))
+    ld = abs(v - ((len(I) - 1) / 2 + 1.5))
+    date_pond = (f - min(F) + 1) ** 2
+    m_pond = 1
+    if u == 1:
+      m_pond += 0.3
+    if v == len(I):
+      m_pond += 0.2
+    pen_pond = 1
+    if u == v:
+      pen_pond = 0
+    final_pond = date_pond * pen_pond * m_pond
+    RF[str((u, v, f, i))] = final_pond * (w1 * (max(ud, ld))**2 + w2 * (v - u)**2 + 1)
+
   params: SSTPAParams = {
-    'I': I,
-    'F': F,
-    'N': N,
-    'S': S,
-    'T': T,
-    'PI': PI,
-    'EB': EB,
-    'R': R,
-    'EL': EL,
-    'EV': EV,
-    'L': L,
-    'V': V,
-    'M': M
+      'I': I,
+      'F': F,
+      'N': N,
+      'S': S,
+      'T': T,
+      'PI': PI,
+      'EB': EB,
+      'R': R,
+      'EL': EL,
+      'EV': EV,
+      'L': L,
+      'V': V,
+      'M': M,
+      'XI': None,
+      'x_bar': x_bar,
+      'P': P,
+      'RF': RF,
   }
 
   filename = os.path.split(filepath)[1]

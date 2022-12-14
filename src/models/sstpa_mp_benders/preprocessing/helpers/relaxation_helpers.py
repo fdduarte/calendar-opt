@@ -1,5 +1,5 @@
 from itertools import product
-from gurobipy import LinExpr
+from gurobipy import LinExpr, quicksum, GRB
 
 
 def set_subproblem_values(self, indexes, subproblem_res, master_vars):
@@ -99,3 +99,18 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
         cut += -r5p.farkasDual * (-M[i] * alpha)
 
   return cut
+
+
+def change_objective_function(params, model, mvars):
+  """
+  Cambia la función objetivo del modelo a la función objetivo que maximiza la diferencia
+  de los betas.
+  """
+  I = params['I']
+  F = params['F']
+  beta_m = mvars['beta_m']
+  beta_p = mvars['beta_p']
+  _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  model.setObjective(_obj, GRB.MAXIMIZE)
+
+  model.update()

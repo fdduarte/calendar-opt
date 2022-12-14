@@ -1,0 +1,36 @@
+{
+  "data": [
+    {
+      "file": "default",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "0-0",
+      "simetric_localies": true,
+      "breaks": 1
+    },
+    {
+      "file": "azerbaijan_8",
+      "allow_4_continue": false,
+      "allow_3_continue": true,
+      "localies_in_pattern": "2-5",
+      "simetric_localies": false,
+      "breaks": 2
+    },
+    {
+      "file": "suiza_10",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-6",
+      "simetric_localies": false,
+      "breaks": 2
+    },
+    {
+      "file": "islandia_12",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-6",
+      "simetric_localies": false,
+      "breaks": 2
+    }
+  ]
+}
