@@ -13,7 +13,7 @@ def parse_rule_file():
     pattern_rules = json.load(infile)["data"]
 
   _, filepath = args.filepath.split('/')
-  filename = filepath.strip('.xlsx')
+  filename, _ = filepath.split('.')
 
   rules = list(filter(lambda x: x["file"] == filename, pattern_rules))
 
