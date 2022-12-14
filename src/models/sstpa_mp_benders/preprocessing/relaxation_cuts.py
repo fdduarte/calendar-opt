@@ -24,6 +24,7 @@ def relaxation_cuts(self):
     s_model[i, l, s] = sub
     s_res[i, l, s] = r
 
+  # Cambio de la función objetivo.
   change_objective_function(self.params, sstpa_model, sstpa_variables)
   change_objective_function(self.params, m_model, m_variables)
 

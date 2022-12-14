@@ -7,6 +7,32 @@ from .argsparser import args
 from .array_tools import remove_duplicates
 
 
+def parse_rule_file():
+  """Lee el archivo de reglas, retornando un diccionario con las reglas especificas del equipo"""
+  with open('data/pattern_rules.json', 'r', encoding='utf-8') as infile:
+    pattern_rules = json.load(infile)["data"]
+
+  _, filepath = args.filepath.split('/')
+  filename = filepath.strip('.xlsx')
+
+  rules = list(filter(lambda x: x["file"] == filename, pattern_rules))
+
+  if len(rules) != 1:
+    log("patterns", f"rules for {filename} not found, resolving to default")
+    rules = list(filter(lambda x: x["file"] == "default", pattern_rules))
+  else:
+    log("patterns", f"applying rules for {filename}")
+
+  rule = rules[0]
+
+  loc_in_pat = rule["localies_in_pattern"]
+  loc_in_pat = loc_in_pat.split('-')
+  loc_in_pat = list(range(int(loc_in_pat[0]), int(loc_in_pat[1]) + 1))
+  rule["localies_in_pattern"] = loc_in_pat
+
+  return rule
+
+
 def _generate_home_away_pattern_string(second_round_date: int, end_date: int) -> list[str]:
   """
   Función que retorna una lista con todos los patrones posibles
@@ -14,17 +40,32 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
   """
   log('params', 'generando patrones de localia')
 
-  breaks = args.breaks
+  data = parse_rule_file()
+
+  breaks = data["breaks"]
 
   length = end_date - second_round_date + 1
   patterns = ["".join(seq) for seq in itertools.product("01", repeat=length)]
 
-  # Se eliminan patrones que rompan maximo dos (0 o 1) seguidos
-  patterns_filtered = list(filter(lambda x: x.count('000') == 0 and x.count('111') == 0, patterns))
+  # Se eliminan patrones que rompan maximo cuatro (0 o 1) seguidos
+  if not data["allow_4_continue"]:
+    patterns_filtered = list(filter(lambda x: x.count(
+        '0000') == 0 and x.count('1111') == 0, patterns))
+
+  # Se eliminan patrones que rompan maximo tres (0 o 1) seguidos
+  if not data["allow_3_continue"]:
+    patterns_filtered = list(filter(lambda x: x.count(
+        '000') == 0 and x.count('111') == 0, patterns))
 
   # Patrones con máximo un partido de diferencia
-  same_matches_fil = lambda x: x.count('1') == x.count('0') + 1 or x.count('1') == x.count('0') - 1
-  patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
+  if data["simetric_localies"]:
+    same_matches_fil = lambda x: x.count('1') == x.count(
+        '0') + 1 or x.count('1') == x.count('0') - 1
+    patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
+
+  if not data["simetric_localies"]:
+    same_matches_fil = lambda x: x.count('1') in data["localies_in_pattern"]
+    patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
 
   # Patrones deben tener maximo n breaks
   patterns_filtered = list(filter(lambda x: x.count('11') <= breaks, patterns_filtered))
