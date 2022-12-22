@@ -46,6 +46,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--fixed_x",
+    action='store_true',
+    default=False,
+    help="Se dejan los partidos como vienen",
+)
+
+parser.add_argument(
     "--not_verbose",
     action='store_true',
     default=False,
@@ -164,6 +171,9 @@ model_to_name = {
     3: 'Integrado',
     5: 'Descompuesto'
 }
+
+if args.fixed_x and args.model == 5:
+  raise Exception("Solamente se pueden dejar las x's fijas en el modelo integrado")
 
 if args.verbose:
   print('Optimización calendario deportivo')

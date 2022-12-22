@@ -76,6 +76,9 @@ def generate_params():
       local_patterns_full[f"{i}-{idx}"] = pattern
       S[i].append(f"{i}-{idx}")
 
+  for i in I:
+    assert len(S[i]) > 0, f"Equipo {i} no tiene patrones."
+
   # PIi: PI[equipo]
   # cantidad de puntos del equipo i la fecha anterior a la primera
   # de las fechas que quedan por jugar

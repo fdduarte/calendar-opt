@@ -28,7 +28,23 @@
       "file": "islandia_12",
       "allow_4_continue": false,
       "allow_3_continue": false,
-      "localies_in_pattern": "4-6",
+      "localies_in_pattern": "5-6",
+      "simetric_localies": false,
+      "breaks": 2
+    },
+    {
+      "file": "paraguay_12",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "5-6",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
+      "file": "grecia_14",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "6-7",
       "simetric_localies": false,
       "breaks": 2
     }
