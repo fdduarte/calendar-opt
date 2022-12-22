@@ -30,7 +30,7 @@ def create_model(log=True, gap=True):
   # Parse params dict to variables
   params = parse_params(filepath, start_date)
 
-  fixed_x = False
+  fixed_x = args.fixed_x
 
   N = params['N']
   F = params['F']
