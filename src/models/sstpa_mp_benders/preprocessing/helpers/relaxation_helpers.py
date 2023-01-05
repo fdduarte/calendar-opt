@@ -101,7 +101,7 @@ def generate_benders_cut(self, indexes, master_vars, subproblem_res):
   return cut
 
 
-def change_objective_function(params, model, mvars):
+def change_objective_function(params, model, mvars, weights):
   """
   Cambia la función objetivo del modelo a la función objetivo que maximiza la diferencia
   de los betas.
@@ -110,7 +110,8 @@ def change_objective_function(params, model, mvars):
   F = params['F']
   beta_m = mvars['beta_m']
   beta_p = mvars['beta_p']
-  _obj = quicksum(l * quicksum(beta_p[i, l] - beta_m[i, l] for i in I) for l in F[:-1])
+  _obj = quicksum(l * quicksum(weights[i, l] * (beta_p[i, l] -
+                  beta_m[i, l]) for i in I) for l in F[:-1])
   model.setObjective(_obj, GRB.MAXIMIZE)
 
   model.update()

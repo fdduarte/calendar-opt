@@ -1,4 +1,5 @@
 from time import time
+from random import uniform
 from gurobipy import GRB
 from ....libs.argsparser import args
 from ..subproblem import subproblem
@@ -8,7 +9,7 @@ from .helpers import set_subproblem_values, generate_benders_cut, change_objecti
 from ..utils import parse_vars, set_sstpa_restrictions, create_sstpa_restrictions
 
 
-def relaxation_cuts(self):
+def relaxation_cuts(self, random=False):
   """
   Resuelve mediante descomposición de benders el problema maestro
   y subproblemas relajados, generando una colección de cortes que se aplicarán
@@ -25,8 +26,11 @@ def relaxation_cuts(self):
     s_res[i, l, s] = r
 
   # Cambio de la función objetivo.
-  change_objective_function(self.params, sstpa_model, sstpa_variables)
-  change_objective_function(self.params, m_model, m_variables)
+  weigths = {(i, l): 1 for i in self.params['I'] for l in self.params['F']}
+  if random:
+    weigths = {(i, l): uniform(0, 100) for i in self.params['I'] for l in self.params['F']}
+  change_objective_function(self.params, sstpa_model, sstpa_variables, weigths)
+  change_objective_function(self.params, m_model, m_variables, weigths)
 
   niter = 0
   ncuts = 0

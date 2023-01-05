@@ -157,6 +157,13 @@ parser.add_argument(
     help="Si se agregan cortes en mipnode."
 )
 
+parser.add_argument(
+    "--preprocess_iters",
+    default=10,
+    type=int,
+    help="Cantidad de iteraciones del preprocesamiento con pesos aleatorios."
+)
+
 args = parser.parse_args()
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
@@ -195,6 +202,7 @@ if args.verbose:
   if args.model == 5:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)
+    print('[args] Iteraciones de preprocesamiento', args.preprocess_iters)
     print('[args] LP gap preprocesamiento', args.lp_gap)
     print('[args] Cortes de Benders', args.benders_cuts)
     print('[args] Cortes de posición', args.position_cuts)
