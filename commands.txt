@@ -1,0 +1,27 @@
+# Archivo por mientras que invoke no funciona para python 3.11
+
+python main.py --model 3 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
+python main.py --model 5 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
+
+python main.py --model 3 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+
+python main.py --model 3 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
+python main.py --model 5 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
+python main.py --model 3 --fixed_x --start_date 8 --filepath "data/azerbaijan_8.xlsx"
+
+python main.py --model 3 --start_date 10 --filepath "data/suiza_10.xlsx"
+python main.py --model 5 --start_date 10 --filepath "data/suiza_10.xlsx"
+python main.py --model 3 --fixed_x --start_date 10 --filepath "data/suiza_10.xlsx"
+
+python main.py --model 3 --start_date 12 --filepath "data/islandia_12.xlsx"
+python main.py --model 5 --start_date 12 --filepath "data/islandia_12.xlsx"
+python main.py --model 3 --fixed_x --start_date 12 --filepath "data/islandia_12.xlsx"
+
+python main.py --model 3 --start_date 12 --filepath "data/paraguay_12.xlsx"
+python main.py --model 5 --start_date 12 --filepath "data/paraguay_12.xlsx"
+python main.py --model 3 --fixed_x --start_date 12 --filepath "data/paraguay_12.xlsx"
+
+python main.py --model 3 --start_date 14 --filepath "data/grecia_14.xlsx"
+python main.py --model 5 --start_date 14 --filepath "data/grecia_14.xlsx"
+python main.py --model 3 --fixed_x --start_date 14 --filepath "data/grecia_14.xlsx" --time_limit
