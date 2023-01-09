@@ -10,7 +10,7 @@ def preprocess(self, model, variables, upgraded=False):
   rel_cuts = True
   if rel_cuts:
     relaxation_cuts(self)
-    for i in range(args.preprocess_iters):
+    for i in range(args.preprocess_iters - 1):
       log('preprocess', f'Iteration {i + 2}')
       relaxation_cuts(self, random=True)
   if position_cuts:
