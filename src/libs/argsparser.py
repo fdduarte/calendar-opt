@@ -159,7 +159,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--preprocess_iters",
-    default=10,
+    default=1,
     type=int,
     help="Cantidad de iteraciones del preprocesamiento con pesos aleatorios."
 )
