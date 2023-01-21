@@ -182,6 +182,9 @@ model_to_name = {
 if args.fixed_x and args.model == 5:
   raise Exception("Solamente se pueden dejar las x's fijas en el modelo integrado")
 
+if args.fixed_x:
+  args.gap = 0.0
+
 if args.verbose:
   print('Optimización calendario deportivo')
   dt_s = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
