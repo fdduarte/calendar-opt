@@ -11,6 +11,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--output",
+    default="",
+    type=str,
+    help="Nombre del output"
+)
+
+parser.add_argument(
     "--start_date",
     default=23,
     type=int,
@@ -183,7 +190,7 @@ if args.fixed_x and args.model == 5:
   raise Exception("Solamente se pueden dejar las x's fijas en el modelo integrado")
 
 if args.fixed_x:
-  args.gap = 0.0
+  args.mip_gap = 0
 
 if args.verbose:
   print('Optimización calendario deportivo')
@@ -192,6 +199,7 @@ if args.verbose:
 
   print('[args] Modelo:', model_to_name[args.model])
   print('[args] Fecha de inicio:', args.start_date)
+  print('[args] Output:', args.output)
   print('[args] Breaks:', args.breaks)
   print('[args] Path del archivo:', args.filepath)
   print('[args] MIP gap:', args.gap)
