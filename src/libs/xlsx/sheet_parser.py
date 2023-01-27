@@ -4,7 +4,7 @@ El siguiente módulo se encarga de leer el archivo en formato
 """
 import math
 import pandas as pd
-from ..types import TeamData, MatchData
+from ...types import TeamData, MatchData
 
 
 def read_teams_file(filename: str) -> dict[str, TeamData]:
@@ -17,9 +17,9 @@ def read_teams_file(filename: str) -> dict[str, TeamData]:
   data = pd.read_excel(filename, sheet_name="Equipos", index_col=0)
   for _, row in data.iterrows():
     team_data = TeamData(
-      full_name=str(row["EQUIPO"]).strip(),
-      points=int(row["Puntos al finalizar la primera rueda"]),
-      home_matches_left=int(row["Localías faltantes"])
+        full_name=str(row["EQUIPO"]).strip(),
+        points=int(row["Puntos al finalizar la primera rueda"]),
+        home_matches_left=int(row["Localías faltantes"])
     )
     parsed_data[str(row["ALIAS"])] = team_data
   return parsed_data
@@ -38,13 +38,13 @@ def read_results_file(filename: str) -> list[MatchData]:
     else:
       parsed_result = _parse_result(row["Resultado"])
       match = MatchData(
-        date=int(date),
-        number=match_number,
-        calendar_date=row["Fecha"],
-        home=row["Local"].strip(),
-        away=row["Visita"].strip(),
-        result="-".join([str(i) for i in parsed_result.values()]),
-        winner=_get_winner(parsed_result),
+          date=int(date),
+          number=match_number,
+          calendar_date=row["Fecha"],
+          home=row["Local"].strip(),
+          away=row["Visita"].strip(),
+          result="-".join([str(i) for i in parsed_result.values()]),
+          winner=_get_winner(parsed_result),
       )
       match_number += 1
       parsed_data.append(match)

@@ -17,8 +17,15 @@ if __name__ == "__main__":
     m = sstpa_mp_benders_create_model()
 
   m.optimize()
-  m.write(f'logs/model/model-{args.output}.lp')
-  m.write(f'logs/output/model-{args.output}.sol')
+  outfile_name = 'model-'
+  if args.fixed_x:
+    outfile_name += 'init-0'
+  else:
+    outfile_name += f'opt-{int(args.gap * 100)}'
+  if args.output != '':
+    outfile_name += f'-{args.output}'
+  m.write(f'logs/model/{outfile_name}.lp')
+  m.write(f'logs/output/{outfile_name}.sol')
 
   if args.verbose:
     print('\n[time] logs:')
