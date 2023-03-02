@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "file": "campeonato_6_1",
+      "policy": [6, 7, 8, 9, 10]
+    },
+    {
+      "file": "azerbaijan_8"
+    },
+    {
+      "file": "suiza_10"
+    },
+    {
+      "file": "islandia_12"
+    },
+    {
+      "file": "paraguay_12"
+    },
+    {
+      "file": "grecia_14"
+    }
+  ]
+}

@@ -11,7 +11,8 @@ from .helpers import (
     get_team_local_patterns,
     get_team_matches_points,
     get_team_points,
-    get_team_localties
+    get_team_localties,
+    load_policy,
 )
 
 
@@ -27,8 +28,15 @@ def generate_params():
   start_date: int = args.start_date
   w1, w2 = args.w1, args.w2
 
+  filename = os.path.split(filepath)[1]
+  filename_wo_extension = filename.split('.')[0]
+
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
+  policies = load_policy(filename_wo_extension)
+
+  # Rp: politica del campeonato
+  Rp = policies
 
   # I: equipos del campeonato
   I = list(teams_data.keys())
@@ -65,6 +73,19 @@ def generate_params():
   # indices que corresponden a cada patron. Para acceder al detalle
   # de un patron, revisar archivo correspondiente con detalle.
   log("params", "generación de patrones terminada")
+
+  # Rub_l: Rub[fecha de la política]
+  # Rlb_l: Rub[fecha de la política]
+  Rlb, Rub = {}, {}
+  for l in Rp:
+    if len(list(filter(lambda x: x < l, F))) == 0:
+      Rlb[l] = l
+    else:
+      Rlb[l] = max(filter(lambda x: x < l, F))
+    if len(list(filter(lambda x: x > l, F))) == 0:
+      Rub[l] = l
+    else:
+      Rub[l] = min(filter(lambda x: x > l, F))
 
   # A cada patron se le asigna un indice.
   local_patterns_full = {}
@@ -189,10 +210,11 @@ def generate_params():
       'x_bar': x_bar,
       'P': P,
       'RF': RF,
+      'Rlb': Rlb,
+      'Rub': Rub,
+      'Rp': Rp
   }
 
-  filename = os.path.split(filepath)[1]
-  filename_wo_extension = filename.split('.')[0]
   outfile_path = f'./data/json/params_{filename_wo_extension}_{start_date}.json'
   with open(outfile_path, 'w', encoding='UTF-8') as outfile:
     outfile.write(json.dumps(params, indent=4))
