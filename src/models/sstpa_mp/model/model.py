@@ -257,7 +257,6 @@ def create_model(log=True, gap=True):
     else:
       continue
     for _l in closed_interval(l, lp1):
-      print(l, _l)
       for i, j in product(I, I):
         if j != i:
           m.addConstr(p_m[i, j, l, F[-1]] == p_m[i, j, _l, F[-1]], name=f"R13[{l},{_l},{i},{j}]")

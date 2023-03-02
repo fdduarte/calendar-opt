@@ -1,2 +1,1 @@
-from .sstpa_normal import generate_params as sstpa_mp_generate_params
-from .sstpa_benders import generate_params as sstpa_mp_benders_generate_params
+from .generate_params import generate_params

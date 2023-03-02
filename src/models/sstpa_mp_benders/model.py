@@ -12,7 +12,8 @@ from .utils import (
 )
 from .cuts import (
   generate_benders_cut,
-  generate_hamming_cut
+  generate_hamming_cut,
+  generate_policy_cuts,
 )
 from .preprocessing import preprocess
 from ...libs.argsparser import args
@@ -51,13 +52,15 @@ class Benders:
     """Instancia los subproblemas"""
     self.subproblem_model = {}
     self.subproblem_res = {}
+    self.subproblem_vars = {}
     if relaxed:
       self.subproblem_relaxed_model = {}
       self.subproblem_relaxed_res = {}
     for i, l, s in self.subproblem_indexes:
-      m, res = _subproblem(i, l, s, self.params)
+      m, res, variables = _subproblem(i, l, s, self.params)
       self.subproblem_model[i, l, s] = m
       self.subproblem_res[i, l, s] = res
+      self.subproblem_vars[i, l, s] = variables
       if relaxed:
         m, res = _subproblem(i, l, s, self.params, True)
         self.subproblem_relaxed_model[i, l, s] = m
@@ -111,7 +114,10 @@ class Benders:
         self.last_sol = parse_vars(self.master_vars, self.master_model, callback=True)
         set_sstpa_restrictions(self.sstpa_model, self.last_sol)
 
+        all_feasible = True
         for i, l, s in self.subproblem_indexes:
+          if l not in self.params['Rp']:
+            continue
           # Se setean las restricciones que fijan a x y alpha en el subproblema
           # y se resuelve.
           timer.timestamp('cortes de hamming')
@@ -125,6 +131,7 @@ class Benders:
 
           # Si el modelo es infactible, se agregan cortes de factibilidad
           if subproblem.Status == GRB.INFEASIBLE:
+            all_feasible = False
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
@@ -153,6 +160,9 @@ class Benders:
               logger.increment_stats('benders cut')
             timer.timestamp('cortes de benders')
         timer.timestamp('MIPSOL')
+        if all_feasible:
+          generate_policy_cuts(self, model)
+          
     except Exception as err:
       log('error', 'callback')
       log('error', err)

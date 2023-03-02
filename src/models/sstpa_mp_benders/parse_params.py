@@ -48,4 +48,9 @@ def parse_params():
     i = i.strip().strip('\'').strip('\'')
     params['RF'][(int(u), int(v), int(l), i)] = params['RF'][key]
 
+  # Rub, Rlb
+  for key in list(params['Rub'].keys()):
+    params['Rub'][int(key)] = params['Rub'][key]
+    params['Rlb'][int(key)] = params['Rlb'][key]
+
   return params

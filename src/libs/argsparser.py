@@ -181,6 +181,13 @@ args.verbose = not args.not_verbose
 args.mip_gap = args.gap
 args.lp_gap = args.lp_gap
 
+# TEMP
+args.preprocess = False
+
+print('=' * 10)
+print('Preprocessing disabled until fixed for policy')
+print('=' * 10)
+
 model_to_name = {
     3: 'Integrado',
     5: 'Descompuesto'
