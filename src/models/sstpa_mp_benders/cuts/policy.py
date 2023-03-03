@@ -1,6 +1,6 @@
 from itertools import product
-from gurobipy import LinExpr
 from ....libs.array_tools import closed_interval
+from ....libs.argsparser import args
 
 
 def generate_policy_cuts(self, model):
@@ -8,6 +8,8 @@ def generate_policy_cuts(self, model):
   Dado un subproblema resuelto, crea cortes de hamming con o sin
   el calculo de IIS.
   """
+  if not args.policy:
+    return
   Rp = self.params['Rp']
   I = self.params['I']
   F = self.params['F']

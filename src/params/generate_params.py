@@ -48,6 +48,12 @@ def generate_params():
   F = list({match.date for match in results_data})
   F = list(filter(lambda x: x >= start_date, F))
 
+  if args.policy is False:
+    Rp = F
+
+  if len(F) == len(Rp):
+    args.policy = False
+
   # N: Partidos
   # partidos por fecha
   matches_per_date = int(len(I) / 2)

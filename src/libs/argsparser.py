@@ -171,7 +171,15 @@ parser.add_argument(
     help="Cantidad de iteraciones del preprocesamiento con pesos aleatorios."
 )
 
+parser.add_argument(
+    "--no_policy",
+    action="store_true",
+    default=False,
+    help="Si se agregan cortes en mipnode."
+)
+
 args = parser.parse_args()
+args.policy = not args.no_policy
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
 args.preprocess = not args.no_preprocess
@@ -182,11 +190,11 @@ args.mip_gap = args.gap
 args.lp_gap = args.lp_gap
 
 # TEMP
-args.preprocess = False
-
-print('=' * 10)
-print('Preprocessing disabled until fixed for policy')
-print('=' * 10)
+if args.policy:
+  args.preprocess = False
+  print('=' * 10)
+  print('Preprocessing disabled until fixed for policy')
+  print('=' * 10)
 
 model_to_name = {
     3: 'Integrado',
@@ -217,6 +225,7 @@ if args.verbose:
   print('[args] Orden de parámetros aleatorio:', args.shuffle_params)
   print('[args] MIPNODE benders cuts', args.mipnode_cuts)
   print(f'[args] Pesos función objetivo: w1={args.w1}, w2={args.w2}')
+  print('[args] Policy:', args.policy)
   if args.model == 5:
     print('[args] IIS:', args.IIS)
     print('[args] Preprocesamiento', args.preprocess)
