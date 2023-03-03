@@ -4,13 +4,13 @@ from ...types import SSTPAParams
 
 
 # pylint: disable=invalid-name
-def parse_params(filepath: str, start_date: int):
+def parse_params(filepath: str, start_date: int) -> SSTPAParams:
   """Funcion que lee el archivo .json de los parametros"""
   filename = os.path.split(filepath)[1]
   filename_wo_extension = filename.split('.')[0]
   infile_path = f'./data/json/params_{filename_wo_extension}_{start_date}.json'
   with open(infile_path, 'r', encoding='UTF-8') as infile:
-    params: SSTPAParams = json.load(infile)
+    params = json.load(infile)
 
   # R
   for key in params['R'].keys():
@@ -33,5 +33,10 @@ def parse_params(filepath: str, start_date: int):
     u, v, l, i = key.strip('(').strip(')').split(',')
     i = i.strip().strip('\'').strip('\'')
     params['RF'][(int(u), int(v), int(l), i)] = params['RF'][key]
+
+  # Rub, Rlb
+  for key in list(params['Rub'].keys()):
+    params['Rub'][int(key)] = params['Rub'][key]
+    params['Rlb'][int(key)] = params['Rlb'][key]
 
   return params
