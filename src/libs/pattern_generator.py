@@ -12,8 +12,11 @@ def parse_rule_file():
   with open('data/pattern_rules.json', 'r', encoding='utf-8') as infile:
     pattern_rules = json.load(infile)["data"]
 
-  _, filepath = args.filepath.split('/')
-  filename, _ = filepath.split('.')
+  if args.parser == 'gurobi_sol':
+    filename = args.og_filename
+  else:
+    _, filepath = args.filepath.split('/')
+    filename, _ = filepath.split('.')
 
   rules = list(filter(lambda x: x["file"] == filename, pattern_rules))
 

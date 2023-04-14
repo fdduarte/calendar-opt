@@ -1,8 +1,9 @@
 from src.libs.argsparser import args
 from src.models import sstpa_mp_create_model, sstpa_mp_benders_create_model
-from src.params import generate_params
+from src.params import generate_params, append_data
 from src.libs.timer import timer
 from src.libs.logger import logger
+from src.libs.output_namer import name_output
 
 
 if __name__ == "__main__":
@@ -15,15 +16,11 @@ if __name__ == "__main__":
     m = sstpa_mp_benders_create_model()
 
   m.optimize()
-  outfile_name = 'model-'
-  if args.fixed_x:
-    outfile_name += 'init-0'
-  else:
-    outfile_name += f'opt-{int(args.gap * 100)}'
-  if args.output != '':
-    outfile_name += f'-{args.output}'
+  outfile_name = name_output()
+  logger.log('output', outfile_name)
   m.write(f'logs/model/{outfile_name}.lp')
   m.write(f'logs/output/{outfile_name}.sol')
+  append_data(f'logs/output/{outfile_name}.sol')
 
   if args.verbose:
     print('\n[time] logs:')

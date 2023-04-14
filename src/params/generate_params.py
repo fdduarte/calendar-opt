@@ -1,7 +1,7 @@
 import json
 import os
 from itertools import product
-from ..libs.xlsx import sheet_parser
+from .parser import instanciate_parser
 from ..libs import pattern_generator
 from ..libs.timer import timer
 from ..libs.argsparser import args
@@ -24,16 +24,22 @@ def generate_params():
   la instancia
   """
   log('params', 'comenzando la generación de parámetros')
-  filepath: str = args.filepath
-  start_date: int = args.start_date
+  filepath = args.filepath
+  start_date = args.start_date
   w1, w2 = args.w1, args.w2
 
   filename = os.path.split(filepath)[1]
   filename_wo_extension = filename.split('.')[0]
 
-  teams_data = sheet_parser.read_teams_file(filepath)
-  results_data = sheet_parser.read_results_file(filepath)
-  policies = load_policy(filename_wo_extension)
+  parser = instanciate_parser()
+  teams_data = parser.read_teams_file(filepath)
+  results_data = parser.read_results_file(filepath)
+
+  if args.parser == 'gurobi_sol':
+    args.og_filename = parser.parse_filename(filepath)
+    policies = load_policy(args.og_filename)
+  else:
+    policies = load_policy(filename_wo_extension)
 
   # Rp: politica del campeonato
   Rp = policies
@@ -237,3 +243,42 @@ def generate_params():
     outfile.write(json.dumps(local_patterns_full, indent=4))
 
   log("params", "generación de parámetros terminada.")
+
+
+def append_data(outpath: str):
+  """append teams data to end of outpath"""
+  filepath = args.filepath
+  parser = instanciate_parser()
+  teams_data = parser.read_teams_file(filepath)
+  results_data = parser.read_results_file(filepath)
+  with open(outpath, 'a', encoding='utf-8') as outfile:
+    outfile.write('*' * 10)
+    outfile.write('|')
+    out_dict = {}
+    for key, value in teams_data.items():
+      out_dict[key] = {
+        'full_name': value.full_name,
+        'points': value.points,
+        'home_matches_left': value.home_matches_left
+      }
+    outfile.write(json.dumps(out_dict))
+    out_dict_res: dict[str, list] = {'data': []}
+    for value in results_data:
+      out_dict_res['data'].append({
+        'date': value.date,
+        'number': value.number,
+        'calendar_date': str(value.calendar_date),
+        'home': value.home,
+        'away': value.away,
+        'result': value.result,
+        'winner': value.winner,
+      })
+    outfile.write('\n')
+    outfile.write('+' * 10)
+    outfile.write('|')
+    outfile.write(json.dumps(out_dict_res))
+    outfile.write('\n')
+    outfile.write('s' * 10)
+    outfile.write('|')
+    filename = os.path.split(filepath)[1]
+    outfile.write(filename.split('.')[0])

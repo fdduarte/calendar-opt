@@ -29,4 +29,4 @@ def generate_policy_cuts(self, model):
           pp_j = self.subproblem_vars[i, l, 'p']['p'][j, i, l, F[-1]].X
           pp_i = self.subproblem_vars[i, l, 'p']['p'][i, i, l, F[-1]].X
           model.cbLazy(pm_j - pm_i <= M[j] * (1 - self.master_vars['alpha_m'][j, i, _l]))
-          model.cbLazy(pp_i - pp_j <= M[j] * self.master_vars['alpha_m'][j, i, _l])
+          model.cbLazy(pp_i - pp_j <= M[i] * self.master_vars['alpha_p'][j, i, _l])

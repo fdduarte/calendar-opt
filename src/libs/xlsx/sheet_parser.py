@@ -51,6 +51,11 @@ def read_results_file(filename: str) -> list[MatchData]:
   return parsed_data
 
 
+def parse_filename(filename: str):
+  """not implemented"""
+  raise Exception('Method not implemented')
+
+
 def _parse_result(result: str) -> dict[str, int]:
   """
   Función que parea el strings de resultados, retornando

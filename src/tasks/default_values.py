@@ -1,0 +1,11 @@
+PATTERNS = True  # Si se usan patrones de localia/visita
+BENDERS = True  # Si se usan cortes de benders
+POSITION_CUTS = True  # Si se usan cortes de posiciones
+IIS = True  # Si se usa IIS para cortes de Hamming
+VERBOSE = True  # Si se imprime a consola
+SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
+MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
+GAP = '0.01'
+FIXED_X = False
+POLICY = True
+PARSER = 'sheets'

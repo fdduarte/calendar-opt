@@ -159,10 +159,11 @@ class Benders:
               model.cbLazy(cut <= 0)
               logger.increment_stats('benders cut')
             timer.timestamp('cortes de benders')
-        timer.timestamp('MIPSOL')
         if all_feasible:
           generate_policy_cuts(self, model)
-          
+          logger.increment_stats('policy cuts')
+        timer.timestamp('MIPSOL')
+
     except Exception as err:
       log('error', 'callback')
       log('error', err)

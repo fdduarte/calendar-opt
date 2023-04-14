@@ -10,5 +10,5 @@ def load_policy(filename):
   if len(policies_filtered) != 1:
     log('policy', f'politica para {filename} no encontrada, resolviendo con default')
     return None
-  log('policy', f'politica para {filename} cargada')
+  log('policy', f'politica para {filename} cargada: {policies_filtered[0]["policy"]}')
   return policies_filtered[0]['policy']

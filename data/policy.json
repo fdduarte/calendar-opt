@@ -1,19 +1,29 @@
 {
   "data": [
     {
+      "file": "campeonato_4_1",
+      "dates": [4, 5, 6],
+      "policy": [4, 5, 6]
+    },
+    {
       "file": "campeonato_6_1",
       "dates": [6, 7, 8, 9, 10],
-      "policy": [6, 8, 10]
+      "policy": [6, 10]
+    },
+    {
+      "file": "campeonato_8_2",
+      "dates": [8, 9, 10, 11, 12, 13, 14],
+      "policy": [8]
     },
     {
       "file": "azerbaijan_8",
       "dates": [8, 9, 10, 11, 12, 13, 14],
-      "policy": [8, 9, 10, 11, 12, 13, 14]
+      "policy": [8, 10, 12, 14]
     },
     {
       "file": "suiza_10",
       "dates": [10, 11, 12, 13, 14, 15, 16, 17, 18],
-      "policy": [10, 12, 13, 14, 15, 16, 17, 18]
+      "policy": [10, 18]
     },
     {
       "file": "islandia_12",
