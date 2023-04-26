@@ -39,6 +39,10 @@ python main.py --model 3 --start_date 14 --filepath "data/grecia_14.xlsx"
 python main.py --model 5 --start_date 14 --filepath "data/grecia_14.xlsx"
 python main.py --model 3 --fixed_x --start_date 14 --filepath "data/grecia_14.xlsx" --time_limit
 
+python main.py --model 3 --start_date 16 --filepath "data/chile_16.xlsx"
+python main.py --model 5 --start_date 16 --filepath "data/chile_16.xlsx"
+python main.py --model 3 --fixed_x --start_date 16 --filepath "data/chile_16.xlsx"
+
 
 # other
 python main.py --model 3 --start_date 10 --filepath logs/output/model-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
