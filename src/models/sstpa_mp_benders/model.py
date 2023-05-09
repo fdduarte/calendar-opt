@@ -19,6 +19,8 @@ from .preprocessing import preprocess
 from ...libs.argsparser import args
 from ...libs.logger import log, logger
 from ...libs.timer import timer
+from ...libs.output import write_sol_file_from_dict
+from ...libs.output_namer import name_output
 from .parse_params import parse_params
 
 
@@ -112,6 +114,8 @@ class Benders:
         # Si estamos en un nodo de solución entera, seteamos last_sol a la
         # solucón del nodo.
         self.last_sol = parse_vars(self.master_vars, self.master_model, callback=True)
+        outfile_name = name_output()
+        write_sol_file_from_dict(self.last_sol, f'logs/output/{outfile_name}.temp.sol', model.ModelName)
         set_sstpa_restrictions(self.sstpa_model, self.last_sol)
 
         all_feasible = True
