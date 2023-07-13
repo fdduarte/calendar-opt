@@ -1,5 +1,5 @@
-from gurobipy import GRB
 from itertools import product
+from gurobipy import GRB
 from .subproblem import subproblem as _subproblem
 from .master import master as _master
 from ..sstpa_mp import create_model as _sstpa
