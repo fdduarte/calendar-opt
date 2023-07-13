@@ -11,7 +11,8 @@ from .helpers import (
     get_team_local_patterns,
     get_team_matches_points,
     get_team_points,
-    get_team_localties
+    get_team_localties,
+    load_policy,
 )
 
 
@@ -27,8 +28,15 @@ def generate_params():
   start_date = args.start_date
   w1, w2 = args.w1, args.w2
 
+  filename = os.path.split(filepath)[1]
+  filename_wo_extension = filename.split('.')[0]
+
   teams_data = sheet_parser.read_teams_file(filepath)
   results_data = sheet_parser.read_results_file(filepath)
+  policies = load_policy(filename_wo_extension)
+
+  # Rp: politica del campeonato
+  Rp = policies
 
   # I: equipos del campeonato
   I = list(teams_data.keys())
@@ -192,10 +200,10 @@ def generate_params():
       'XI': XI,
       'P': P,
       'RF': RF,
+      'Rp': Rp,
+      'x_bar': None,
   }
 
-  filename = os.path.split(filepath)[1]
-  filename_wo_extension = filename.split('.')[0]
   outfile_path = f'./data/json/params_{filename_wo_extension}_{start_date}.json'
   with open(outfile_path, 'w', encoding='UTF-8') as outfile:
     outfile.write(json.dumps(params, indent=4))

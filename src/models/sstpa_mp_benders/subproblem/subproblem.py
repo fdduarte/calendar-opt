@@ -26,6 +26,8 @@ def subproblem(i, l, s, params):
   # * VARIABLES * #
   #################
 
+  variables = {}
+
   # x_nf: x[partido, fecha]
   # 1 si el partido n se programa finalmente
   # en la fecha f
@@ -44,6 +46,7 @@ def subproblem(i, l, s, params):
   # la info de los resultados hasta la fecha l inclusive en el
   # MEJOR/PEOR conjunto de resultados futuros para el equipo i
   p = m.addVars(I, [i], [l], F, vtype=GRB.CONTINUOUS, name="p")
+  variables['p'] = p
 
   # v_nilf : v[partido, equipo, fecha, fecha]
   # binaria,  1 si el equipo local gana el partido n de la
@@ -124,4 +127,4 @@ def subproblem(i, l, s, params):
 
   m.update()
 
-  return m, res
+  return m, res, variables

@@ -2,6 +2,7 @@ from itertools import product
 from gurobipy import Model, GRB, quicksum, LinExpr
 from ..parse_params import parse_params
 from ....libs.argsparser import args
+from ....libs.array_tools import closed_interval
 
 
 # pylint: disable=invalid-name
@@ -44,6 +45,9 @@ def create_model(log=True, gap=True):
   PI = params['PI']
   P = params['P']
   RF = params['RF']
+  Rlb = params['Rlb']
+  Rub = params['Rub']
+  Rp = params['Rp']
   if fixed_x:
     x_bar = params['x_bar']
 
@@ -245,32 +249,58 @@ def create_model(log=True, gap=True):
                   name=f"R12[{l},{i},{j}]")
 
   # R13
-  for i, l in product(I, F):
-    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in P) for v in P) == 1, name=f'R13[{i},{l}]')
+  for i, l in enumerate(Rp):
+    if i + 1 < len(Rp):
+      lp1 = Rp[i + 1]
+    elif l != F[-1]:
+      lp1 = F[-1] + 1
+    else:
+      continue
+    for _l in closed_interval(l, lp1):
+      for i, j in product(I, I):
+        if j != i:
+          m.addConstr(p_m[i, j, l, F[-1]] == p_m[i, j, _l, F[-1]], name=f"R13[{l},{_l},{i},{j}]")
 
   # R14
-  for i, l in product(I, F):
-    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in P)
-                for v in P) == beta_p[i, l], name=f'R14[{i},{l}]')
+  for i, l in enumerate(Rp):
+    if i + 1 < len(Rp):
+      lp1 = Rp[i + 1]
+    elif l != F[-1]:
+      lp1 = F[-1] + 1
+    else:
+      continue
+    for _l in closed_interval(l, lp1):
+      for i, j in product(I, I):
+        if j != i:
+          m.addConstr(p_p[i, j, l, F[-1]] == p_p[i, j, _l, F[-1]], name=f"R14[{l},{_l},{i},{j}]")
 
   # R15
   for i, l in product(I, F):
-    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in P)
-                for v in P) == beta_m[i, l], name=f'R15[{i},{l}]')
+    m.addConstr(quicksum(quicksum(z[i, l, u, v] for u in P) for v in P) == 1, name=f'R15[{i},{l}]')
 
   # R16
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
-    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R16[{i},{l}]")
+    m.addConstr(quicksum(quicksum(u * z[i, l, u, v] for u in P)
+                for v in P) == beta_p[i, l], name=f'R16[{i},{l}]')
 
   # R17
   for i, l in product(I, F):
-    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
-    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R17[{i},{l}]")
+    m.addConstr(quicksum(quicksum(v * z[i, l, u, v] for u in P)
+                for v in P) == beta_m[i, l], name=f'R17[{i},{l}]')
 
   # R18
   for i, l in product(I, F):
-    m.addConstr(beta_m[i, l] <= beta_p[i, l], name=f"R18[{i},{l}]")
+    _exp = LinExpr(quicksum(alpha_m[j, i, l] for j in I if i != j))
+    m.addConstr(beta_m[i, l] == len(I) - _exp, name=f"R18[{i},{l}]")
+
+  # R19
+  for i, l in product(I, F):
+    _exp = LinExpr(quicksum(1 - alpha_p[j, i, l] for j in I if i != j))
+    m.addConstr(beta_p[i, l] == 1 + _exp, name=f"R19[{i},{l}]")
+
+  # R20
+  for i, l in product(I, F):
+    m.addConstr(beta_m[i, l] <= beta_p[i, l], name=f"R20[{i},{l}]")
 
   ########################
   # * FUNCION OBJETIVO * #

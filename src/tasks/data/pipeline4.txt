@@ -1,0 +1,4 @@
+# DESC: Commands for optimizing the calendar with a reduced policy and then reoptimize with less dates
+# We save the time taken and the optimize the calendar normally with a time constraint.
+# POLICY: suiza_10 = [10, 12, 14, 16, 17, 18]
+python main.py --model 5 --start_date 10 --filepath "data/suiza_10.xlsx"

@@ -1,5 +1,5 @@
-from gurobipy import GRB
 from itertools import product
+from gurobipy import GRB
 from .subproblem import subproblem as _subproblem
 from .master import master as _master
 from ..sstpa_mp import create_model as _sstpa
@@ -12,12 +12,15 @@ from .utils import (
 )
 from .cuts import (
   generate_benders_cut,
-  generate_hamming_cut
+  generate_hamming_cut,
+  generate_policy_cuts,
 )
 from .preprocessing import preprocess
 from ...libs.argsparser import args
 from ...libs.logger import log, logger
 from ...libs.timer import timer
+from ...libs.output import write_sol_file_from_dict
+from ...libs.output_namer import name_output
 from .parse_params import parse_params
 
 
@@ -51,13 +54,15 @@ class Benders:
     """Instancia los subproblemas"""
     self.subproblem_model = {}
     self.subproblem_res = {}
+    self.subproblem_vars = {}
     if relaxed:
       self.subproblem_relaxed_model = {}
       self.subproblem_relaxed_res = {}
     for i, l, s in self.subproblem_indexes:
-      m, res = _subproblem(i, l, s, self.params)
+      m, res, variables = _subproblem(i, l, s, self.params)
       self.subproblem_model[i, l, s] = m
       self.subproblem_res[i, l, s] = res
+      self.subproblem_vars[i, l, s] = variables
       if relaxed:
         m, res = _subproblem(i, l, s, self.params, True)
         self.subproblem_relaxed_model[i, l, s] = m
@@ -109,9 +114,14 @@ class Benders:
         # Si estamos en un nodo de solución entera, seteamos last_sol a la
         # solucón del nodo.
         self.last_sol = parse_vars(self.master_vars, self.master_model, callback=True)
+        outfile_name = name_output()
+        write_sol_file_from_dict(self.last_sol, f'logs/output/{outfile_name}.temp.sol', model.ModelName)
         set_sstpa_restrictions(self.sstpa_model, self.last_sol)
 
+        all_feasible = True
         for i, l, s in self.subproblem_indexes:
+          if l not in self.params['Rp']:
+            continue
           # Se setean las restricciones que fijan a x y alpha en el subproblema
           # y se resuelve.
           timer.timestamp('cortes de hamming')
@@ -125,6 +135,7 @@ class Benders:
 
           # Si el modelo es infactible, se agregan cortes de factibilidad
           if subproblem.Status == GRB.INFEASIBLE:
+            all_feasible = False
             if args.IIS:
               timer.timeit_nd(subproblem.computeIIS, 'IIS')
             cut = generate_hamming_cut(self, (i, l, s), model, IIS=args.IIS)
@@ -152,7 +163,11 @@ class Benders:
               model.cbLazy(cut <= 0)
               logger.increment_stats('benders cut')
             timer.timestamp('cortes de benders')
+        if all_feasible:
+          generate_policy_cuts(self, model)
+          logger.increment_stats('policy cuts')
         timer.timestamp('MIPSOL')
+
     except Exception as err:
       log('error', 'callback')
       log('error', err)

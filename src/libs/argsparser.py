@@ -18,6 +18,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--parser",
+    default="sheets",
+    type=str,
+    help="Parser de informacion [sheets, gurobi_sol]"
+)
+
+parser.add_argument(
     "--start_date",
     default=23,
     type=int,
@@ -171,7 +178,15 @@ parser.add_argument(
     help="Cantidad de iteraciones del preprocesamiento con pesos aleatorios."
 )
 
+parser.add_argument(
+    "--no_policy",
+    action="store_true",
+    default=False,
+    help="Si se agregan cortes en mipnode."
+)
+
 args = parser.parse_args()
+args.policy = not args.no_policy
 args.IIS = not args.no_IIS
 args.local_patterns = not args.no_local_patterns
 args.preprocess = not args.no_preprocess
@@ -180,6 +195,13 @@ args.benders_cuts = not args.no_benders_cuts
 args.verbose = not args.not_verbose
 args.mip_gap = args.gap
 args.lp_gap = args.lp_gap
+
+# TEMP
+if args.policy:
+  args.preprocess = False
+  print('=' * 10)
+  print('Preprocessing disabled until fixed for policy')
+  print('=' * 10)
 
 model_to_name = {
     3: 'Integrado',
@@ -197,25 +219,27 @@ if args.verbose:
   dt_s = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
   print(dt_s, '\n')
 
-  print('[args] Modelo:', model_to_name[args.model])
-  print('[args] Fecha de inicio:', args.start_date)
-  print('[args] Output:', args.output)
   print('[args] Breaks:', args.breaks)
-  print('[args] Path del archivo:', args.filepath)
-  print('[args] MIP gap:', args.gap)
+  print('[args] Fecha de inicio:', args.start_date)
   print('[args] MIP focus:', args.mip_focus)
-  print('[args] Tiempo máximo:', args.time_limit)
-  print('[args] Patrones:', args.local_patterns)
-  print('[args] Solución Inicial:', args.initial_sol)
-  print('[args] Orden de parámetros aleatorio:', args.shuffle_params)
+  print('[args] MIP gap:', args.gap)
   print('[args] MIPNODE benders cuts', args.mipnode_cuts)
+  print('[args] Modelo:', model_to_name[args.model])
+  print('[args] Orden de parámetros aleatorio:', args.shuffle_params)
+  print('[args] Output:', args.output)
+  print('[args] Parser:', args.parser)
+  print('[args] Path del archivo:', args.filepath)
+  print('[args] Patrones:', args.local_patterns)
   print(f'[args] Pesos función objetivo: w1={args.w1}, w2={args.w2}')
+  print('[args] Policy:', args.policy)
+  print('[args] Solución Inicial:', args.initial_sol)
+  print('[args] Tiempo máximo:', args.time_limit)
   if args.model == 5:
-    print('[args] IIS:', args.IIS)
-    print('[args] Preprocesamiento', args.preprocess)
-    print('[args] Iteraciones de preprocesamiento', args.preprocess_iters)
-    print('[args] LP gap preprocesamiento', args.lp_gap)
     print('[args] Cortes de Benders', args.benders_cuts)
     print('[args] Cortes de posición', args.position_cuts)
+    print('[args] IIS:', args.IIS)
+    print('[args] Iteraciones de preprocesamiento', args.preprocess_iters)
+    print('[args] LP gap preprocesamiento', args.lp_gap)
+    print('[args] Preprocesamiento', args.preprocess)
     print('[args] Print cada n cortes', args.print_every_n_cuts)
   print("")

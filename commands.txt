@@ -2,17 +2,30 @@
 
 python main.py --model 3 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
 python main.py --model 5 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
+python main.py --model 3 --fixed_x --start_date 4 --filepath "data/campeonato_4_1.xlsx"
+python main.py --model 3 --start_date 4 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+python main.py --model 3 --fixed_x --start_date 6 --filepath "data/campeonato_6_1.xlsx"
 python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+python main.py --model 3 --start_date 6 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
+
+python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
+python main.py --model 3 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
+python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
+python main.py --model 3 --fixed_x --start_date 8 --filepath "data/campeonato_8_1.xlsx"
+python main.py --model 3 --start_date 8 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
 python main.py --model 5 --start_date 8 --filepath "data/azerbaijan_8.xlsx"
 python main.py --model 3 --fixed_x --start_date 8 --filepath "data/azerbaijan_8.xlsx"
+python main.py --model 3 --start_date 8 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
+python main.py --model 3 --start_date 8 --filepath logs/output/model-azerbaijan_8-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 10 --filepath "data/suiza_10.xlsx"
 python main.py --model 5 --start_date 10 --filepath "data/suiza_10.xlsx"
 python main.py --model 3 --fixed_x --start_date 10 --filepath "data/suiza_10.xlsx"
+python main.py --model 3 --start_date 10 --filepath logs/output/model-suiza_10-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 12 --filepath "data/islandia_12.xlsx"
 python main.py --model 5 --start_date 12 --filepath "data/islandia_12.xlsx"
@@ -25,3 +38,11 @@ python main.py --model 3 --fixed_x --start_date 12 --filepath "data/paraguay_12.
 python main.py --model 3 --start_date 14 --filepath "data/grecia_14.xlsx"
 python main.py --model 5 --start_date 14 --filepath "data/grecia_14.xlsx"
 python main.py --model 3 --fixed_x --start_date 14 --filepath "data/grecia_14.xlsx" --time_limit
+
+python main.py --model 3 --start_date 16 --filepath "data/chile_16.xlsx"
+python main.py --model 5 --start_date 16 --filepath "data/chile_16.xlsx"
+python main.py --model 3 --fixed_x --start_date 16 --filepath "data/chile_16.xlsx"
+
+
+# other
+python main.py --model 3 --start_date 10 --filepath logs/output/model-opt-1.sol --no_policy --parser gurobi_sol --fixed_x

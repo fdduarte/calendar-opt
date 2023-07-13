@@ -1,18 +1,7 @@
-from platform import python_version
-
-assert python_version() != '3.11.0', 'Invoke not working in python 3.11'
-
 from invoke import task
-
-# Task params
-
-PATTERNS = True  # Si se usan patrones de localia/visita
-BENDERS = True  # Si se usan cortes de benders
-POSITION_CUTS = True  # Si se usan cortes de posiciones
-IIS = True  # Si se usa IIS para cortes de Hamming
-VERBOSE = True  # Si se imprime a consola
-SHUFFLE = True  # Si se ordenan los patrones de forma aleatoria
-MODEL = 5  # Modelo a utilizar. Opciones válidas 3 y 5.
+from src.tasks import default_values as default
+from src.tasks.run_championships import championships
+from src.tasks.pipes import pipelines
 
 
 @task
@@ -21,25 +10,32 @@ def clear_cache(context, full=False):
   context.run('rm data/json/params_*')
   context.run('rm data/json/patterns/*')
   context.run('rm data/patterns/*')
-
   if full:
     context.run('rm logs/*.txt')
     context.run('rm logs/model/*')
 
 
 @task
-def run_tiny(con, start=4, gap='0', preprocess_gap='0'):
-  """Campeonato enano con descomposición"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_4_1.xlsx"'
-  if SHUFFLE:
-    com += ' --shuffle_params'
-  con.run(com)
+def run(
+  con, champ='small', start=None, gap=default.GAP, preprocess_gap='0', model=default.MODEL,
+  shuffle=default.SHUFFLE, fixed_x=default.FIXED_X, no_policy=(not default.POLICY),
+  parser=default.PARSER, filepath=None
+):
+  """Corre el campeonato"""
+  if fixed_x:
+    model = 3
+  command = championships[champ](start, model, gap, preprocess_gap, fixed_x, filepath)
+  if shuffle:
+    command += ' --shuffle_params'
+  if no_policy:
+    command += ' --no_policy'
+  if parser != 'sheets':
+    command += f' --parser {parser}'
+  print(command)
+  con.run(command)
 
 
 @task
-def run_small(con, start=6, gap='0', preprocess_gap='0'):
-  """Campeonato pequeño con descomposición"""
-  com = f'python main.py --model {MODEL} --start_date {start} --filepath "data/campeonato_6_1.xlsx"'
-  if SHUFFLE:
-    com += ' --shuffle_params'
-  con.run(com)
+def pipeline(con, number='1'):
+  """Corre pipelines"""
+  pipelines[number](con)
