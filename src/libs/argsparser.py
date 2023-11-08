@@ -11,6 +11,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--second_round_date",
+    default=-1,
+    type=int,
+    help="Fecha de inicio del segundo campeonato."
+)
+
+parser.add_argument(
     "--output",
     default="",
     type=str,

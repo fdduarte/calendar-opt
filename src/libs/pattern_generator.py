@@ -138,7 +138,10 @@ def create_local_patterns(team_patterns: dict[str, str], end_date: int) -> dict[
   start_date = args.start_date
   breaks = args.breaks
 
-  second_round_date = int((end_date / 2) + 1)
+  if args.second_round_date == -1:
+    second_round_date = int((end_date / 2) + 1)
+  else:
+    second_round_date = second_round_date
 
   filename = args.filepath.split(os.path.sep)[1]
   filename = filename.split('.')[0]
