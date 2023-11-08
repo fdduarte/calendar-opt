@@ -62,8 +62,7 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
 
   # Patrones con máximo un partido de diferencia
   if data["simetric_localies"]:
-    same_matches_fil = lambda x: x.count('1') == x.count(
-        '0') + 1 or x.count('1') == x.count('0') - 1
+    same_matches_fil = lambda x: x.count('1') == x.count('0') + 1 or x.count('1') == x.count('0') - 1
     patterns_filtered = list(filter(same_matches_fil, patterns_filtered))
 
   if not data["simetric_localies"]:
@@ -93,6 +92,8 @@ def filter_local_patterns(
 
   # Se hace copia de los patrones
   patterns = patterns.copy()
+
+  print(team_pattern)
 
   # Se revisa que tenga cantidad localias y visitas congruentes con la data
   home_left = team_pattern[2:].count('1')
@@ -141,7 +142,7 @@ def create_local_patterns(team_patterns: dict[str, str], end_date: int) -> dict[
   if args.second_round_date == -1:
     second_round_date = int((end_date / 2) + 1)
   else:
-    second_round_date = second_round_date
+    second_round_date = args.second_round_date
 
   filename = args.filepath.split(os.path.sep)[1]
   filename = filename.split('.')[0]

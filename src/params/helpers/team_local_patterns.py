@@ -1,4 +1,5 @@
 from ...types import TeamData, MatchData
+from ...libs.argsparser import args
 
 
 def get_team_local_patterns(
@@ -11,6 +12,10 @@ def get_team_local_patterns(
   el patron incluye dos fechas antes que parta el torneo.
   """
   # Una fecha antes de la primera vuelta (para ver si arrastra break)
+  if args.second_round_date == -1:
+    mid_date = int(dates[-1] / 2)
+  else:
+    mid_date = args.second_round_date + 1
   mid_date = int(dates[-1] / 2)
 
   patterns = {team: "" for team in teams_data.keys()}
