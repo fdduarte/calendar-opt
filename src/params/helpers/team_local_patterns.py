@@ -15,8 +15,7 @@ def get_team_local_patterns(
   if args.second_round_date == -1:
     mid_date = int(dates[-1] / 2)
   else:
-    mid_date = args.second_round_date + 1
-  mid_date = int(dates[-1] / 2)
+    mid_date = args.second_round_date - 1
 
   patterns = {team: "" for team in teams_data.keys()}
 

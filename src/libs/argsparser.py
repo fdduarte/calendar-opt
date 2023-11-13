@@ -74,6 +74,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    "--debug_patterns",
+    action='store_true',
+    default=False,
+    help="Prints para debuggear patrones",
+)
+
+parser.add_argument(
     "--not_verbose",
     action='store_true',
     default=False,

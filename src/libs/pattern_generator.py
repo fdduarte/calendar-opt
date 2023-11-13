@@ -93,11 +93,14 @@ def filter_local_patterns(
   # Se hace copia de los patrones
   patterns = patterns.copy()
 
-  print(team_pattern)
-
   # Se revisa que tenga cantidad localias y visitas congruentes con la data
   home_left = team_pattern[2:].count('1')
   away_left = team_pattern[2:].count('0')
+
+  if args.debug_patterns:
+    print('team_pattern', team_pattern)
+    print('home_left', home_left)
+    print('away_left', away_left)
 
   patterns = list(filter(lambda x: x.count('1') == home_left, patterns))
   patterns = list(filter(lambda x: x.count('0') == away_left, patterns))
