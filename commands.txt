@@ -1,18 +1,42 @@
 # Archivo por mientras que invoke no funciona para python 3.11
 
+# Albania
+
+python main.py --model 5 --start_date 28 --filepath "data/albania_10_20-21.xlsx" --second_round_date 28
+python main.py --model 3 --fixed_x --start_date 28 --filepath "data/albania_10_20-21.xlsx" --second_round_date 28
+
+python main.py --model 3 --start_date 28 --filepath "data/albania_10_21-22.xlsx" --second_round_date 28
+python main.py --model 3 --fixed_x --start_date 28 --filepath "data/albania_10_21-22.xlsx" --second_round_date 28
+
+python main.py --model 3 --start_date 28 --filepath "data/albania_10_22-23.xlsx" --second_round_date 28
+python main.py --model 3 --fixed_x --start_date 28 --filepath "data/albania_10_22-23.xlsx" --second_round_date 28
+
+# Bosnia
+
+python main.py --model 5 --start_date 23 --filepath "data/bosnia_12_20-21.xlsx" --second_round_date 23 --time_limit 3600
+python main.py --model 3 --fixed_x --start_date 23 --filepath "data/bosnia_12_20-21.xlsx"  --second_round_date 23
+
+python main.py --model 5 --start_date 23 --filepath "data/bosnia_12_21-22.xlsx" --second_round_date 23 --time_limit 7200
+python main.py --model 3 --fixed_x --start_date 23 --filepath "data/bosnia_12_21-22.xlsx"  --second_round_date 23
+
+python main.py --model 5 --start_date 23 --filepath "data/bosnia_12_22-23.xlsx" --second_round_date 23 --time_limit 10800
+python main.py --model 3 --fixed_x --start_date 23 --filepath "data/bosnia_12_22-23.xlsx"  --second_round_date 23
+
+# Other
+
 python main.py --model 3 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
 python main.py --model 5 --start_date 4 --filepath "data/campeonato_4_1.xlsx"
 python main.py --model 3 --fixed_x --start_date 4 --filepath "data/campeonato_4_1.xlsx"
 python main.py --model 3 --start_date 4 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
 
-python main.py --model 3 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
+python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
 python main.py --model 3 --fixed_x --start_date 6 --filepath "data/campeonato_6_1.xlsx"
 python main.py --model 5 --start_date 6 --filepath "data/campeonato_6_1.xlsx"
 python main.py --model 3 --start_date 6 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
 
-python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
-python main.py --model 3 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
-python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_1.xlsx" --gap 0
+python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_2.xlsx" --gap 0
+python main.py --model 3 --start_date 8 --filepath "data/campeonato_8_2.xlsx" --gap 0
+python main.py --model 5 --start_date 8 --filepath "data/campeonato_8_2.xlsx" --gap 0
 python main.py --model 3 --fixed_x --start_date 8 --filepath "data/campeonato_8_1.xlsx"
 python main.py --model 3 --start_date 8 --filepath logs/output/model-opt-0.sol --no_policy --parser gurobi_sol --fixed_x
 
@@ -28,21 +52,27 @@ python main.py --model 3 --fixed_x --start_date 10 --filepath "data/suiza_10.xls
 python main.py --model 3 --start_date 10 --filepath logs/output/model-suiza_10-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 12 --filepath "data/islandia_12.xlsx"
-python main.py --model 5 --start_date 12 --filepath "data/islandia_12.xlsx"
+python main.py --model 5 --start_date 12 --filepath "data/islandia_12.xlsx" --time_limit 21600
 python main.py --model 3 --fixed_x --start_date 12 --filepath "data/islandia_12.xlsx"
 
 python main.py --model 3 --start_date 12 --filepath "data/paraguay_12.xlsx"
 python main.py --model 5 --start_date 12 --filepath "data/paraguay_12.xlsx"
 python main.py --model 3 --fixed_x --start_date 12 --filepath "data/paraguay_12.xlsx"
+python main.py --model 3 --start_date 12 --filepath logs/output/model-paraguay_12-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 14 --filepath "data/grecia_14.xlsx"
 python main.py --model 5 --start_date 14 --filepath "data/grecia_14.xlsx"
-python main.py --model 3 --fixed_x --start_date 14 --filepath "data/grecia_14.xlsx" --time_limit
+python main.py --model 3 --fixed_x --start_date 14 --filepath "data/grecia_14.xlsx"
+python main.py --model 3 --start_date 14 --filepath logs/output/model-grecia_14-opt-1-full_temp.sol --no_policy --parser gurobi_sol --fixed_x
 
 python main.py --model 3 --start_date 16 --filepath "data/chile_16.xlsx"
 python main.py --model 5 --start_date 16 --filepath "data/chile_16.xlsx"
 python main.py --model 3 --fixed_x --start_date 16 --filepath "data/chile_16.xlsx"
+python main.py --model 3 --start_date 16 --filepath logs/output/chile/model-chile_24-opt-1.sol --no_policy --parser gurobi_sol --fixed_x --no_local_patterns
+
 
 
 # other
 python main.py --model 3 --start_date 10 --filepath logs/output/model-opt-1.sol --no_policy --parser gurobi_sol --fixed_x
+
+python main.py --model 5 --start_date 16 --filepath "data/chile_16.xlsx" --time_limit 1800

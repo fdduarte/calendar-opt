@@ -161,3 +161,6 @@ data/patterns/*.json
 # Other
 *_results_pattern.csv
 V4-Plots (2)
+logs/cuts
+result_plots
+notebooks/output
