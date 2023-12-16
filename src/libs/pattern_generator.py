@@ -49,16 +49,17 @@ def _generate_home_away_pattern_string(second_round_date: int, end_date: int) ->
 
   length = end_date - second_round_date + 1
   patterns = ["".join(seq) for seq in itertools.product("01", repeat=length)]
+  patterns_filtered = patterns
 
   # Se eliminan patrones que rompan maximo cuatro (0 o 1) seguidos
   if not data["allow_4_continue"]:
     patterns_filtered = list(filter(lambda x: x.count(
-        '0000') == 0 and x.count('1111') == 0, patterns))
+        '0000') == 0 and x.count('1111') == 0, patterns_filtered))
 
   # Se eliminan patrones que rompan maximo tres (0 o 1) seguidos
   if not data["allow_3_continue"]:
     patterns_filtered = list(filter(lambda x: x.count(
-        '000') == 0 and x.count('111') == 0, patterns))
+        '000') == 0 and x.count('111') == 0, patterns_filtered))
 
   # Patrones con máximo un partido de diferencia
   if data["simetric_localies"]:
