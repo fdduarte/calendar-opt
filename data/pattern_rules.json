@@ -33,7 +33,7 @@
       "breaks": 1
     },
     {
-      "file": "albania_10_20-21",
+      "file": "albania_10_21-22",
       "allow_4_continue": false,
       "allow_3_continue": false,
       "localies_in_pattern": "4-5",
@@ -41,7 +41,31 @@
       "breaks": 1
     },
     {
-      "file": "albania_10_20-21",
+      "file": "albania_10_22-23",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-5",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
+      "file": "suiza_10_20-21",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-5",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
+      "file": "suiza_10_21-22",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-5",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
+      "file": "suiza_10_22-23",
       "allow_4_continue": false,
       "allow_3_continue": false,
       "localies_in_pattern": "4-5",
