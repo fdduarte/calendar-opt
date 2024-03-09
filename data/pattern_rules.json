@@ -25,6 +25,14 @@
       "breaks": 2
     },
     {
+      "file": "azerbaijan_8_20-21",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "3-4",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
       "file": "albania_10_20-21",
       "allow_4_continue": false,
       "allow_3_continue": false,
