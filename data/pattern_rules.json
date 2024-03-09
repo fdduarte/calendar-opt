@@ -33,6 +33,22 @@
       "breaks": 1
     },
     {
+      "file": "azerbaijan_9_21-22",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "3-6",
+      "simetric_localies": false,
+      "breaks": 2
+    },
+    {
+      "file": "azerbaijan_10_22-23",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "4-5",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
       "file": "albania_10_20-21",
       "allow_4_continue": false,
       "allow_3_continue": false,
