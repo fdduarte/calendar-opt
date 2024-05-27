@@ -121,6 +121,22 @@
       "breaks": 1
     },
     {
+      "file": "hungria_12_21-22",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "5-6",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
+      "file": "hungria_12_22-23",
+      "allow_4_continue": false,
+      "allow_3_continue": false,
+      "localies_in_pattern": "5-6",
+      "simetric_localies": false,
+      "breaks": 1
+    },
+    {
       "file": "islandia_12",
       "allow_4_continue": false,
       "allow_3_continue": false,
